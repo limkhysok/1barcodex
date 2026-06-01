@@ -44,7 +44,7 @@ export default function DashboardNavbar({ onMenuClick }: Readonly<Props>) {
         <div className="flex items-center gap-0">
           <button
             onClick={onMenuClick}
-            className="md:hidden p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all active:scale-90"
+            className="md:hidden p-2 rounded-md text-gray-800 hover:text-gray-900 hover:bg-gray-50 transition-all active:scale-90"
             aria-label="Toggle sidebar"
           >
             <Menu size={20} strokeWidth={2.5} />
@@ -56,7 +56,7 @@ export default function DashboardNavbar({ onMenuClick }: Readonly<Props>) {
             </div>
             <div className="flex flex-col leading-none">
               <p className="text-[17px] font-black tracking-tight  text-gray-900">CTK</p>
-              <p className="text-[7px] font-bold tracking-[0.4em]  text-orange-600 mt-0.1 opacity-90">Spare Parts</p>
+              <p className="text-[7px] font-bold tracking-[0.4em] uppercase text-orange-600 mt-0.1 opacity-90">Spare Parts</p>
             </div>
           </Link>
         </div>

@@ -15,8 +15,8 @@ import {
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard size={17} /> },
-  { label: "Transactions", href: "/transactions", icon: <ArrowLeftRight size={17} /> },
-  { label: "Products", href: "/products", icon: <Package size={17} /> },
+  { label: "Transaction", href: "/transactions", icon: <ArrowLeftRight size={17} /> },
+  { label: "Product", href: "/products", icon: <Package size={17} /> },
   { label: "Inventory", href: "/inventory", icon: <Database size={17} /> },
 ];
 
@@ -54,13 +54,13 @@ function NavItem({
         className={`
           flex items-center w-full select-none
           ${active
-            ? "bg-slate-50 text-orange-600 border-r-2 border-orange-600"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            ? "bg-gray-50 text-orange-600 border-r-2 border-orange-600"
+            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
           }
         `}
       >
         {/* Icon pinned in a fixed-width cell — same width as collapsed sidebar, never moves */}
-        <div className={`shrink-0 flex items-center justify-center w-12.5 py-3 ${active ? "scale-110" : "group-hover:scale-110"}`}>
+        <div className={`shrink-0 flex items-center justify-center w-12.5 py-3 text-gray-900 ${active ? "scale-110" : "group-hover:scale-110"}`}>
           {icon}
         </div>
 
@@ -73,9 +73,9 @@ function NavItem({
         >
           <span
             className={`
-              min-w-0 text-[11px] font-black uppercase tracking-[0.15em] leading-none
-              whitespace-nowrap overflow-hidden pr-4
-              transition-opacity duration-500 ease-in-out
+              min-w-0 text-sm font-regular text-gray-900
+              whitespace-nowrap overflow-hidden pr-4 
+              transition-opacity duration-1000 ease-in-out
               ${isCollapsed ? "opacity-0" : "opacity-100"}
             `}
           >
@@ -88,12 +88,12 @@ function NavItem({
       {isCollapsed && (
         <div className="
           pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50
-          px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest
+          px-2.5 py-1.5 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest
           rounded-sm whitespace-nowrap shadow-lg
           opacity-0 group-hover:opacity-100 transition-opacity duration-150
         ">
           {label}
-          <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
+          <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
         </div>
       )}
     </div>
@@ -153,7 +153,7 @@ function SidebarContent({
           >
             <p
               className={`
-                min-w-0 text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-4
+                min-w-0 text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-2
                 whitespace-nowrap overflow-hidden
                 transition-opacity duration-500 ease-in-out
                 ${isCollapsed ? "opacity-0" : "opacity-100"}
@@ -179,14 +179,14 @@ function SidebarContent({
               {/* Fix 4: grid trick for "Management" section label */}
               <div
                 className={`
-                  grid overflow-hidden px-5 mt-8
+                  grid overflow-hidden px-5 mt-4
                   transition-[grid-template-columns] duration-500 ease-in-out
                   ${isCollapsed ? "grid-cols-[0fr]" : "grid-cols-[1fr]"}
                 `}
               >
                 <p
                   className={`
-                    min-w-0 text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-4
+                    min-w-0 text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-2
                     whitespace-nowrap overflow-hidden
                     transition-opacity duration-500 ease-in-out
                     ${isCollapsed ? "opacity-0" : "opacity-100"}
@@ -228,7 +228,7 @@ function CollapseToggle({
       className="
         absolute top-12.5 -right-3 z-30 hidden md:flex
         items-center justify-center w-6 h-6 rounded-full
-        bg-white text-slate-800 border border-gray-400
+        bg-white text-gray-800 border border-gray-400
         hover:text-orange-600 hover:border-orange-200
         active:scale-95 transition-all duration-300
         shadow-xl group/btn cursor-pointer
@@ -267,7 +267,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
       {/* ── Mobile drawer ───────────────────────────────────────────────────── */}
       <div
         className={`
-          fixed inset-0 z-40 bg-slate-900/40 md:hidden backdrop-blur-sm
+          fixed inset-0 z-40 bg-gray-900/40 md:hidden backdrop-blur-sm
           transition-opacity duration-500 ease-in-out
           ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
         `}
