@@ -39,26 +39,26 @@ export default function ProfileClient({ initialUser }: Readonly<{ initialUser: U
 
         {/* Avatar + identity */}
         <div className="flex flex-col items-center gap-3 pt-8 pb-6 px-6 border-b border-gray-100">
-          <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center shrink-0">
-            <Image src="/albert-einstein.png" alt="User Avatar" width={64} height={64} className="object-cover" />
+          <div className="w-36 h-36 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+            <Image src="/albert-einstein.png" alt="User Avatar" width={94} height={94} className="object-cover" />
           </div>
 
         </div>
 
         {/* Info rows */}
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-gray-200">
           <InfoRow
-            icon={<AtSign size={14} className="text-gray-400" strokeWidth={2} />}
+            icon={<AtSign size={16} className="text-gray-700" strokeWidth={2} />}
             label="Username"
             value={initialUser.username}
           />
           <InfoRow
-            icon={<UserIcon size={14} className="text-gray-400" strokeWidth={2} />}
+            icon={<UserIcon size={16} className="text-gray-700" strokeWidth={2} />}
             label="Full Name"
             value={initialUser.name || "—"}
           />
           <InfoRow
-            icon={<ShieldCheck size={14} className="text-gray-400" strokeWidth={2} />}
+            icon={<ShieldCheck size={16} className="text-gray-700" strokeWidth={2} />}
             label="Role"
             value={roleLabel}
           />
@@ -69,7 +69,7 @@ export default function ProfileClient({ initialUser }: Readonly<{ initialUser: U
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 border border-gray-200 hover:border-red-200 rounded-xl transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-gray-900 hover:text-red-500 hover:bg-red-50 border border-gray-300 hover:border-red-200 rounded-xl transition-all cursor-pointer"
           >
             <LogOut size={14} strokeWidth={2} />
             Sign Out
@@ -87,11 +87,11 @@ function InfoRow({ icon, label, value }: Readonly<{
   value: string;
 }>) {
   return (
-    <div className="flex items-center gap-3 px-5 py-3.5">
+    <div className="flex items-center gap-3 px-5 py-2.5">
       <div className="shrink-0">{icon}</div>
       <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
-        <span className="text-sm text-gray-400 shrink-0">{label}</span>
-        <span className="text-sm font-medium text-gray-700 truncate text-right">{value}</span>
+        <span className="text-sm font-medium text-gray-700 shrink-0">{label}</span>
+        <span className="text-sm font-semibold text-gray-900 truncate text-right">{value}</span>
       </div>
     </div>
   );
