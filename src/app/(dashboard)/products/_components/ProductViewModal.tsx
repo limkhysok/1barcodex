@@ -2,6 +2,7 @@
 
 import type { Product } from "@/src/types/product.types";
 import { X, Package } from "lucide-react";
+import Image from "next/image";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -52,8 +53,8 @@ export function ProductViewModal({ product, onClose }: Readonly<ProductViewModal
         {/* Image */}
         <div className="px-5 pt-4">
           {imageUrl ? (
-            <div className="w-full h-40 rounded-sm overflow-hidden bg-gray-50 border border-slate-500">
-              <img src={imageUrl} alt={product.product_name} className="w-full h-full object-contain" />
+            <div className="w-full h-40 rounded-sm overflow-hidden bg-gray-50 border border-slate-500 relative">
+              <Image src={imageUrl} alt={product.product_name} fill className="object-contain" unoptimized />
             </div>
           ) : (
             <div className="w-full h-40 rounded-sm bg-gray-50 border border-slate-500 flex flex-col items-center justify-center gap-2">

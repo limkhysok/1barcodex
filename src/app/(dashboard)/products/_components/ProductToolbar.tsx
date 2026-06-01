@@ -147,8 +147,8 @@ function SearchBar({ search, setSearch, placeholder = "Search product..." }: Rea
 export function ProductToolbar({
   categoryFilter, setCategoryFilter,
   supplierFilter, setSupplierFilter,
-  sortField: _sortField, setSortField,
-  sortDir: _sortDir, setSortDir,
+  setSortField,
+  setSortDir,
   search, setSearch,
   categories, suppliers,
   totalResults,

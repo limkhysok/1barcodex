@@ -83,7 +83,7 @@ export default function DashboardNavbar({ onMenuClick }: Readonly<Props>) {
             </button>
 
             {open && (
-              <div className="absolute right-0 mt-3 w-40 bg-white border border-gray-400 shadow-sm overflow-hidden z-50 rounded-xl animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-3 w-40 bg-white border border-gray-400 shadow-sm overflow-hidden z-50 rounded-md animate-in fade-in slide-in-from-top-2 duration-200">
 
 
                 <div className="p-2">

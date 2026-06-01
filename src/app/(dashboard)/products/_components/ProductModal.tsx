@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { Product, ProductPayload } from "@/src/types/product.types";
 import { ChevronDown, Check, Image as ImageIcon, X, Package } from "lucide-react";
-
-const REORDER_PRESETS = new Set([5, 10, 15, 20]);
+import Image from "next/image";
 
 const inputCls =
   "w-full px-2 py-1 rounded-sm border border-gray-200 text-[13px] text-gray-800 placeholder:text-gray-300 outline-none focus:ring-1 focus:border-gray-200 focus:bg-gray-50 transition";
@@ -32,9 +31,8 @@ function Field({ label, id, type = "text", value, onChange, placeholder, disable
   );
 }
 
-function ModalSelect({ label, id, value, options, onChange, placeholder, optional }: Readonly<{
+function ModalSelect({ label, value, options, onChange, placeholder, optional }: Readonly<{
   label: string;
-  id: string;
   value: string | number;
   options: { value: string | number; label: string }[];
   onChange: (v: string) => void;
@@ -71,9 +69,8 @@ function ModalSelect({ label, id, value, options, onChange, placeholder, optiona
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className={`w-full px-2 py-1.5 rounded-sm border text-[13px] text-left flex items-center justify-between transition-all duration-200 group ${
-            open ? "border-orange-500 bg-white shadow-sm" : "border-gray-200 bg-white"
-          }`}
+          className={`w-full px-2 py-1.5 rounded-sm border text-[13px] text-left flex items-center justify-between transition-all duration-200 group ${open ? "border-orange-500 bg-white shadow-sm" : "border-gray-200 bg-white"
+            }`}
         >
           <span className={`${selected ? "text-gray-900 font-bold uppercase tracking-tight" : "text-gray-300 font-medium"}`}>
             {selected ? selected.label : placeholder || "Select…"}
@@ -96,11 +93,10 @@ function ModalSelect({ label, id, value, options, onChange, placeholder, optiona
                       onChange(String(o.value));
                       setOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-3 flex items-center justify-between transition-all duration-150 group/opt ${
-                      String(value) === String(o.value)
+                    className={`w-full text-left px-4 py-3 flex items-center justify-between transition-all duration-150 group/opt ${String(value) === String(o.value)
                         ? "bg-orange-500 text-white"
                         : "text-slate-600 hover:bg-orange-50"
-                    }`}
+                      }`}
                   >
                     <span className={`text-[10px] font-black uppercase tracking-widest ${String(value) === String(o.value) ? "text-white" : "text-slate-700"}`}>
                       {o.label}
@@ -209,7 +205,7 @@ export function ProductModal({
               <div className="relative group w-24 h-24 rounded-sm border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden transition-colors hover:border-orange-500/30">
                 {previewUrl ? (
                   <div className="relative w-full h-full">
-                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <Image src={previewUrl} alt="Preview" fill className="object-cover" unoptimized />
                     <button
                       type="button"
                       onClick={removePicture}
@@ -255,14 +251,14 @@ export function ProductModal({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ModalSelect id="category" label="Category" value={form.category} placeholder="Select…"
+            <ModalSelect label="Category" value={form.category} placeholder="Select…"
               onChange={(v) => setForm((f) => ({ ...f, category: v }))}
               options={[
                 { value: "Accessories", label: "Accessories" },
                 { value: "Fasteners", label: "Fasteners" },
               ]} />
             <div className="space-y-1.5">
-              <ModalSelect id="reorder_level" label="Reorder Level"
+              <ModalSelect label="Reorder Level"
                 value={reorderCustom ? "custom" : form.reorder_level} placeholder="Select…"
                 onChange={(v) => {
                   if (v === "custom") {

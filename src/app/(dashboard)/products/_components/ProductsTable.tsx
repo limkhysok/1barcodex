@@ -3,6 +3,7 @@
 import React from "react";
 import type { Product } from "@/src/types/product.types";
 import { Edit2, Trash2, Eye, Database, ArrowUp, ArrowDown, Package } from "lucide-react";
+import Image from "next/image";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -54,9 +55,8 @@ const Header = ({
   return (
     <th
       onClick={() => isSortable && field && handleSort(field)}
-      className={`px-5 py-4 text-left text-[9px] font-black tracking-widest uppercase transition-all duration-200 select-none ${
-        isSortable ? "cursor-pointer hover:bg-slate-100/50" : ""
-      } ${isActive ? "text-orange-600 bg-orange-50/30" : "text-slate-400"} ${className || ""}`}
+      className={`px-5 py-4 text-left text-[9px] font-black tracking-widest uppercase transition-all duration-200 select-none ${isSortable ? "cursor-pointer hover:bg-slate-100/50" : ""
+        } ${isActive ? "text-orange-600 bg-orange-50/30" : "text-slate-400"} ${className || ""}`}
     >
       <div className="flex items-center">
         {label}
@@ -201,7 +201,7 @@ export function ProductsTable({
           <button type="button" onClick={() => onView(p)} className="w-full text-left flex flex-col cursor-pointer">
             <div className="h-20 w-full bg-slate-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
               {p.product_picture ? (
-                <img src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <Image src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
               ) : (
                 <Package size={20} strokeWidth={1} className="opacity-20" />
               )}
@@ -250,12 +250,14 @@ export function ProductsTable({
                 <span className="text-[12px] font-black text-slate-500 tabular-nums group-hover:text-orange-600 transition-colors">#{p.id}</span>
               </td>
               <td className="px-5 py-4 whitespace-nowrap ">
-                <div className="w-10 h-10 rounded-sm bg-slate-50 border border-slate-500 flex items-center justify-center overflow-hidden">
+                <div className="w-10 h-10 rounded-sm bg-slate-50 border border-slate-500 flex items-center justify-center overflow-hidden relative">
                   {p.product_picture ? (
-                    <img
+                    <Image
                       src={`${BASE_URL}${p.product_picture}`}
                       alt={p.product_name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   ) : (
                     <Package size={16} className="text-slate-200" />
@@ -326,7 +328,7 @@ export function ProductsTable({
           <button type="button" onClick={() => onView(p)} className="w-full text-left flex flex-col cursor-pointer">
             <div className="h-20 w-full bg-slate-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
               {p.product_picture ? (
-                <img src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <Image src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
               ) : (
                 <Package size={20} strokeWidth={1} className="opacity-20" />
               )}
