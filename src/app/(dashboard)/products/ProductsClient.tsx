@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/src/context/AuthContext";
 import type { Product, ProductPayload } from "@/src/types/product.types";
@@ -91,7 +91,7 @@ export default function ProductsClient({
   const filtersRef = useRef<HTMLDivElement>(null);
   const filtersMounted = useRef(false);
 
-  function buildFilters(): ProductFilters {
+  const buildFilters = useCallback((): ProductFilters => {
     const ordering = getSortParam(sortField, sortDir);
     return {
       search: search.trim() || undefined,
@@ -99,16 +99,16 @@ export default function ProductsClient({
       supplier: supplierFilter || undefined,
       ordering,
     };
-  }
+  }, [search, categoryFilter, supplierFilter, sortField, sortDir]);
 
-  function fetchProducts() {
+  const fetchProducts = useCallback(() => {
     setLoading(true);
     setError("");
     getProducts(undefined, buildFilters())
       .then((data) => setPaginated(data))
       .catch(() => setError("Failed to load products."))
       .finally(() => setLoading(false));
-  }
+  }, [buildFilters]);
 
   // Debounce API filter changes
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function ProductsClient({
       fetchProducts();
     }, 300);
     return () => clearTimeout(t);
-  }, [search, categoryFilter, supplierFilter, sortField, sortDir]);
+  }, [fetchProducts]);
 
   useEffect(() => {
     function handler(e: MouseEvent) {

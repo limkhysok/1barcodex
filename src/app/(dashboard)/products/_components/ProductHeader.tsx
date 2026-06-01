@@ -41,10 +41,9 @@ export function ProductHeader({ onNew }: Readonly<ProductHeaderProps>) {
       {/* ── DESKTOP (≥ lg) ── */}
       <div className="hidden lg:flex items-center justify-between gap-4">
         <div className="flex flex-col border-l-4 border-orange-500 pl-4">
-          <h1 className="text-[16px] font-black text-slate-950 uppercase tracking-[0.25em] leading-tight">Product</h1>
+          <h1 className="text-xl font-medium text-black-950 ">Product</h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Command Center / Catalog</p>
+            <p className="text-xs text-slate-600">Command Center / Catalog</p>
           </div>
         </div>
         <button
