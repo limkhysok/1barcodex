@@ -14,14 +14,14 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard",    href: "/dashboard",    icon: <LayoutDashboard size={17} /> },
+  { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard size={17} /> },
   { label: "Transactions", href: "/transactions", icon: <ArrowLeftRight size={17} /> },
-  { label: "Products",     href: "/products",     icon: <Package size={17} /> },
-  { label: "Inventory",    href: "/inventory",    icon: <Database size={17} /> },
+  { label: "Products", href: "/products", icon: <Package size={17} /> },
+  { label: "Inventory", href: "/inventory", icon: <Database size={17} /> },
 ];
 
 const bossItems = [
-  { label: "Staff",        href: "/staff",        icon: <Users size={17} /> },
+  { label: "Staff", href: "/staff", icon: <Users size={17} /> },
 ];
 
 interface Props {
@@ -113,7 +113,7 @@ function SidebarContent({
     <div className="flex flex-col h-full w-full bg-white">
 
       {/* ── Brand Section ── */}
-      <div className="flex items-center h-12.5 border-b border-slate-400 overflow-hidden shrink-0 bg-white">
+      <div className="flex items-center h-12.5 border-b border-gray-400 overflow-hidden shrink-0 bg-white">
         {/* Logo pinned in same fixed-width cell as nav icons — never moves */}
         <div className="shrink-0 flex items-center justify-center w-12.5">
           <Image src="/ctk.svg" alt="CTK" width={16} height={22} priority className="h-auto" />
@@ -133,7 +133,7 @@ function SidebarContent({
               ${isCollapsed ? "opacity-0" : "opacity-100"}
             `}
           >
-            <p className="text-[17px] font-black tracking-tight uppercase text-slate-950">CTK</p>
+            <p className="text-[17px] font-black tracking-tight  text-gray-900">CTK</p>
             <p className="text-[7px] font-bold tracking-[0.4em] uppercase text-orange-600 mt-0.1 opacity-90">Spare Parts</p>
           </div>
         </div>
@@ -228,7 +228,7 @@ function CollapseToggle({
       className="
         absolute top-12.5 -right-3 z-30 hidden md:flex
         items-center justify-center w-6 h-6 rounded-full
-        bg-white text-slate-800 border border-slate-500
+        bg-white text-slate-800 border border-gray-400
         hover:text-orange-600 hover:border-orange-200
         active:scale-95 transition-all duration-300
         shadow-xl group/btn cursor-pointer
@@ -257,7 +257,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
       >
         {/* Fix 1: removed overflow-hidden — each child manages its own overflow,
             so tooltips (absolute left-full) are no longer clipped */}
-        <div className="h-full w-full border-r border-slate-500">
+        <div className="h-full w-full border-r border-gray-400">
           <SidebarContent isCollapsed={isCollapsed} onClose={onClose} />
         </div>
 

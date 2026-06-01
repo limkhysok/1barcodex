@@ -6,15 +6,15 @@ import { useAuth } from "@/src/context/AuthContext";
 
 export default function LoginPage() {
   const { login, user } = useAuth();
-  const router          = useRouter();
+  const router = useRouter();
 
-  const [username, setUsername]         = useState("");
-  const [password, setPassword]         = useState("");
-  const [error, setError]               = useState("");
-  const [loading, setLoading]           = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [toast, setToast]               = useState(false);
-  const [redirecting, setRedirecting]   = useState(false);
+  const [toast, setToast] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   // Only auto-redirect if the user is already logged in on page load (not mid-login flow)
   useEffect(() => {
@@ -39,7 +39,8 @@ export default function LoginPage() {
       setRedirecting(true);
       await login({ username: username.trim(), password });
       setToast(true);
-      setTimeout(() => router.push("/transactions"), 1800);
+      // Keep loading=true during the transition so the button keeps spinning
+      setTimeout(() => router.push("/transactions"), 400);
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       setError(
@@ -47,13 +48,13 @@ export default function LoginPage() {
           ? "Invalid username or password."
           : "Something went wrong. Please try again."
       );
-    } finally {
       setLoading(false);
+      setRedirecting(false);
     }
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-orange-50 via-white to-orange-100 flex items-center justify-center px-4 py-8 sm:py-12">
+    <main className="min-h-screen bg-white flex items-center justify-center px-4 py-8 sm:py-12">
       <div className="w-full max-w-xs sm:max-w-sm">
 
         {/* Card */}
@@ -145,7 +146,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 rounded-xl text-sm font-semibold text-white bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
