@@ -264,7 +264,7 @@ export function InventoryTable({
   // ── Desktop: List Table ──
   const desktopList = (
     <div className="hidden lg:block overflow-x-auto bg-white border border-slate-500 rounded-sm">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm table-fixed">
         <thead className="bg-slate-50/50 border-b border-slate-500">
           <tr>
             <Header label="#" field="id" ordering={ordering} handleSort={onSort} className="pl-6 w-16" />

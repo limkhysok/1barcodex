@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/context/AuthContext";
 import Sidebar from "@/src/components/layouts/Sidebar";
@@ -12,16 +12,24 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Tracks whether the user has manually toggled the sidebar,
+  // so viewport-based auto-collapse doesn't override their preference.
+  const userSetCollapse = useRef(false);
 
-  // Auto-collapse sidebar on tablet, expand on desktop; close mobile drawer on resize
   useEffect(() => {
+    // Apply breakpoint defaults on mount only (no user override yet)
+    const init = window.innerWidth;
+    if (init >= 1024) setSidebarCollapsed(false);
+    else if (init >= 768) setSidebarCollapsed(true);
+
     function handleResize() {
       const w = window.innerWidth;
-      if (w >= 1024) setSidebarCollapsed(false);
-      else if (w >= 768) setSidebarCollapsed(true);
+      if (!userSetCollapse.current) {
+        if (w >= 1024) setSidebarCollapsed(false);
+        else if (w >= 768) setSidebarCollapsed(true);
+      }
       if (w >= 768) setSidebarOpen(false);
     }
-    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -54,7 +62,10 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         isCollapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+        onToggleCollapse={() => {
+          userSetCollapse.current = true;
+          setSidebarCollapsed((v) => !v);
+        }}
       />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <DashboardNavbar onMenuClick={() => setSidebarOpen((v) => !v)} />

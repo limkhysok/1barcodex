@@ -52,28 +52,36 @@ function NavItem({
         onClick={onClick}
         aria-current={active ? "page" : undefined}
         className={`
-          flex items-center w-full select-none relative
-          transition-all duration-400 ease-in-out
-          ${isCollapsed ? "py-2.5 px-0 justify-center gap-0" : "py-3 px-4 justify-start gap-2.5"}
+          flex items-center w-full select-none
           ${active
             ? "bg-slate-50 text-orange-600 border-r-2 border-orange-600"
             : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           }
         `}
       >
-        <div className={`shrink-0 transition-transform duration-300 ${active ? "scale-110" : "group-hover:scale-110"}`}>
+        {/* Icon pinned in a fixed-width cell — same width as collapsed sidebar, never moves */}
+        <div className={`shrink-0 flex items-center justify-center w-12.5 py-3 ${active ? "scale-110" : "group-hover:scale-110"}`}>
           {icon}
         </div>
-        <span
+
+        <div
           className={`
-            text-[11px] font-black uppercase tracking-[0.15em] leading-none
-            overflow-hidden whitespace-nowrap
-            transition-all duration-400 ease-in-out
-            ${isCollapsed ? "max-w-0 opacity-0" : "max-w-35 opacity-100"}
+            grid overflow-hidden
+            transition-[grid-template-columns] duration-500 ease-in-out
+            ${isCollapsed ? "grid-cols-[0fr]" : "grid-cols-[1fr]"}
           `}
         >
-          {label}
-        </span>
+          <span
+            className={`
+              min-w-0 text-[11px] font-black uppercase tracking-[0.15em] leading-none
+              whitespace-nowrap overflow-hidden pr-4
+              transition-opacity duration-500 ease-in-out
+              ${isCollapsed ? "opacity-0" : "opacity-100"}
+            `}
+          >
+            {label}
+          </span>
+        </div>
       </Link>
 
       {/* Tooltip — shown only when collapsed */}
@@ -105,41 +113,56 @@ function SidebarContent({
     <div className="flex flex-col h-full w-full bg-white">
 
       {/* ── Brand Section ── */}
-      <div
-        className={`
-          flex items-center h-12.5 border-b border-slate-400 overflow-hidden shrink-0 bg-white
-          transition-all duration-400 ease-in-out
-          ${isCollapsed ? "justify-center px-0 gap-0" : "justify-start px-4 gap-2"}
-        `}
-      >
-        <div className="flex items-center justify-center shrink-0 w-6">
+      <div className="flex items-center h-12.5 border-b border-slate-400 overflow-hidden shrink-0 bg-white">
+        {/* Logo pinned in same fixed-width cell as nav icons — never moves */}
+        <div className="shrink-0 flex items-center justify-center w-12.5">
           <Image src="/ctk.svg" alt="CTK" width={16} height={22} priority className="h-auto" />
         </div>
+
         <div
           className={`
-            flex flex-col leading-none overflow-hidden
-            transition-all duration-400 ease-in-out
-            ${isCollapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-30"}
+            grid overflow-hidden
+            transition-[grid-template-columns] duration-500 ease-in-out
+            ${isCollapsed ? "grid-cols-[0fr]" : "grid-cols-[1fr]"}
           `}
         >
-          <p className="text-[17px] font-black tracking-tight uppercase text-slate-950">CTK</p>
-          <p className="text-[7px] font-bold tracking-[0.4em] uppercase text-orange-600 mt-0.1 opacity-90">Spare Parts</p>
+          <div
+            className={`
+              min-w-0 flex flex-col leading-none overflow-hidden pr-4
+              transition-opacity duration-500 ease-in-out
+              ${isCollapsed ? "opacity-0" : "opacity-100"}
+            `}
+          >
+            <p className="text-[17px] font-black tracking-tight uppercase text-slate-950">CTK</p>
+            <p className="text-[7px] font-bold tracking-[0.4em] uppercase text-orange-600 mt-0.1 opacity-90">Spare Parts</p>
+          </div>
         </div>
       </div>
 
       {/* ── Navigation List ── */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none no-scrollbar pt-3">
         <div className="space-y-0">
-          <p
+
+          {/* Fix 4: grid trick for "Menu" section label */}
+          <div
             className={`
-              text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-4 px-5
-              overflow-hidden whitespace-nowrap
-              transition-all duration-400 ease-in-out
-              ${isCollapsed ? "max-w-0 opacity-0" : "max-w-40 opacity-100"}
+              grid overflow-hidden px-5
+              transition-[grid-template-columns] duration-500 ease-in-out
+              ${isCollapsed ? "grid-cols-[0fr]" : "grid-cols-[1fr]"}
             `}
           >
-            Menu
-          </p>
+            <p
+              className={`
+                min-w-0 text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-4
+                whitespace-nowrap overflow-hidden
+                transition-opacity duration-500 ease-in-out
+                ${isCollapsed ? "opacity-0" : "opacity-100"}
+              `}
+            >
+              Menu
+            </p>
+          </div>
+
           {navItems.map(({ label, href, icon }) => (
             <NavItem
               key={href}
@@ -153,16 +176,25 @@ function SidebarContent({
 
           {showManagement && (
             <>
-              <p
+              {/* Fix 4: grid trick for "Management" section label */}
+              <div
                 className={`
-                  text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-4 mt-8 px-5
-                  overflow-hidden whitespace-nowrap
-                  transition-all duration-400 ease-in-out
-                  ${isCollapsed ? "max-w-0 opacity-0" : "max-w-40 opacity-100"}
+                  grid overflow-hidden px-5 mt-8
+                  transition-[grid-template-columns] duration-500 ease-in-out
+                  ${isCollapsed ? "grid-cols-[0fr]" : "grid-cols-[1fr]"}
                 `}
               >
-                Management
-              </p>
+                <p
+                  className={`
+                    min-w-0 text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-4
+                    whitespace-nowrap overflow-hidden
+                    transition-opacity duration-500 ease-in-out
+                    ${isCollapsed ? "opacity-0" : "opacity-100"}
+                  `}
+                >
+                  Management
+                </p>
+              </div>
               {bossItems.map(({ label, href, icon }) => (
                 <NavItem
                   key={href}
@@ -205,7 +237,7 @@ function CollapseToggle({
       <ChevronLeft
         size={14}
         strokeWidth={3.5}
-        className={`transition-transform duration-400 ease-in-out ${isCollapsed ? "rotate-180" : "rotate-0"}`}
+        className={`transition-transform duration-500 ease-in-out ${isCollapsed ? "rotate-180" : "rotate-0"}`}
       />
     </button>
   );
@@ -220,11 +252,12 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
       <div
         className={`
           hidden md:block h-full shrink-0 relative z-20
-          transition-all duration-400 ease-in-out
           ${isCollapsed ? "w-12.5 min-w-12.5" : "w-45 min-w-45"}
         `}
       >
-        <div className="h-full w-full overflow-hidden border-r border-slate-500">
+        {/* Fix 1: removed overflow-hidden — each child manages its own overflow,
+            so tooltips (absolute left-full) are no longer clipped */}
+        <div className="h-full w-full border-r border-slate-500">
           <SidebarContent isCollapsed={isCollapsed} onClose={onClose} />
         </div>
 
@@ -235,7 +268,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
       <div
         className={`
           fixed inset-0 z-40 bg-slate-900/40 md:hidden backdrop-blur-sm
-          transition-opacity duration-250 ease
+          transition-opacity duration-500 ease-in-out
           ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
         `}
         onClick={onClose}
@@ -244,7 +277,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
       <div
         className={`
           fixed inset-y-0 left-0 z-50 md:hidden shadow-3xl w-60
-          transition-transform duration-400 ease-in-out
+          transition-transform duration-500 ease-in-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >

@@ -230,7 +230,7 @@ export function ProductsTable({
   // ── Desktop: List table ──
   const desktopList = (
     <div className="hidden lg:block overflow-x-auto bg-white border border-slate-500 rounded-sm">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm table-fixed">
         <thead className="bg-slate-50/50 border-b border-slate-500">
           <tr>
             <Header label="#" field="id" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
