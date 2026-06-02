@@ -283,9 +283,9 @@ const chartData = useMemo(() => {
       
       {/* ── HEADER: MOBILE (< sm) — single row ── */}
       <div className="sm:hidden flex items-center justify-between gap-2">
-        <div className="flex flex-col border-l-2 border-orange-500 pl-3 shrink-0">
-          <h1 className="text-[14px] font-black text-slate-950 uppercase tracking-[0.2em] leading-none">Dashboard</h1>
-          <p className="text-[8px] text-orange-500 font-black uppercase tracking-widest mt-0.5">Overview</p>
+        <div className="flex flex-col shrink-0">
+          <h1 className="text-base font-medium text-slate-950">Dashboard</h1>
+          <p className="text-xs text-slate-600">Overview</p>
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <RangeTabs
@@ -308,16 +308,11 @@ const chartData = useMemo(() => {
       </div>
 
       {/* ── HEADER: TABLET / DESKTOP (≥ sm) ── */}
-      <div className="hidden sm:flex flex-col gap-4 md:flex-row md:items-center md:justify-between ">
+      <div className="hidden sm:flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col border-l-4 border-orange-500 pl-4">
-          <h1 className="text-[16px] font-black text-slate-950 uppercase tracking-[0.25em] leading-tight">
-            Dashboard
-          </h1>
+          <h1 className="text-xl font-medium text-slate-950">Dashboard</h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-              Command Center / Integrated Logistics
-            </p>
+            <p className="text-sm text-slate-600">Overview of inventory, products, and transactions.</p>
           </div>
         </div>
 

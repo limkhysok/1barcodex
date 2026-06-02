@@ -238,38 +238,84 @@ export default function StaffClient() {
 
   return (
     <div className="px-4 py-5 sm:px-5 sm:py-5 space-y-4">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-black text-slate-950 uppercase tracking-tight flex items-center gap-2.5">
-            <Users className="text-orange-600" size={20} strokeWidth={2.5} />
-            Staff Management
-          </h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">
-            View and manage authorized staff members
-          </p>
+      {/* ── MOBILE (< sm) ── */}
+      <div className="sm:hidden flex items-center justify-between">
+        <div className="flex flex-col">
+          <h1 className="text-base font-medium text-slate-950">Staff</h1>
+          <p className="text-xs text-slate-600">Management</p>
         </div>
+        <button
+          onClick={openCreateModal}
+          className="px-2 py-1 rounded-md text-[13px] font-regular bg-orange-500 text-white active:scale-[0.98] transition-all cursor-pointer"
+        >
+          Add
+        </button>
+      </div>
 
-        {/* Actions Section */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Search Bar */}
-          <div className="relative group flex-1 sm:w-64">
+      {/* ── MOBILE search row ── */}
+      <div className="sm:hidden">
+        <div className="relative group">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+          <input
+            type="text"
+            placeholder="Search staff..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-white border border-slate-200 pl-9 pr-4 py-2 text-sm placeholder:text-slate-300 focus:outline-none focus:border-orange-500 transition-all rounded-md"
+          />
+        </div>
+      </div>
+
+      {/* ── TABLET (sm → lg) ── */}
+      <div className="hidden sm:flex lg:hidden items-center justify-between">
+        <div className="flex flex-col border-l-2 border-orange-500 pl-3">
+          <h1 className="text-lg font-medium text-slate-950">Staff</h1>
+          <p className="text-sm text-slate-600">View and manage authorized staff members.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative group w-52">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
             <input
               type="text"
-              placeholder="SEARCH STAFF..."
+              placeholder="Search staff..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-slate-500 pl-9 pr-4 py-2 text-[11px] font-bold uppercase tracking-widest placeholder:text-slate-300 focus:outline-none focus:border-orange-500 transition-all rounded-sm shadow-sm"
+              className="w-full bg-white border border-slate-200 pl-9 pr-4 py-1.5 text-sm placeholder:text-slate-300 focus:outline-none focus:border-orange-500 transition-all rounded-md"
             />
           </div>
-
           <button
             onClick={openCreateModal}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-950 text-white text-[11px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all rounded-sm shadow-md active:scale-95 shrink-0"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-regular bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.97] transition-all cursor-pointer shrink-0"
           >
-            <Plus size={14} strokeWidth={3} />
-            Add Staff
+            <span>Add Staff</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── DESKTOP (≥ lg) ── */}
+      <div className="hidden lg:flex items-center justify-between gap-4">
+        <div className="flex flex-col border-l-4 border-orange-500 pl-4">
+          <h1 className="text-xl font-medium text-slate-950">Staff</h1>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-sm text-slate-600">View and manage authorized staff members.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative group w-64">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="Search staff..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white border border-slate-200 pl-9 pr-4 py-1.5 text-sm placeholder:text-slate-300 focus:outline-none focus:border-orange-500 transition-all rounded-md"
+            />
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm bg-orange-500 font-regular text-white hover:bg-orange-600 active:scale-[0.96] transition-all cursor-pointer shrink-0"
+          >
+            <span>Add Staff</span>
           </button>
         </div>
       </div>
@@ -375,7 +421,7 @@ export default function StaffClient() {
       </div>
       {/* Staff Management Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white border border-slate-500 shadow-2xl rounded-sm overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="px-6 py-4 bg-slate-50 border-b border-slate-500 flex items-center justify-between">

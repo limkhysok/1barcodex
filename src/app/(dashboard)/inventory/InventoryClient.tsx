@@ -112,8 +112,8 @@ export default function InventoryClient({
 
   // -- Fetch logic --
   const fetchInventory = useCallback((nextPage = 1, append = false) => {
-    if (!append) setLoading(true);
-    else setLoadingMore(true);
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     setError("");
 
     getInventory({ search: search.trim() || undefined, ordering: ordering || undefined, page: nextPage })

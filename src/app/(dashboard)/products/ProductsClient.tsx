@@ -106,8 +106,8 @@ export default function ProductsClient({
   }, [search, categoryFilter, supplierFilter, sortField, sortDir]);
 
   const fetchProducts = useCallback((nextPage = 1, append = false) => {
-    if (!append) setLoading(true);
-    else setLoadingMore(true);
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     setError("");
     getProducts(undefined, buildFilters(nextPage))
       .then((data) => {

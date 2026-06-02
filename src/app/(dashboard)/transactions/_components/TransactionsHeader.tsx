@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileText, ChevronDown, Plus, X, Check } from "lucide-react";
+import { FileText, ChevronDown, X, Check } from "lucide-react";
 
 interface TransactionsHeaderProps {
   onNew: () => void;
@@ -147,14 +147,14 @@ export function TransactionsHeader({
       {/* ── MOBILE (< sm) ── */}
       <div className="sm:hidden flex items-center justify-between">
         <div className="flex flex-col">
-          <h1 className="text-[13px] font-black text-slate-950 uppercase tracking-[0.2em] leading-none">Transactions</h1>
-          <p className="text-[8px] text-orange-500 font-black uppercase tracking-widest mt-0.5">Operations</p>
+          <h1 className="text-base font-medium text-slate-950">Transactions</h1>
+          <p className="text-xs text-slate-600">Overview</p>
         </div>
         <div className="flex items-center gap-2">
-          <ReportDropdown 
-            open={pdfPanelOpen} 
-            setOpen={setPdfPanelOpen} 
-            reportRef={pdfPanelRef} 
+          <ReportDropdown
+            open={pdfPanelOpen}
+            setOpen={setPdfPanelOpen}
+            reportRef={pdfPanelRef}
             pdfDate={pdfDate}
             setPdfDate={setPdfDate}
             pdfType={pdfType}
@@ -162,13 +162,13 @@ export function TransactionsHeader({
             onExportPdf={onExportPdf}
             pdfLoading={pdfLoading}
             pdfError={pdfError}
-            compact 
+            compact
           />
           <button
             onClick={onNew}
-            className="px-4 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-wider bg-orange-50 text-orange-500 border border-orange-200 active:scale-[0.98] transition-all cursor-pointer"
+            className="px-2 py-1 rounded-md text-[13px] font-regular bg-orange-500 text-white active:scale-[0.98] transition-all cursor-pointer"
           >
-            + New
+            Add
           </button>
         </div>
       </div>
@@ -176,14 +176,14 @@ export function TransactionsHeader({
       {/* ── TABLET (sm → lg) ── */}
       <div className="hidden sm:flex lg:hidden items-center justify-between">
         <div className="flex flex-col border-l-2 border-orange-500 pl-3">
-          <h1 className="text-[15px] font-black text-slate-950 uppercase tracking-[0.2em] leading-tight">Transactions</h1>
-          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Command Center / Operations</p>
+          <h1 className="text-lg font-medium text-slate-950">Transactions</h1>
+          <p className="text-sm text-slate-600">Log and review all stock receive and sale transactions.</p>
         </div>
         <div className="flex items-center gap-2">
-          <ReportDropdown 
-            open={pdfPanelOpen} 
-            setOpen={setPdfPanelOpen} 
-            reportRef={pdfPanelRef} 
+          <ReportDropdown
+            open={pdfPanelOpen}
+            setOpen={setPdfPanelOpen}
+            reportRef={pdfPanelRef}
             pdfDate={pdfDate}
             setPdfDate={setPdfDate}
             pdfType={pdfType}
@@ -194,9 +194,8 @@ export function TransactionsHeader({
           />
           <button
             onClick={onNew}
-            className="flex items-center gap-2 px-4 py-2 rounded-sm text-[11px] font-black uppercase tracking-wider bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.97] transition-all cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-regular bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.97] transition-all cursor-pointer"
           >
-            <Plus size={14} strokeWidth={3} />
             <span>New Transaction</span>
           </button>
         </div>
@@ -205,17 +204,16 @@ export function TransactionsHeader({
       {/* ── DESKTOP (≥ lg) ── */}
       <div className="hidden lg:flex items-center justify-between gap-4">
         <div className="flex flex-col border-l-4 border-orange-500 pl-4">
-          <h1 className="text-[16px] font-black text-slate-950 uppercase tracking-[0.25em] leading-tight">Transactions</h1>
+          <h1 className="text-xl font-medium text-slate-950">Transactions</h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Command Center / Operations</p>
+            <p className="text-sm text-slate-600">Log and review all stock receive and sale transactions.</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <ReportDropdown 
-            open={pdfPanelOpen} 
-            setOpen={setPdfPanelOpen} 
-            reportRef={pdfPanelRef} 
+          <ReportDropdown
+            open={pdfPanelOpen}
+            setOpen={setPdfPanelOpen}
+            reportRef={pdfPanelRef}
             pdfDate={pdfDate}
             setPdfDate={setPdfDate}
             pdfType={pdfType}
@@ -226,9 +224,8 @@ export function TransactionsHeader({
           />
           <button
             onClick={onNew}
-            className="flex items-center gap-2.5 px-5 py-2 rounded-sm text-[11px] font-black uppercase tracking-wider bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.96] transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm bg-orange-500 font-regular text-white hover:bg-orange-600 active:scale-[0.96] transition-all cursor-pointer"
           >
-            <Plus size={16} strokeWidth={3} />
             <span>New Transaction</span>
           </button>
         </div>

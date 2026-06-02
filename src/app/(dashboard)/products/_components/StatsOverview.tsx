@@ -33,17 +33,17 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
           <div className="flex flex-col items-center gap-0.5 py-3">
             <Package size={14} className="text-orange-500" strokeWidth={2} />
             <p className="text-[18px] font-black text-slate-900 leading-none tabular-nums">{fmt(s.accCount)}</p>
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Accessories</p>
+            <p className="text-sm font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Accessories</p>
           </div>
           <div className="flex flex-col items-center gap-0.5 py-3">
             <Box size={14} className="text-orange-500" strokeWidth={2} />
             <p className="text-[18px] font-black text-slate-900 leading-none tabular-nums">{fmt(s.fasCount)}</p>
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Fasteners</p>
+            <p className="text-sm font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Fasteners</p>
           </div>
           <div className="flex flex-col items-center gap-0.5 py-3">
             <Zap size={14} className="text-orange-500" strokeWidth={2} />
             <p className="text-[18px] font-black text-slate-900 leading-none tabular-nums">{fmt(s.total)}</p>
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total</p>
+            <p className="text-sm font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Total</p>
           </div>
         </div>
         <div className="px-3 pb-3 flex flex-col gap-1">
@@ -66,7 +66,7 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
               <div className="w-7 h-7 rounded-sm bg-orange-50 flex items-center justify-center">
                 <Package size={14} className="text-orange-500" strokeWidth={2} />
               </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Accessories</p>
+              <p className="text-base font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Accessories</p>
             </div>
             <span className="text-[9px] font-black text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">{s.accShare}%</span>
           </div>
@@ -82,7 +82,7 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
               <div className="w-7 h-7 rounded-sm bg-orange-50 flex items-center justify-center">
                 <Box size={14} className="text-orange-500" strokeWidth={2} />
               </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fasteners</p>
+              <p className="text-base font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Fasteners</p>
             </div>
             <span className="text-[9px] font-black text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">{s.fasShare}%</span>
           </div>
@@ -98,7 +98,7 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
               <div className="w-7 h-7 rounded-sm bg-orange-50 flex items-center justify-center">
                 <Zap size={14} className="text-orange-500" strokeWidth={2} />
               </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</p>
+              <p className="text-base font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Total</p>
             </div>
           </div>
           <p className="text-[26px] font-black text-slate-900 leading-none tabular-nums tracking-tighter">{fmt(s.total)}</p>
@@ -113,7 +113,7 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
         <div className="bg-white border border-slate-500 rounded-sm p-4 flex flex-col gap-3">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Accessories</p>
+              <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Accessories</p>
               <p className="text-3xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.accCount)}</p>
             </div>
             <div className="w-9 h-9 rounded-sm bg-orange-50 flex items-center justify-center">
@@ -134,7 +134,7 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
         <div className="bg-white border border-slate-500 rounded-sm p-4 flex flex-col gap-3">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Fasteners</p>
+              <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Fasteners</p>
               <p className="text-3xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.fasCount)}</p>
             </div>
             <div className="w-9 h-9 rounded-sm bg-orange-50 flex items-center justify-center">
@@ -155,7 +155,7 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
         <div className="bg-white border border-slate-500 rounded-sm p-4 flex flex-col gap-3">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Total Products</p>
+              <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Total</p>
               <p className="text-3xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.total)}</p>
             </div>
             <div className="w-9 h-9 rounded-sm bg-orange-50 flex items-center justify-center">
