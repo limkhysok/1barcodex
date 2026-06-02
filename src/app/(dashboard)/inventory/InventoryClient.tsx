@@ -317,8 +317,7 @@ export default function InventoryClient({
       'Location': 'location',
       'Quantity': 'quantity_on_hand',
       'Status': 'reorder_status',
-      'Order Date': 'updated_at',
-      'Updated': 'updated_at',
+      'Created': 'created_at',
     };
     const field = orderingFields[colLabel];
     if (!field) return;
