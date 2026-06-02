@@ -32,6 +32,19 @@ export interface InventoryPayload {
   quantity_on_hand: number;
 }
 
+/** Response from GET /api/v1/inventory/stats/ */
+export interface InventoryStats {
+  total_records: number;
+  total_quantity_on_hand: number;
+  total_stock_value: number;
+  needs_reorder: number;
+  by_site: Record<string, {
+    records: number;
+    total_quantity_on_hand: number;
+    total_stock_value: number;
+  }>;
+}
+
 /** Response from GET /api/v1/inventory/scan/?barcode=<value> */
 export interface ScanResult {
   found: boolean;

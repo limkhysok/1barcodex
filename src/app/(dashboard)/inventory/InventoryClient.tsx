@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/src/context/AuthContext";
-import type { InventoryRecord, InventoryPayload } from "@/src/types/inventory.types";
-import { getInventory, createInventory, updateInventory, deleteInventory } from "@/src/services/inventory.service";
+import type { InventoryRecord, InventoryPayload, InventoryStats } from "@/src/types/inventory.types";
+import { getInventory, createInventory, updateInventory, deleteInventory, getInventoryStats } from "@/src/services/inventory.service";
 import { getProducts } from "@/src/services/product.service";
 import type { PaginatedInventory, PaginatedProducts } from "@/src/types/api.types";
 
@@ -179,6 +179,7 @@ export default function InventoryClient({
       }
       setModalOpen(false);
       fetchInventory(1, false);
+      fetchStats();
       getProducts().then(setPaginatedProducts).catch(() => { });
     } catch (err: any) {
       if (err?.response?.status === 409) {
@@ -198,6 +199,7 @@ export default function InventoryClient({
       await deleteInventory(deleteTarget.id);
       setDeleteTarget(null);
       fetchInventory(1, false);
+      fetchStats();
       toast.success("Record Deleted", { description: "Inventory record has been removed." });
     } catch {
       toast.error("Delete Failed", { description: "Failed to delete record. Please try again." });
@@ -301,18 +303,26 @@ export default function InventoryClient({
     return list;
   }, [records, search, ordering]);
 
-  // Stats always reflect the CURRENTLY displayed/filtered view
-  const stats = useMemo(() => {
-    const total = displayed.length;
-    const totalQty = displayed.reduce((s, r) => s + r.quantity_on_hand, 0);
-    const needsReorder = displayed.filter((r) => r.reorder_status !== "No").length;
-    return { total, totalQty, needsReorder };
-  }, [displayed]);
+  // Stats fetched directly from the database
+  const [dbStats, setDbStats] = useState<InventoryStats | null>(null);
+
+  const fetchStats = useCallback(() => {
+    getInventoryStats().then((data) => { if (data) setDbStats(data); }).catch(() => {});
+  }, []);
+
+  useEffect(() => { fetchStats(); }, [fetchStats]);
+
+  const stats = useMemo(() => ({
+    total: dbStats?.total_records ?? 0,
+    totalQty: dbStats?.total_quantity_on_hand ?? 0,
+    needsReorder: dbStats?.needs_reorder ?? 0,
+  }), [dbStats]);
 
   function handleSort(colLabel: string, dir?: string) {
     const orderingFields: Record<string, string> = {
-      '#': 'id',
+      'No': 'id',
       'Product': 'product_name',
+      'Barcode': 'barcode',
       'Site': 'site',
       'Location': 'location',
       'Quantity': 'quantity_on_hand',

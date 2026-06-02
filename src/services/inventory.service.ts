@@ -1,5 +1,5 @@
 import api from "./api";
-import type { InventoryRecord, InventoryPayload, ScanResult } from "@/src/types/inventory.types";
+import type { InventoryRecord, InventoryPayload, InventoryStats, ScanResult } from "@/src/types/inventory.types";
 import type { PaginatedInventory } from "@/src/types/api.types";
 import { isRedirectError } from "@/src/lib/is-redirect-error";
 
@@ -28,11 +28,11 @@ export async function getInventory(params?: {
   return data;
 }
 
-export async function getInventoryStats(fetcher?: <T>(path: string) => Promise<T>): Promise<any> {
+export async function getInventoryStats(fetcher?: <T>(path: string) => Promise<T>): Promise<InventoryStats | null> {
   const path = "/v1/inventory/stats/";
   try {
-    if (fetcher) return await fetcher(path);
-    const { data } = await api.get<any>(path);
+    if (fetcher) return await fetcher<InventoryStats>(path);
+    const { data } = await api.get<InventoryStats>(path);
     return data;
   } catch (error) {
     if (isRedirectError(error)) throw error;
