@@ -110,68 +110,38 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
 
       {/* ── DESKTOP (≥ lg) ── */}
       <div className="hidden lg:grid grid-cols-3 gap-3">
-        <div className="bg-white border border-slate-500 rounded-sm p-4 flex flex-col gap-3">
+        <div className="bg-white border border-black-400 rounded-xl p-5 flex flex-col gap-3">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Accessories</p>
-              <p className="text-3xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.accCount)}</p>
+              <p className="text-xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.accCount)}</p>
             </div>
-            <div className="w-9 h-9 rounded-sm bg-orange-50 flex items-center justify-center">
-              <Package size={18} className="text-orange-500" strokeWidth={1.5} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5 mt-auto">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Share</span>
-              <span className="text-[10px] font-black text-orange-600">{s.accShare}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-orange-100 overflow-hidden">
-              <div className="h-full bg-orange-500 rounded-full transition-all duration-700" style={{ width: `${s.accShare}%` }} />
+            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center">
+              <Package size={23} className="text-orange-500" strokeWidth={1.5} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-500 rounded-sm p-4 flex flex-col gap-3">
+        <div className="bg-white border border-black-400 rounded-xl p-5 flex flex-col gap-3">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Fasteners</p>
-              <p className="text-3xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.fasCount)}</p>
+              <p className="text-xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.fasCount)}</p>
             </div>
-            <div className="w-9 h-9 rounded-sm bg-orange-50 flex items-center justify-center">
-              <Box size={18} className="text-orange-500" strokeWidth={1.5} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5 mt-auto">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Share</span>
-              <span className="text-[10px] font-black text-orange-600">{s.fasShare}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-orange-100 overflow-hidden">
-              <div className="h-full bg-orange-500 rounded-full transition-all duration-700" style={{ width: `${s.fasShare}%` }} />
+            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center">
+              <Box size={23} className="text-orange-500" strokeWidth={1.5} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-500 rounded-sm p-4 flex flex-col gap-3">
+        <div className="bg-white border border-black-400 rounded-xl p-5 flex flex-col gap-3">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Total</p>
-              <p className="text-3xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.total)}</p>
+              <p className="text-xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.total)}</p>
             </div>
-            <div className="w-9 h-9 rounded-sm bg-orange-50 flex items-center justify-center">
-              <Zap size={18} className="text-orange-500" strokeWidth={1.5} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5 mt-auto">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Split</span>
-              <span className="text-[9px] font-black text-orange-500">
-                {s.accShare}% · {s.fasShare}%
-              </span>
-            </div>
-            <div className="h-1.5 rounded-full overflow-hidden bg-orange-100 flex">
-              <div className="h-full bg-orange-500 transition-all duration-700" style={{ width: `${s.accShare}%` }} />
-              <div className="h-full bg-orange-200 transition-all duration-700" style={{ width: `${s.fasShare}%` }} />
+            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center">
+              <Zap size={23} className="text-orange-500" strokeWidth={1.5} />
             </div>
           </div>
         </div>
