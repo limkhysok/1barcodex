@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import type { SortDir } from "./ProductsTable";
-import { Search, X, ChevronDown, Filter, Tag, Users, List, LayoutGrid } from "lucide-react";
+import { Search, X, ChevronDown, Filter, Tag, Users } from "lucide-react";
 
 interface ProductToolbarProps {
   categoryFilter: string;
@@ -21,8 +21,6 @@ interface ProductToolbarProps {
   filtersOpen: boolean;
   setFiltersOpen: React.Dispatch<React.SetStateAction<boolean>>;
   filtersRef: React.RefObject<HTMLDivElement | null>;
-  viewMode: "list" | "grid";
-  setViewMode: (v: "list" | "grid") => void;
 }
 
 function DropdownFilter({
@@ -106,23 +104,6 @@ function DropdownFilter({
   );
 }
 
-function ViewToggle({ viewMode, setViewMode }: Readonly<{ viewMode: "list" | "grid"; setViewMode: (v: "list" | "grid") => void }>) {
-  return (
-    <div className="flex items-center gap-0 bg-slate-100 border border-slate-500 rounded-sm h-8 overflow-hidden shrink-0">
-      {(["list", "grid"] as const).map((mode) => (
-        <button
-          key={mode}
-          type="button"
-          onClick={() => setViewMode(mode)}
-          className={`flex items-center justify-center w-8 h-full transition-all duration-150 cursor-pointer ${viewMode === mode ? "bg-orange-500 text-white" : "text-gray-400 hover:text-orange-500"}`}
-          title={mode === "list" ? "List view" : "Grid view"}
-        >
-          {mode === "list" ? <List size={13} strokeWidth={2.5} /> : <LayoutGrid size={13} strokeWidth={2.5} />}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function SearchBar({ search, setSearch, placeholder = "Search product..." }: Readonly<{ search: string; setSearch: (v: string) => void; placeholder?: string }>) {
   return (
@@ -153,7 +134,6 @@ export function ProductToolbar({
   categories, suppliers,
   totalResults,
   filtersOpen, setFiltersOpen, filtersRef,
-  viewMode, setViewMode,
 }: Readonly<ProductToolbarProps>) {
   const activeCount = [categoryFilter, supplierFilter, search].filter(Boolean).length;
   const isFiltered = activeCount > 0;
@@ -264,7 +244,6 @@ export function ProductToolbar({
         </div>
         <div className="ml-auto flex items-center gap-2">
           <SearchBar search={search} setSearch={setSearch} />
-          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
         </div>
       </div>
 

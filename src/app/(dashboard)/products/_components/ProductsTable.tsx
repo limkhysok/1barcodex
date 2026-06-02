@@ -235,12 +235,12 @@ export function ProductsTable({
           <tr>
             <Header label="No" field="id" className="w-[6%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
             <Header label="Barcode" field="barcode" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Product Name" field="product_name" className="w-[22%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Category" field="category" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Name" field="product_name" className="w-[20%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Category" field="category" className="w-[14%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
             <Header label="Reorder" field="reorder_level" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Supplier" field="supplier" className="w-[14%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Supplier" field="supplier" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
             <Header label="Date" field="created_at" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Actions" className="w-[10%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Actions" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
