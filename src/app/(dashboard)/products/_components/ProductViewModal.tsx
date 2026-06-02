@@ -1,7 +1,7 @@
 "use client";
 
 import type { Product } from "@/src/types/product.types";
-import { X, Package } from "lucide-react";
+import { X, Package, Edit2, Trash2 } from "lucide-react";
 import Image from "next/image";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
@@ -9,6 +9,10 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 interface ProductViewModalProps {
   product: Product | null;
   onClose: () => void;
+  onEdit?: (p: Product) => void;
+  onDelete?: (p: Product) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 function Row({ label, value }: Readonly<{ label: string; value: React.ReactNode }>) {
@@ -20,7 +24,7 @@ function Row({ label, value }: Readonly<{ label: string; value: React.ReactNode 
   );
 }
 
-export function ProductViewModal({ product, onClose }: Readonly<ProductViewModalProps>) {
+export function ProductViewModal({ product, onClose, onEdit, onDelete, canEdit, canDelete }: Readonly<ProductViewModalProps>) {
   if (!product) return null;
 
   const rawPicture = product.product_picture;
@@ -92,7 +96,27 @@ export function ProductViewModal({ product, onClose }: Readonly<ProductViewModal
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 px-5 py-3 bg-white shrink-0 flex justify-end">
+        <div className="border-t border-gray-100 px-5 py-3 bg-white shrink-0 flex items-center justify-between gap-2">
+          <div className="flex gap-2">
+            {canEdit && onEdit && (
+              <button
+                onClick={() => { onEdit(product); onClose(); }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-orange-600 bg-orange-50 hover:bg-orange-100 active:scale-[0.97] transition cursor-pointer"
+              >
+                <Edit2 size={13} strokeWidth={2.5} />
+                Edit
+              </button>
+            )}
+            {canDelete && onDelete && (
+              <button
+                onClick={() => { onDelete(product); onClose(); }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-red-500 bg-red-50 hover:bg-red-100 active:scale-[0.97] transition cursor-pointer"
+              >
+                <Trash2 size={13} strokeWidth={2.5} />
+                Delete
+              </button>
+            )}
+          </div>
           <button
             onClick={onClose}
             className="px-5 py-2 rounded-xl text-[13px] font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 active:scale-[0.97] transition cursor-pointer"

@@ -385,6 +385,10 @@ export default function ProductsClient({
       <ProductViewModal
         product={viewTarget}
         onClose={() => setViewTarget(null)}
+        onEdit={openEdit}
+        onDelete={setDeleteTarget}
+        canEdit={canEdit}
+        canDelete={canDelete}
       />
 
       {/* Delete Confirm Modal */}
