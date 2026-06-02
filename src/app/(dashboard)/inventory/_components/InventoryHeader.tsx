@@ -109,7 +109,7 @@ export function InventoryHeader({ onNew, canEdit, exportOpen, setExportOpen, exp
             onClick={onNew}
             className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm bg-orange-500 font-regular text-white hover:bg-orange-600 active:scale-[0.96] transition-all cursor-pointer"
           >
-            <span>New Record</span>
+            <span>New</span>
           </button>
         </div>
       </div>

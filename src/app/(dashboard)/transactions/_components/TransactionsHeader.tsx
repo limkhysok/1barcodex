@@ -49,11 +49,11 @@ function ReportDropdown({
     <div className="relative" ref={reportRef}>
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2 rounded-sm text-[11px] font-black uppercase tracking-wider border border-slate-500 transition-all cursor-pointer ${
-          open ? "bg-black text-white border-black" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-        } ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
+        className={`flex items-center gap-1 rounded-sm text-sm border border-slate-500 transition-all cursor-pointer ${
+          open ? "bg-black text-white border-black" : "bg-white text-gray-800 border-slate-200 hover:bg-slate-50"
+        } ${compact ? "px-3 py-1.5" : "px-4 py-1.5"}`}
       >
-        <FileText size={13} strokeWidth={3} className={open ? "text-white" : "text-slate-400"} />
+        <FileText size={13} strokeWidth={3} className={open ? "text-white" : "text-gray-800"} />
         {!compact && <span>Report</span>}
         <ChevronDown size={10} strokeWidth={3} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
@@ -61,7 +61,7 @@ function ReportDropdown({
       {open && (
         <div className={`absolute right-0 mt-3 z-50 bg-white border border-slate-200 rounded-sm shadow-2xl p-5 animate-in fade-in zoom-in-95 duration-200 ${compact ? "w-64" : "w-80"}`}>
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
-            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Report Configuration</h3>
+            <h3 className="text-sm font-regular text-gray-900 ">Report Configuration</h3>
             <button onClick={() => setOpen(false)} className="text-slate-300 hover:text-slate-950 transition-colors">
               <X size={14} strokeWidth={3} />
             </button>
@@ -69,37 +69,37 @@ function ReportDropdown({
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor={inputId} className="text-[9px] font-black text-slate-400 uppercase tracking-widest block cursor-pointer">Operational Date</label>
+              <label htmlFor={inputId} className="text-sm font-regular text-gray-900 block cursor-pointer">Operational Date</label>
               <input 
                 id={inputId}
                 type="date" 
                 value={pdfDate} 
                 onChange={(e) => setPdfDate(e.target.value)} 
-                className="w-full text-[12px] font-bold p-2.5 border border-slate-200 rounded-sm focus:border-orange-500 outline-none transition-all" 
+                className="w-full text-sm font-regular px-3 py-1.5 border border-gray-400 rounded-md focus:border-orange-500 outline-none transition-all" 
               />
             </div>
 
             <div className="space-y-1.5">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Transaction Category</p>
+              <p className="text-sm font-regular text-gray-900 block">Category</p>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setTypeMenuOpen(!typeMenuOpen)}
-                  className="w-full flex items-center justify-between gap-2.5 px-3 py-2.5 border border-slate-200 rounded-sm bg-white text-[12px] font-bold text-slate-900 focus:border-orange-500 transition-all outline-none"
+                  className="w-full flex items-center justify-between gap-2 px-3 py-1.5 border border-gray-400 rounded-md bg-white text-sm font-regular text-slate-900 focus:border-orange-500 transition-all outline-none"
                 >
-                  <span className="uppercase tracking-widest">{pdfType === "Receive" ? "RECEIVE (RESTOCK)" : "SALE (OUTBOUND)"}</span>
-                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${typeMenuOpen ? "rotate-180" : ""}`} />
+                  <span className="">{pdfType === "Receive" ? "Receive" : "Sale"}</span>
+                  <ChevronDown size={14} className={`text-gray-300 transition-transform duration-200 ${typeMenuOpen ? "rotate-180" : ""}`} />
                 </button>
                 {typeMenuOpen && (
-                  <div className="absolute top-full left-0 right-0 z-60 mt-1.5 bg-white border border-slate-200 rounded-sm shadow-2xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="absolute top-full left-0 right-0 z-60 mt-1.5 bg-white border border-slate-200 rounded-sm shadow-xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-1 duration-200">
                     {(["Receive", "Sale"] as const).map((cat) => (
                       <button
                         key={cat}
                         type="button"
                         onClick={() => { setPdfType(cat); setTypeMenuOpen(false); }}
-                        className={`w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-colors ${pdfType === cat ? "bg-orange-500 text-white" : "text-slate-600 hover:bg-slate-50"}`}
+                        className={`w-full text-left px-4 py-3 text-sm font-regular flex items-center justify-between transition-colors ${pdfType === cat ? "bg-orange-500 text-white" : "text-slate-600 hover:bg-slate-50"}`}
                       >
-                        {cat === "Receive" ? "RECEIVE (Restock)" : "SALE (Outbound)"}
+                        {cat === "Receive" ? "Receive (Restock)" : "Sale (Outbound)"}
                         {pdfType === cat && <Check size={14} strokeWidth={3} />}
                       </button>
                     ))}
@@ -108,12 +108,12 @@ function ReportDropdown({
               </div>
             </div>
 
-            {pdfError && <p className="text-[10px] text-red-500 font-bold uppercase tracking-tight bg-red-50 p-2 rounded-sm border border-red-100">{pdfError}</p>}
+            {pdfError && <p className="text-sm text-red-500 font-regular bg-red-50 p-2 rounded-md border border-red-200">{pdfError}</p>}
             
             <button 
               onClick={onExportPdf} 
               disabled={pdfLoading} 
-              className="w-full py-3 bg-orange-500 text-white text-[11px] font-black uppercase tracking-widest rounded-sm shadow-lg shadow-orange-500/30 hover:bg-orange-600 transition-all flex items-center justify-center gap-2"
+              className="w-full py-2 bg-orange-500 text-white text-sm font-regular rounded-md shadow-orange-500/30 hover:bg-orange-600 transition-all flex items-center justify-center gap-1"
             >
               {pdfLoading ? (
                 <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent animate-spin rounded-full" />
@@ -147,7 +147,7 @@ export function TransactionsHeader({
       {/* ── MOBILE (< sm) ── */}
       <div className="sm:hidden flex items-center justify-between">
         <div className="flex flex-col">
-          <h1 className="text-lg font-normal text-slate-950">Transactions</h1>
+          <h1 className="text-lg font-normal text-slate-950">Transaction</h1>
           <p className="text-xs text-slate-600">Overview</p>
         </div>
         <div className="flex items-center gap-2">
@@ -176,7 +176,7 @@ export function TransactionsHeader({
       {/* ── TABLET (sm → lg) ── */}
       <div className="hidden sm:flex lg:hidden items-center justify-between">
         <div className="flex flex-col border-l-2 border-orange-500 pl-3">
-          <h1 className="text-xl font-normal text-slate-950">Transactions</h1>
+          <h1 className="text-xl font-normal text-slate-950">Transaction</h1>
           <p className="text-sm text-slate-600">Log and review all stock receive and sale transactions.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -196,7 +196,7 @@ export function TransactionsHeader({
             onClick={onNew}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-regular bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.97] transition-all cursor-pointer"
           >
-            <span>New Transaction</span>
+            <span>New</span>
           </button>
         </div>
       </div>
@@ -204,7 +204,7 @@ export function TransactionsHeader({
       {/* ── DESKTOP (≥ lg) ── */}
       <div className="hidden lg:flex items-center justify-between gap-4">
         <div className="flex flex-col border-l-4 border-orange-500 pl-4">
-          <h1 className="text-2xl font-normal text-slate-950">Transactions</h1>
+          <h1 className="text-2xl font-normal text-slate-950">Transaction</h1>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-sm text-slate-600">Log and review all stock receive and sale transactions.</p>
           </div>
@@ -226,7 +226,7 @@ export function TransactionsHeader({
             onClick={onNew}
             className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm bg-orange-500 font-regular text-white hover:bg-orange-600 active:scale-[0.96] transition-all cursor-pointer"
           >
-            <span>New Transaction</span>
+            <span>Add</span>
           </button>
         </div>
       </div>
