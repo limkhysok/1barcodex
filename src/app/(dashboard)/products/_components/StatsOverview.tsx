@@ -110,37 +110,37 @@ export function StatsOverview({ stats, products }: Readonly<StatsOverviewProps>)
 
       {/* ── DESKTOP (≥ lg) ── */}
       <div className="hidden lg:grid grid-cols-3 gap-3">
-        <div className="bg-white border border-black-400 rounded-xl p-5 flex flex-col gap-3">
+        <div className="group bg-white border border-black-400 rounded-lg p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Accessories</p>
+              <p className="text-lg font-regular text-black-700 group-hover:text-orange-500 transition-colors duration-200">Accessories</p>
               <p className="text-xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.accCount)}</p>
             </div>
-            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 group-hover:scale-110 transition-all duration-200">
               <Package size={23} className="text-orange-500" strokeWidth={1.5} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white border border-black-400 rounded-xl p-5 flex flex-col gap-3">
+        <div className="group bg-white border border-black-400 rounded-lg p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Fasteners</p>
+              <p className="text-lg font-regular text-black-700 group-hover:text-orange-500 transition-colors duration-200">Fasteners</p>
               <p className="text-xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.fasCount)}</p>
             </div>
-            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 group-hover:scale-110 transition-all duration-200">
               <Box size={23} className="text-orange-500" strokeWidth={1.5} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white border border-black-400 rounded-xl p-5 flex flex-col gap-3">
+        <div className="group bg-white border border-black-400 rounded-lg p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-lg font-regular text-black-700 group-hover/hdr:text-orange-500 transition-colors duration-200">Total</p>
+              <p className="text-lg font-regular text-black-700 group-hover:text-orange-500 transition-colors duration-200">Total</p>
               <p className="text-xl font-black text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{fmt(s.total)}</p>
             </div>
-            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 group-hover:scale-110 transition-all duration-200">
               <Zap size={23} className="text-orange-500" strokeWidth={1.5} />
             </div>
           </div>

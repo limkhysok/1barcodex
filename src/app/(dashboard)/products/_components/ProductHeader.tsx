@@ -10,7 +10,7 @@ export function ProductHeader({ onNew }: Readonly<ProductHeaderProps>) {
       {/* ── MOBILE (< sm) ── */}
       <div className="sm:hidden flex items-center justify-between">
         <div className="flex flex-col">
-          <h1 className="text-base font-medium text-black-950 ">Product</h1>
+          <h1 className="text-lg font-normal text-black-950 ">Product</h1>
           <p className="text-xs text-slate-600">Overview</p>
         </div>
         <button
@@ -23,7 +23,7 @@ export function ProductHeader({ onNew }: Readonly<ProductHeaderProps>) {
       {/* ── TABLET (sm → lg) ── */}
       <div className="hidden sm:flex lg:hidden items-center justify-between">
         <div className="flex flex-col border-l-2 border-orange-500 pl-3">
-          <h1 className="text-lg font-medium text-black-950 ">Product</h1>
+          <h1 className="text-xl font-normal text-black-950 ">Product</h1>
             <p className="text-sm text-slate-600">Overview of all listed products, stock categories, and suppliers.</p>
         </div>
         <button
@@ -36,7 +36,7 @@ export function ProductHeader({ onNew }: Readonly<ProductHeaderProps>) {
       {/* ── DESKTOP (≥ lg) ── */}
       <div className="hidden lg:flex items-center justify-between gap-4">
         <div className="flex flex-col border-l-4 border-orange-500 pl-4">
-          <h1 className="text-xl font-medium text-black-950 ">Product</h1>
+          <h1 className="text-2xl font-normal text-black-950 ">Product</h1>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-sm text-slate-600">Overview of all listed products, stock categories, and suppliers.</p>
           </div>

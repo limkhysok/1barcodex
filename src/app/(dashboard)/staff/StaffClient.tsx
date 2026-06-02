@@ -241,7 +241,7 @@ export default function StaffClient() {
       {/* ── MOBILE (< sm) ── */}
       <div className="sm:hidden flex items-center justify-between">
         <div className="flex flex-col">
-          <h1 className="text-base font-medium text-slate-950">Staff</h1>
+          <h1 className="text-lg font-normal text-slate-950">Staff</h1>
           <p className="text-xs text-slate-600">Management</p>
         </div>
         <button
@@ -269,7 +269,7 @@ export default function StaffClient() {
       {/* ── TABLET (sm → lg) ── */}
       <div className="hidden sm:flex lg:hidden items-center justify-between">
         <div className="flex flex-col border-l-2 border-orange-500 pl-3">
-          <h1 className="text-lg font-medium text-slate-950">Staff</h1>
+          <h1 className="text-xl font-normal text-slate-950">Staff</h1>
           <p className="text-sm text-slate-600">View and manage authorized staff members.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -295,7 +295,7 @@ export default function StaffClient() {
       {/* ── DESKTOP (≥ lg) ── */}
       <div className="hidden lg:flex items-center justify-between gap-4">
         <div className="flex flex-col border-l-4 border-orange-500 pl-4">
-          <h1 className="text-xl font-medium text-slate-950">Staff</h1>
+          <h1 className="text-2xl font-normal text-slate-950">Staff</h1>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-sm text-slate-600">View and manage authorized staff members.</p>
           </div>

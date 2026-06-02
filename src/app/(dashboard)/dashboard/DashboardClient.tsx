@@ -284,7 +284,7 @@ const chartData = useMemo(() => {
       {/* ── HEADER: MOBILE (< sm) — single row ── */}
       <div className="sm:hidden flex items-center justify-between gap-2">
         <div className="flex flex-col shrink-0">
-          <h1 className="text-base font-medium text-slate-950">Dashboard</h1>
+          <h1 className="text-lg font-normal text-slate-950">Dashboard</h1>
           <p className="text-xs text-slate-600">Overview</p>
         </div>
         <div className="flex items-center gap-2 ml-auto">
@@ -310,7 +310,7 @@ const chartData = useMemo(() => {
       {/* ── HEADER: TABLET / DESKTOP (≥ sm) ── */}
       <div className="hidden sm:flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col border-l-4 border-orange-500 pl-4">
-          <h1 className="text-xl font-medium text-slate-950">Dashboard</h1>
+          <h1 className="text-2xl font-normal text-slate-950">Dashboard</h1>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-sm text-slate-600">Overview of inventory, products, and transactions.</p>
           </div>
