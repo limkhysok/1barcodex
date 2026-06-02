@@ -55,8 +55,8 @@ const Header = ({
   return (
     <th
       onClick={() => isSortable && field && handleSort(field)}
-      className={`px-5 py-4 text-left text-[9px] font-black tracking-widest uppercase transition-all duration-200 select-none ${isSortable ? "cursor-pointer hover:bg-slate-100/50" : ""
-        } ${isActive ? "text-orange-600 bg-orange-50/30" : "text-slate-400"} ${className || ""}`}
+      className={`px-5 py-4 text-left text-sm font-medium transition-all duration-200 select-none ${isSortable ? "cursor-pointer hover:bg-slate-100/50" : ""
+        } ${isActive ? "text-orange-600 bg-orange-50/30" : "text-gray-800"} ${className || ""}`}
     >
       <div className="flex items-center">
         {label}
@@ -110,7 +110,7 @@ export function ProductsTable({
   if (displayed.length === 0) {
     const msg = products.length === 0 ? "Product is Empty" : "No Match Found";
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-400">
+      <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-600">
         <Database className="w-10 h-10 opacity-30" strokeWidth={1.5} />
         <p className="text-sm font-medium uppercase tracking-widest text-[10px]">{msg}</p>
       </div>
@@ -122,11 +122,11 @@ export function ProductsTable({
     <div className="sm:hidden">
       <div className="px-3 py-1.5 flex items-center gap-2 border-b border-t border-gray-400 bg-white">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">#</span>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">No.</span>
           <span className="text-slate-200">·</span>
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Category</span>
           <span className="text-slate-200">·</span>
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Name</span>
+          <span className="text-[9px] font-black uppercase tracking-widest text-gray-700">Name</span>
         </div>
         <div className="shrink-0 flex items-center gap-4">
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Reorder</span>
@@ -205,7 +205,7 @@ export function ProductsTable({
               ) : (
                 <Package size={20} strokeWidth={1} className="opacity-20" />
               )}
-              <span className="absolute top-1 left-1 text-[8px] font-black text-slate-500 tabular-nums bg-white/80 px-1 py-0.5 rounded-sm">#{p.id}</span>
+              <span className="absolute top-1 left-1 text-[8px] font-black text-slate-500 tabular-nums bg-white/80 px-1 py-0.5 rounded-sm">{p.id}</span>
             </div>
             <div className="px-2 py-1.5 flex flex-col gap-1">
               <span className="text-[8px] font-black text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100 uppercase tracking-widest self-start truncate max-w-full">{p.category}</span>
@@ -229,59 +229,49 @@ export function ProductsTable({
 
   // ── Desktop: List table ──
   const desktopList = (
-    <div className="hidden lg:block overflow-x-auto bg-white border border-slate-500 rounded-sm">
+    <div className="hidden lg:block overflow-x-auto bg-white border border-slate-500 rounded-lg">
       <table className="w-full text-sm table-fixed">
-        <thead className="bg-slate-50/50 border-b border-slate-500">
+        <thead className="bg-slate-50/50 border-b border-gray-600">
           <tr>
-            <Header label="#" field="id" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Pic" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Barcode" field="barcode" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Product Name" field="product_name" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Category" field="category" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Reorder" field="reorder_level" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Supplier" field="supplier" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
-            <Header label="Actions" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="No" field="id" className="w-[6%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Barcode" field="barcode" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Product Name" field="product_name" className="w-[22%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Category" field="category" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Reorder" field="reorder_level" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Supplier" field="supplier" className="w-[14%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Date" field="created_at" className="w-[12%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
+            <Header label="Actions" className="w-[10%]" sortField={sortField} sortDir={sortDir} handleSort={handleSort} />
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
           {displayed.map((p) => (
             <tr key={p.id} className="group hover:bg-orange-50/60 transition-colors">
               <td className="px-5 py-4">
-                <span className="text-[12px] font-black text-slate-500 tabular-nums group-hover:text-orange-600 transition-colors">#{p.id}</span>
-              </td>
-              <td className="px-5 py-4 whitespace-nowrap ">
-                <div className="w-10 h-10 rounded-sm bg-slate-50 border border-slate-500 flex items-center justify-center overflow-hidden relative">
-                  {p.product_picture ? (
-                    <Image
-                      src={`${BASE_URL}${p.product_picture}`}
-                      alt={p.product_name}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  ) : (
-                    <Package size={16} className="text-slate-200" />
-                  )}
-                </div>
+                <span className="text-sm font-normal text-gray-600 tabular-nums group-hover:text-orange-600 transition-colors">{p.id}</span>
               </td>
               <td className="px-5 py-4 whitespace-nowrap">
-                <span className="text-[12px] font-mono font-bold text-slate-500 tracking-tighter tabular-nums group-hover:text-orange-400 transition-colors">{p.barcode}</span>
+                <span className="text-sm font-normal font-mono text-gray-700 tabular-nums group-hover:text-orange-400 transition-colors">{p.barcode}</span>
               </td>
               <td className="px-5 py-4">
-                <span className="text-[12px] font-black text-slate-900 tracking-tight group-hover:text-orange-600 transition-colors">
+                <span className="text-sm font-normal text-gray-900 group-hover:text-orange-600 transition-colors">
                   {p.product_name}
                 </span>
               </td>
               <td className="px-5 py-4">
-                <span className="inline-flex text-[9px] font-black text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100/50 uppercase tracking-widest">
+                <span className="inline-flex text-sm font-normal text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100/50">
                   {p.category}
                 </span>
               </td>
               <td className="px-5 py-4">
-                <span className="text-[12px] font-black text-slate-950 tabular-nums group-hover:text-orange-600 transition-colors">{p.reorder_level}</span>
+                <span className="text-sm font-normal text-gray-800 tabular-nums group-hover:text-orange-600 transition-colors">{p.reorder_level}</span>
               </td>
               <td className="px-5 py-4">
-                <span className="text-[12px] font-black text-slate-400 tracking-widest group-hover:text-orange-600 transition-colors">{p.supplier}</span>
+                <span className="text-sm font-normal text-gray-700 group-hover:text-orange-600 transition-colors">{p.supplier}</span>
+              </td>
+              <td className="px-5 py-4 whitespace-nowrap">
+                <span className="text-sm font-normal text-gray-600 tabular-nums">
+                  {new Date(p.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                </span>
               </td>
               <td className="px-5 py-4">
                 <div className="flex items-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -332,7 +322,7 @@ export function ProductsTable({
               ) : (
                 <Package size={20} strokeWidth={1} className="opacity-20" />
               )}
-              <span className="absolute top-1 left-1 text-[8px] font-black text-slate-500 tabular-nums bg-white/80 px-1 py-0.5 rounded-sm">#{p.id}</span>
+              <span className="absolute top-1 left-1 text-[8px] font-black text-slate-500 tabular-nums bg-white/80 px-1 py-0.5 rounded-sm">{p.id}</span>
             </div>
             <div className="px-2 py-1.5 flex flex-col gap-1">
               <span className="text-[8px] font-black text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100 uppercase tracking-widest self-start truncate max-w-full">{p.category}</span>

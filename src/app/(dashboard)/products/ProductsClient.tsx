@@ -105,13 +105,19 @@ export default function ProductsClient({
     };
   }, [search, categoryFilter, supplierFilter, sortField, sortDir]);
 
+  const mergeProducts = useCallback((prev: Product[], next: Product[], append: boolean): Product[] => {
+    if (!append) return next;
+    const seen = new Set(prev.map((p) => p.id));
+    return [...prev, ...next.filter((p) => !seen.has(p.id))];
+  }, []);
+
   const fetchProducts = useCallback((nextPage = 1, append = false) => {
     if (append) setLoadingMore(true);
     else setLoading(true);
     setError("");
     getProducts(undefined, buildFilters(nextPage))
       .then((data) => {
-        setProducts((prev) => append ? [...prev, ...data.results] : data.results);
+        setProducts((prev) => mergeProducts(prev, data.results, append));
         setHasMore(data.next !== null);
         setPage(nextPage);
       })
