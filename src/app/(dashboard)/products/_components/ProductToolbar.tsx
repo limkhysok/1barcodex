@@ -59,12 +59,12 @@ function DropdownFilter({
           <Icon size={13} strokeWidth={3} />
         </div>
         {!compact && (
-          <span className="truncate flex-1 text-left text-sm font-regular text-gray-500">
+          <span className={`truncate flex-1 text-left text-sm font-regular ${isActive ? "text-white" : "text-gray-500 group-hover:text-white"}`}>
             {value || label}
           </span>
         )}
         {compact && isActive && (
-          <span className="truncate max-w-20 text-left text-sm font-regular text-gray-700">
+          <span className="truncate max-w-20 text-left text-sm font-regular text-white">
             {value}
           </span>
         )}
@@ -79,7 +79,7 @@ function DropdownFilter({
           <ul className="divide-y divide-gray-50">
             <li>
               <button type="button" onClick={() => { onChange(""); setOpen(false); }}
-                className={`w-full text-left px-4 py-2 text-sm font-regular text-gray-600 transition-colors ${value === "" ? "bg-slate-50 text-orange-500 border-l-2 border-orange-500" : "text-gray-500 hover:bg-orange-500 hover:text-white"}`}>
+                className={`w-full text-left px-4 py-2 text-sm font-regular transition-colors ${value === "" ? "bg-slate-50 text-orange-500 border-l-2 border-orange-500" : "text-gray-500 hover:bg-orange-500 hover:text-white"}`}>
                 {label}
               </button>
             </li>
