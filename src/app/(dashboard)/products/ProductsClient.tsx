@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/src/context/AuthContext";
 import type { Product, ProductPayload } from "@/src/types/product.types";
@@ -84,11 +84,39 @@ export default function ProductsClient({
   const [supplierFilter, setSupplierFilter] = useState("");
   const [sortField, setSortField] = useState<string>("id");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  // Accumulate all ever-seen categories/suppliers so the dropdown never collapses when filters are active
+  const allCategoriesRef = useRef<Set<string>>(new Set(initialPaginated.results.map(p => p.category)));
+  const allSuppliersRef = useRef<Set<string>>(new Set(initialPaginated.results.map(p => p.supplier)));
+  const [categories, setCategories] = useState<string[]>(() =>
+    Array.from(allCategoriesRef.current).sort((a, b) => a.localeCompare(b))
+  );
+  const [suppliers, setSuppliers] = useState<string[]>(() =>
+    Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b))
+  );
 
-  // Dynamic Options (from all products)
-  const categories = useMemo(() => Array.from(new Set(products.map(p => p.category))).sort((a, b) => a.localeCompare(b)), [products]);
-  const suppliers = useMemo(() => Array.from(new Set(products.map(p => p.supplier))).sort((a, b) => a.localeCompare(b)), [products]);
+  // On mount: crawl all pages with no filters to fully populate category/supplier dropdowns
+  useEffect(() => {
+    let cancelled = false;
+    async function discover() {
+      let pg = 1;
+      while (true) {
+        const data = await getProducts(undefined, { page: pg }).catch(() => null);
+        if (cancelled || !data) break;
+        let catChanged = false, supChanged = false;
+        data.results.forEach(p => {
+          if (!allCategoriesRef.current.has(p.category)) { allCategoriesRef.current.add(p.category); catChanged = true; }
+          if (!allSuppliersRef.current.has(p.supplier)) { allSuppliersRef.current.add(p.supplier); supChanged = true; }
+        });
+        if (catChanged) setCategories(Array.from(allCategoriesRef.current).sort((a, b) => a.localeCompare(b)));
+        if (supChanged) setSuppliers(Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b)));
+        if (!data.next) break;
+        pg++;
+      }
+    }
+    discover();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersRef = useRef<HTMLDivElement>(null);
@@ -120,6 +148,14 @@ export default function ProductsClient({
         setProducts((prev) => mergeProducts(prev, data.results, append));
         setHasMore(data.next !== null);
         setPage(nextPage);
+        let catChanged = false;
+        let supChanged = false;
+        data.results.forEach(p => {
+          if (!allCategoriesRef.current.has(p.category)) { allCategoriesRef.current.add(p.category); catChanged = true; }
+          if (!allSuppliersRef.current.has(p.supplier)) { allSuppliersRef.current.add(p.supplier); supChanged = true; }
+        });
+        if (catChanged) setCategories(Array.from(allCategoriesRef.current).sort((a, b) => a.localeCompare(b)));
+        if (supChanged) setSuppliers(Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b)));
       })
       .catch(() => setError("Failed to load products."))
       .finally(() => { setLoading(false); setLoadingMore(false); });
@@ -287,12 +323,9 @@ export default function ProductsClient({
         setSearch={setSearch}
         categories={categories}
         suppliers={suppliers}
-        totalResults={products.length}
         filtersOpen={filtersOpen}
         setFiltersOpen={setFiltersOpen}
         filtersRef={filtersRef}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
       />
 
       {/* Table */}
@@ -311,7 +344,6 @@ export default function ProductsClient({
           onView={setViewTarget}
           canEdit={canEdit}
           canDelete={canDelete}
-          viewMode={viewMode}
         />
       </div>
 

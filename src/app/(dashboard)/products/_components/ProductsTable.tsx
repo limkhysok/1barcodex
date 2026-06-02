@@ -23,7 +23,6 @@ interface ProductsTableProps {
   onView: (p: Product) => void;
   canEdit: boolean;
   canDelete: boolean;
-  viewMode?: "list" | "grid";
 }
 
 const SortIcon = ({ field, sortField, sortDir }: { field: string; sortField: string; sortDir: SortDir }) => {
@@ -55,7 +54,7 @@ const Header = ({
   return (
     <th
       onClick={() => isSortable && field && handleSort(field)}
-      className={`px-5 py-4 text-left text-sm font-medium transition-all duration-200 select-none ${isSortable ? "cursor-pointer hover:bg-slate-100/50" : ""
+      className={`px-4 py-2 text-left text-sm font-medium transition-all duration-200 select-none ${isSortable ? "cursor-pointer hover:bg-slate-100/50" : ""
         } ${isActive ? "text-orange-600 bg-orange-50/30" : "text-gray-800"} ${className || ""}`}
     >
       <div className="flex items-center">
@@ -80,7 +79,6 @@ export function ProductsTable({
   onView,
   canEdit,
   canDelete,
-  viewMode = "list",
 }: Readonly<ProductsTableProps>) {
 
   const handleSort = (field: string) => {
@@ -246,34 +244,34 @@ export function ProductsTable({
         <tbody className="divide-y divide-slate-100 bg-white">
           {displayed.map((p) => (
             <tr key={p.id} className="group hover:bg-orange-50/60 transition-colors">
-              <td className="px-5 py-4">
+              <td className="px-4 py-2">
                 <span className="text-sm font-normal text-gray-600 tabular-nums group-hover:text-orange-600 transition-colors">{p.id}</span>
               </td>
-              <td className="px-5 py-4 whitespace-nowrap">
+              <td className="px-4 py-2 whitespace-nowrap">
                 <span className="text-sm font-normal font-mono text-gray-700 tabular-nums group-hover:text-orange-400 transition-colors">{p.barcode}</span>
               </td>
-              <td className="px-5 py-4">
+              <td className="px-4 py-2">
                 <span className="text-sm font-normal text-gray-900 group-hover:text-orange-600 transition-colors">
                   {p.product_name}
                 </span>
               </td>
-              <td className="px-5 py-4">
+              <td className="px-4 py-2">
                 <span className="inline-flex text-sm font-normal text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100/50">
                   {p.category}
                 </span>
               </td>
-              <td className="px-5 py-4">
+              <td className="px-4 py-2">
                 <span className="text-sm font-normal text-gray-800 tabular-nums group-hover:text-orange-600 transition-colors">{p.reorder_level}</span>
               </td>
-              <td className="px-5 py-4">
+              <td className="px-4 py-2">
                 <span className="text-sm font-normal text-gray-700 group-hover:text-orange-600 transition-colors">{p.supplier}</span>
               </td>
-              <td className="px-5 py-4 whitespace-nowrap">
+              <td className="px-4 py-2 whitespace-nowrap">
                 <span className="text-sm font-normal text-gray-600 tabular-nums">
                   {new Date(p.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                 </span>
               </td>
-              <td className="px-5 py-4">
+              <td className="px-4 py-2">
                 <div className="flex items-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => onView(p)}
@@ -309,46 +307,11 @@ export function ProductsTable({
     </div>
   );
 
-  // ── Desktop: Grid cards ──
-  const desktopGrid = (
-    <div className="hidden lg:grid grid-cols-6 gap-2 pt-1">
-      {displayed.map((p) => (
-        <div key={p.id} className="group relative bg-white border border-slate-500 rounded-sm overflow-hidden transition-all duration-300 hover:border-orange-400 hover:shadow-md hover:shadow-orange-500/10 hover:-translate-y-0.5">
-          {/* Card button — click anywhere to view */}
-          <button type="button" onClick={() => onView(p)} className="w-full text-left flex flex-col cursor-pointer">
-            <div className="h-20 w-full bg-slate-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
-              {p.product_picture ? (
-                <Image src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
-              ) : (
-                <Package size={20} strokeWidth={1} className="opacity-20" />
-              )}
-              <span className="absolute top-1 left-1 text-[8px] font-black text-slate-500 tabular-nums bg-white/80 px-1 py-0.5 rounded-sm">{p.id}</span>
-            </div>
-            <div className="px-2 py-1.5 flex flex-col gap-1">
-              <span className="text-[8px] font-black text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100 uppercase tracking-widest self-start truncate max-w-full">{p.category}</span>
-              <span className="text-[11px] font-black text-slate-900 leading-tight truncate group-hover:text-orange-600 transition-colors">{p.product_name}</span>
-              <div className="flex items-center justify-between pt-1 border-t border-slate-500">
-                <span className="text-[9px] text-slate-400 truncate">{p.supplier}</span>
-                <span className="text-[10px] font-black text-orange-600 tabular-nums shrink-0 ml-1">{p.reorder_level}</span>
-              </div>
-            </div>
-          </button>
-          {/* Action overlay — sibling to button, pointer-events-none so bg passes clicks to card */}
-          <div className="absolute top-0 inset-x-0 h-20 bg-black/30 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center gap-1">
-            <button type="button" onClick={() => onView(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-sm text-slate-600 hover:text-blue-500 transition-colors cursor-pointer" title="View"><Eye size={11} strokeWidth={2.5} /></button>
-            {canEdit && <button type="button" onClick={() => onEdit(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-sm text-slate-600 hover:text-orange-500 transition-colors cursor-pointer" title="Edit"><Edit2 size={11} strokeWidth={2.5} /></button>}
-            {canDelete && <button type="button" onClick={() => onDelete(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-sm text-slate-600 hover:text-red-500 transition-colors cursor-pointer" title="Delete"><Trash2 size={11} strokeWidth={2.5} /></button>}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <>
       {mobileRows}
       {tabletGrid}
-      {viewMode === "list" ? desktopList : desktopGrid}
+      {desktopList}
     </>
   );
 }
