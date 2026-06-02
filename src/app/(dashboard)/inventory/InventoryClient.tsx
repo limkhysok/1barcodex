@@ -17,7 +17,6 @@ import { InventoryDetailModal } from "./_components/InventoryDetailModal";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 
-type SortDir = "asc" | "desc" | "";
 
 const emptyForm: InventoryPayload = {
   product: 0,
@@ -63,14 +62,7 @@ export default function InventoryClient({
   const [search, setSearch] = useState("");
   const [ordering, setOrdering] = useState<string>("-updated_at");
 
-  // Derive directions for the toolbar from a single source of truth: ordering
-  const getSortDir = (field: string): SortDir => {
-    if (!ordering.includes(field)) return "";
-    return ordering.startsWith("-") ? "desc" : "asc";
-  };
 
-  const quantitySort = getSortDir("quantity_on_hand");
-  const dateSort = getSortDir("updated_at");
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersRef = useRef<HTMLDivElement>(null);
@@ -89,8 +81,6 @@ export default function InventoryClient({
   const [form, setForm] = useState<InventoryPayload>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
-
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const [deleteTarget, setDeleteTarget] = useState<InventoryRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -116,7 +106,7 @@ export default function InventoryClient({
     else setLoading(true);
     setError("");
 
-    getInventory({ search: search.trim() || undefined, ordering: ordering || undefined, page: nextPage })
+    getInventory({ search: search.trim() || undefined, ordering: ordering || undefined, site: siteFilter || undefined, reorder_status: statusFilter || undefined, page: nextPage })
       .then((data) => {
         setRecords((prev) => append ? [...prev, ...data.results] : data.results);
         setHasMore(data.next !== null);
@@ -124,7 +114,7 @@ export default function InventoryClient({
       })
       .catch(() => setError("Failed to load inventory."))
       .finally(() => { setLoading(false); setLoadingMore(false); });
-  }, [search, ordering]);
+  }, [search, ordering, siteFilter, statusFilter]);
 
   // Debounced re-fetch when search or ordering changes (reset to page 1)
   const filtersMounted = useRef(false);
@@ -266,8 +256,8 @@ export default function InventoryClient({
   }
 
   const siteOptions = useMemo(
-    () => Array.from(new Set(records.map((r) => r.site))).sort((a, b) => a.localeCompare(b)),
-    [records]
+    () => Array.from(new Set(initialPaginatedRecords.results.map((r) => r.site))).sort((a, b) => a.localeCompare(b)),
+    [initialPaginatedRecords.results]
   );
 
   // -- Client-side Filtering & Sorting Logic --
@@ -283,19 +273,7 @@ export default function InventoryClient({
       );
     }
 
-    // 2. Site Filter
-    if (siteFilter) {
-      list = list.filter(r => r.site === siteFilter);
-    }
-
-    // 2.5 Status Filter (Reorder)
-    if (statusFilter === "no_stock") {
-      list = list.filter(r => r.quantity_on_hand === 0);
-    } else if (statusFilter) {
-      list = list.filter(r => r.quantity_on_hand > 0 && r.reorder_status === statusFilter);
-    }
-
-    // 3. Sorting
+    // Sorting
     if (ordering) {
       const isDesc = ordering.startsWith("-");
       const field = isDesc ? ordering.substring(1) : ordering;
@@ -321,7 +299,7 @@ export default function InventoryClient({
     }
 
     return list;
-  }, [records, search, siteFilter, statusFilter, ordering]);
+  }, [records, search, ordering]);
 
   // Stats always reflect the CURRENTLY displayed/filtered view
   const stats = useMemo(() => {
@@ -379,19 +357,13 @@ export default function InventoryClient({
         siteOptions={siteOptions}
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
-        quantitySort={quantitySort}
-        setQuantitySort={(v) => handleSort("Quantity", v)}
-        dateSort={dateSort}
-        setDateSort={(v) => handleSort("Order Date", v)}
-        search={search}
+search={search}
         setSearch={setSearch}
         setOrdering={setOrdering}
         totalResults={stats.total}
         filtersOpen={filtersOpen}
         setFiltersOpen={setFiltersOpen}
         filtersRef={filtersRef}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
       />
 
       {/* Table Section */}
@@ -407,7 +379,6 @@ export default function InventoryClient({
           canDelete={canDelete}
           ordering={ordering}
           onSort={handleSort}
-          viewMode={viewMode}
         />
       </div>
 

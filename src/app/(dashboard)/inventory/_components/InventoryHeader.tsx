@@ -34,16 +34,16 @@ function ExportDropdown({ open, setOpen, exportRef, onExport, compact = false }:
 
       {open && (
         <div className="absolute top-full right-0 mt-2 w-28 bg-white border border-slate-200 rounded-md shadow-2xl z-50 py-1 animate-in fade-in slide-in-from-top-2">
-          <button onClick={() => onExport("no_stock")} className="w-full text-left px-2.5 py-1.5 text-[13px] font-medium lg:text-sm text-gray-800 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 transition-colors flex items-center justify-between outline-none">
+          <button onClick={() => onExport("no_stock")} className="w-full text-left px-3.5 py-1.5 text-[13px] font-medium lg:text-sm text-gray-800 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 transition-colors flex items-center justify-between outline-none">
             <span>No Stock</span>
           </button>
-          <button onClick={() => onExport("low")} className="w-full text-left px-2.5 py-1.5 text-[13px] font-medium lg:text-sm text-gray-800 hover:text-yellow-600 focus:text-yellow-600 hover:bg-yellow-50 focus:bg-yellow-50 transition-colors flex items-center justify-between border-t border-slate-50 outline-none">
+          <button onClick={() => onExport("low")} className="w-full text-left px-3.5 py-1.5 text-[13px] font-medium lg:text-sm text-gray-800 hover:text-yellow-600 focus:text-yellow-600 hover:bg-yellow-50 focus:bg-yellow-50 transition-colors flex items-center justify-between border-t border-slate-50 outline-none">
             <span>Low Stock</span>
           </button>
-          <button onClick={() => onExport("good")} className="w-full text-left px-2.5 py-1.5 text-[13px] font-medium lg:text-sm text-gray-800 hover:text-green-600 focus:text-green-600 hover:bg-green-50 focus:bg-green-50 transition-colors flex items-center justify-between border-t border-slate-50 outline-none">
+          <button onClick={() => onExport("good")} className="w-full text-left px-3.5 py-1.5 text-[13px] font-medium lg:text-sm text-gray-800 hover:text-green-600 focus:text-green-600 hover:bg-green-50 focus:bg-green-50 transition-colors flex items-center justify-between border-t border-slate-50 outline-none">
             <span>Good Stock</span>
           </button>
-          <button onClick={() => onExport("all")} className="w-full text-left px-2.5 py-1.5 text-[13px] font-medium lg:text-sm text-slate-600 hover:bg-slate-50  transition-colors border-t border-slate-100">
+          <button onClick={() => onExport("all")} className="w-full text-left px-3.5 py-1.5 text-[13px] font-medium lg:text-sm text-slate-600 hover:bg-slate-50  transition-colors border-t border-slate-100">
             All
           </button>
         </div>
@@ -109,7 +109,7 @@ export function InventoryHeader({ onNew, canEdit, exportOpen, setExportOpen, exp
             onClick={onNew}
             className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm bg-orange-500 font-regular text-white hover:bg-orange-600 active:scale-[0.96] transition-all cursor-pointer"
           >
-            <span>New</span>
+            <span>Add</span>
           </button>
         </div>
       </div>
