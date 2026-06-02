@@ -5,7 +5,7 @@ import type { Transaction, TransactionPayload } from "@/src/types/transaction.ty
 import type { InventoryRecord } from "@/src/types/inventory.types";
 import { getTransactions, createTransaction, updateTransaction, deleteTransaction, getTransactionStats, type TransactionStats } from "@/src/services/transaction.service";
 import { getInventory } from "@/src/services/inventory.service";
-import type { PaginatedInventory } from "@/src/types/api.types";
+import type { PaginatedInventory, PaginatedTransactions } from "@/src/types/api.types";
 import TransactionTemplate from "@/src/components/features/export/TransactionTemplate";
 type TxTypeFilter = "" | "Receive" | "Sale";
 type TemplateItem = { barcode: string; product_name: string; unit: string; quantity: number };
@@ -26,13 +26,13 @@ function waitTwoFrames(): Promise<void> {
 }
 
 type TransactionsClientProps = Readonly<{
-  initialTransactions: Transaction[];
+  initialPaginatedTransactions: PaginatedTransactions;
   initialPaginatedInventory: PaginatedInventory;
   initialStats: TransactionStats | null;
 }>;
 
 const TransactionsClient: React.FC<TransactionsClientProps> = ({
-  initialTransactions,
+  initialPaginatedTransactions,
   initialPaginatedInventory,
   initialStats,
 }) => {
@@ -40,7 +40,11 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
   const canEdit = role === "boss" || role === "superadmin";
   const canDelete = role === "superadmin";
 
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const [transactions, setTransactions] = useState<Transaction[]>(initialPaginatedTransactions.results);
+  const [hasMore, setHasMore] = useState(initialPaginatedTransactions.next !== null);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const [paginatedInventory, setPaginatedInventory] = useState<PaginatedInventory>(initialPaginatedInventory);
   const inventory = paginatedInventory.results;
@@ -102,27 +106,46 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
     return () => window.removeEventListener("scroll", onScroll, true);
   }, [menuOpenId]);
 
-  const fetchAll = useCallback(() => {
-    setLoading(true);
+  const fetchAll = useCallback((nextPage = 1, append = false) => {
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     setError("");
-    Promise.all([
-      getTransactions({
-        type: typeFilter || undefined,
-        ordering: "-transaction_date",
-      }),
-      getTransactionStats(),
-    ])
-      .then(([newTransactions, newStats]) => {
-        setTransactions(newTransactions);
-        setStats(newStats);
+    const txPromise = getTransactions({
+      type: typeFilter || undefined,
+      ordering: "-transaction_date",
+      page: nextPage,
+    });
+    const statsPromise = append ? Promise.resolve(null) : getTransactionStats();
+    Promise.all([txPromise, statsPromise])
+      .then(([txData, newStats]) => {
+        setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results);
+        setHasMore(txData.next !== null);
+        setPage(nextPage);
+        if (newStats !== null) setStats(newStats);
       })
       .catch(() => setError("Failed to load data."))
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false); setLoadingMore(false); });
   }, [typeFilter]);
 
   useEffect(() => {
-    fetchAll();
+    fetchAll(1, false);
   }, [fetchAll]);
+
+  // Infinite scroll
+  useEffect(() => {
+    if (!hasMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !loadingMore && !loading) {
+          fetchAll(page + 1, true);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    const el = sentinelRef.current;
+    if (el) observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loading, page, fetchAll]);
 
   const exportTemplateAsPdf = async (items: TemplateItem[], txType: "Sale" | "Receive") => {
     setPendingExportItems(items);
@@ -166,7 +189,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
     try {
       await createTransaction(payload);
       setModalOpen(false);
-      fetchAll();
+      fetchAll(1, false);
       getInventory().then(setPaginatedInventory).catch(() => { });
       if (andExport) {
         const templateItems: TemplateItem[] = payload.items.map((i) => {
@@ -196,7 +219,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
     try {
       await updateTransaction(id, payload);
       setEditTarget(null);
-      fetchAll();
+      fetchAll(1, false);
       getInventory().then(setPaginatedInventory).catch(() => { });
     } catch (err: unknown) {
       type ApiErr = { response?: { data?: { detail?: string; items?: Array<{ quantity?: string }> } } };
@@ -214,7 +237,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
     try {
       await deleteTransaction(deleteTarget.id);
       setDeleteTarget(null);
-      fetchAll();
+      fetchAll(1, false);
     } finally {
       setDeleting(false);
     }
@@ -428,10 +451,18 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
         />
       </div>
 
+      {/* Infinite scroll sentinel */}
+      <div ref={sentinelRef} />
+      {loadingMore && (
+        <div className="flex justify-center py-4">
+          <span className="text-xs text-gray-400 animate-pulse">Loading more transactions...</span>
+        </div>
+      )}
       {!loading && !error && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-1">
           <p className="text-xs text-gray-400">
-            <span className="font-bold text-gray-600">{transactions.length}</span> records
+            <span className="font-bold text-gray-600">{transactions.length}</span> loaded
+            {hasMore && <span className="text-gray-300"> · scroll for more</span>}
           </p>
         </div>
       )}

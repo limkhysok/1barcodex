@@ -56,9 +56,12 @@ export default function ProductsClient({
   const canEdit = role === "boss" || role === "superadmin";
   const canDelete = role === "superadmin";
 
-  const [paginated, setPaginated] = useState<PaginatedProducts>(initialPaginated);
-  const products = paginated.results;
+  const [products, setProducts] = useState<Product[]>(initialPaginated.results);
+  const [hasMore, setHasMore] = useState(initialPaginated.next !== null);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
 
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -91,33 +94,53 @@ export default function ProductsClient({
   const filtersRef = useRef<HTMLDivElement>(null);
   const filtersMounted = useRef(false);
 
-  const buildFilters = useCallback((): ProductFilters => {
+  const buildFilters = useCallback((nextPage = 1): ProductFilters => {
     const ordering = getSortParam(sortField, sortDir);
     return {
       search: search.trim() || undefined,
       category: categoryFilter || undefined,
       supplier: supplierFilter || undefined,
       ordering,
+      page: nextPage,
     };
   }, [search, categoryFilter, supplierFilter, sortField, sortDir]);
 
-  const fetchProducts = useCallback(() => {
-    setLoading(true);
+  const fetchProducts = useCallback((nextPage = 1, append = false) => {
+    if (!append) setLoading(true);
+    else setLoadingMore(true);
     setError("");
-    getProducts(undefined, buildFilters())
-      .then((data) => setPaginated(data))
+    getProducts(undefined, buildFilters(nextPage))
+      .then((data) => {
+        setProducts((prev) => append ? [...prev, ...data.results] : data.results);
+        setHasMore(data.next !== null);
+        setPage(nextPage);
+      })
       .catch(() => setError("Failed to load products."))
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false); setLoadingMore(false); });
   }, [buildFilters]);
 
-  // Debounce API filter changes
+  // Debounce re-fetch when filters change (reset to page 1)
   useEffect(() => {
     if (!filtersMounted.current) { filtersMounted.current = true; return; }
-    const t = setTimeout(() => {
-      fetchProducts();
-    }, 300);
+    const t = setTimeout(() => fetchProducts(1, false), 300);
     return () => clearTimeout(t);
   }, [fetchProducts]);
+
+  // Infinite scroll
+  useEffect(() => {
+    if (!hasMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !loadingMore && !loading) {
+          fetchProducts(page + 1, true);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    const el = sentinelRef.current;
+    if (el) observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loading, page, fetchProducts]);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -127,7 +150,7 @@ export default function ProductsClient({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const displayed = products;
+  const displayed = products; // filters applied server-side; products is the accumulated list
 
   function openCreate() {
     setEditing(null);
@@ -179,7 +202,7 @@ export default function ProductsClient({
       }
       setSaving(false);
       setModalOpen(false);
-      fetchProducts();
+      fetchProducts(1, false);
     } catch (err: unknown) {
       setSaving(false);
       const apiErr = err as ApiError;
@@ -217,14 +240,14 @@ export default function ProductsClient({
       });
       setDeleteTarget(null);
       setDeleting(false);
-      fetchProducts();
+      fetchProducts(1, false);
     } catch (err: unknown) {
       const apiErr = err as ApiError;
       const data = apiErr?.response?.data;
       const status = apiErr?.response?.status;
       if (status === 404) {
         setDeleteTarget(null);
-        fetchProducts();
+        fetchProducts(1, false);
       } else if (status === 409) {
         toast.error("Cannot Delete Product", {
           description: (data?.detail as string | undefined) ?? "This product has linked transactions and cannot be removed.",
@@ -258,7 +281,7 @@ export default function ProductsClient({
         setSearch={setSearch}
         categories={categories}
         suppliers={suppliers}
-        totalResults={paginated.count}
+        totalResults={products.length}
         filtersOpen={filtersOpen}
         setFiltersOpen={setFiltersOpen}
         filtersRef={filtersRef}
@@ -285,6 +308,19 @@ export default function ProductsClient({
           viewMode={viewMode}
         />
       </div>
+
+      {/* Infinite scroll sentinel */}
+      <div ref={sentinelRef} />
+      {loadingMore && (
+        <div className="flex justify-center py-4">
+          <span className="text-xs text-gray-400 animate-pulse">Loading more products...</span>
+        </div>
+      )}
+      {!hasMore && products.length > 0 && !loading && (
+        <div className="flex justify-center py-3">
+          <span className="text-xs text-gray-300">All {products.length} products loaded</span>
+        </div>
+      )}
 
       {/* Add / Edit Modal */}
       <ProductModal

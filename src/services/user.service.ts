@@ -4,8 +4,9 @@ import { User } from "../types/auth.types";
 const BASE_URL = "/v1/admin/staff";
 
 export const getStaffUsers = async (): Promise<User[]> => {
-  const { data } = await api.get<User[]>(`${BASE_URL}/`);
-  return data;
+  const { data } = await api.get<{ results: User[] } | User[]>(`${BASE_URL}/`);
+  if (Array.isArray(data)) return data;
+  return data.results ?? [];
 };
 
 export const createStaffUser = async (userData: Partial<User>): Promise<User> => {

@@ -1,5 +1,6 @@
 import api from "./api";
 import type { Transaction, TransactionPayload } from "@/src/types/transaction.types";
+import type { PaginatedTransactions } from "@/src/types/api.types";
 import { isRedirectError } from "@/src/lib/is-redirect-error";
 
 export async function getTransactions(params?: {
@@ -7,22 +8,25 @@ export async function getTransactions(params?: {
   barcode?: string;
   search?: string;
   ordering?: string;
-}, fetcher?: <T>(path: string) => Promise<T>): Promise<Transaction[]> {
+  page?: number;
+}, fetcher?: <T>(path: string) => Promise<T>): Promise<PaginatedTransactions> {
   const query = new URLSearchParams();
   if (params?.type) query.set("type", params.type);
   if (params?.barcode) query.set("barcode", params.barcode);
   if (params?.search) query.set("search", params.search);
   if (params?.ordering) query.set("ordering", params.ordering);
+  if (params?.page && params.page > 1) query.set("page", String(params.page));
 
   const path = `/v1/transactions/?${query.toString()}`;
   const raw: unknown = fetcher
     ? await fetcher(path)
     : (await api.get<unknown>(path)).data;
 
-  // Normalize: handle both plain array (new) and paginated wrapper (old)
-  if (Array.isArray(raw)) return raw as Transaction[];
-  const wrapped = raw as { results?: Transaction[] };
-  return wrapped.results ?? [];
+  if (Array.isArray(raw)) {
+    return { count: raw.length, next: null, previous: null, results: raw as Transaction[] };
+  }
+  const wrapped = raw as PaginatedTransactions;
+  return { count: wrapped.count ?? 0, next: wrapped.next ?? null, previous: wrapped.previous ?? null, results: wrapped.results ?? [] };
 }
 
 export interface TransactionTypeStats {

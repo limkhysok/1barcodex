@@ -10,31 +10,26 @@ export function ProductHeader({ onNew }: Readonly<ProductHeaderProps>) {
       {/* ── MOBILE (< sm) ── */}
       <div className="sm:hidden flex items-center justify-between">
         <div className="flex flex-col">
-          <h1 className="text-[13px] font-black text-slate-950 uppercase tracking-[0.2em] leading-none">Product</h1>
-          <p className="text-[8px] text-orange-500 font-black uppercase tracking-widest mt-0.5">Catalog</p>
+          <h1 className="text-base font-medium text-black-950 ">Product</h1>
+          <p className="text-xs text-slate-600">Overview</p>
         </div>
         <button
           onClick={onNew}
-          className="px-4 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-wider bg-orange-500 text-white active:scale-[0.98] transition-all cursor-pointer"
-        >
-          + New
+          className="px-2 py-1 rounded-md text-[13px] font-regular bg-orange-500 text-white active:scale-[0.98] transition-all cursor-pointer">
+          Add
         </button>
       </div>
 
       {/* ── TABLET (sm → lg) ── */}
       <div className="hidden sm:flex lg:hidden items-center justify-between">
         <div className="flex flex-col border-l-2 border-orange-500 pl-3">
-          <h1 className="text-[15px] font-black text-slate-950 uppercase tracking-[0.2em] leading-tight">Product</h1>
-          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Command Center / Catalog</p>
+          <h1 className="text-lg font-medium text-black-950 ">Product</h1>
+            <p className="text-sm text-slate-600">Overview of all listed products, stock categories, and suppliers.</p>
         </div>
         <button
           onClick={onNew}
-          className="flex items-center gap-2 px-4 py-2 rounded-sm text-[11px] font-black uppercase tracking-wider bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.97] transition-all cursor-pointer"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          <span>New Product</span>
+          className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-regular bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.97] transition-all cursor-pointer">
+          <span>Add</span>
         </button>
       </div>
 
@@ -43,17 +38,14 @@ export function ProductHeader({ onNew }: Readonly<ProductHeaderProps>) {
         <div className="flex flex-col border-l-4 border-orange-500 pl-4">
           <h1 className="text-xl font-medium text-black-950 ">Product</h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-xs text-slate-600">Command Center / Catalog</p>
+            <p className="text-sm text-slate-600">Overview of all listed products, stock categories, and suppliers.</p>
           </div>
         </div>
         <button
           onClick={onNew}
-          className="flex items-center gap-2.5 px-5 py-2 rounded-sm text-[11px] font-black uppercase tracking-wider bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.96] transition-all cursor-pointer"
+          className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm bg-orange-500 font-regular text-white hover:bg-orange-600 active:scale-[0.96] transition-all cursor-pointer"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          <span>New Product</span>
+          <span>Add</span>
         </button>
       </div>
     </>

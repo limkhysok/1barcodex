@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/src/context/AuthContext";
 import type { InventoryRecord, InventoryPayload } from "@/src/types/inventory.types";
 import { getInventory, createInventory, updateInventory, deleteInventory } from "@/src/services/inventory.service";
@@ -44,13 +44,18 @@ export default function InventoryClient({
   const canEdit = role === "boss" || role === "superadmin";
   const canDelete = role === "superadmin";
 
-  const [paginated, setPaginated] = useState<PaginatedInventory>(initialPaginatedRecords);
-  const records = paginated.results;
+  const [records, setRecords] = useState<InventoryRecord[]>(initialPaginatedRecords.results);
+  const [hasMore, setHasMore] = useState(initialPaginatedRecords.next !== null);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [paginatedProducts, setPaginatedProducts] = useState<PaginatedProducts>(initialPaginatedProducts);
   const products = paginatedProducts.results;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // sentinel ref for infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // -- Filter / sort state --
   const [siteFilter, setSiteFilter] = useState("");
@@ -105,18 +110,45 @@ export default function InventoryClient({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // -- Fetch logic: Reduced to manual reload only --
-  function fetchInventory() {
-    setLoading(true);
+  // -- Fetch logic --
+  const fetchInventory = useCallback((nextPage = 1, append = false) => {
+    if (!append) setLoading(true);
+    else setLoadingMore(true);
     setError("");
 
-    getInventory()
-      .then(setPaginated)
+    getInventory({ search: search.trim() || undefined, ordering: ordering || undefined, page: nextPage })
+      .then((data) => {
+        setRecords((prev) => append ? [...prev, ...data.results] : data.results);
+        setHasMore(data.next !== null);
+        setPage(nextPage);
+      })
       .catch(() => setError("Failed to load inventory."))
-      .finally(() => setLoading(false));
-  }
+      .finally(() => { setLoading(false); setLoadingMore(false); });
+  }, [search, ordering]);
 
-  // No longer re-fetching on every state change. Data is managed locally.
+  // Debounced re-fetch when search or ordering changes (reset to page 1)
+  const filtersMounted = useRef(false);
+  useEffect(() => {
+    if (!filtersMounted.current) { filtersMounted.current = true; return; }
+    const t = setTimeout(() => fetchInventory(1, false), 300);
+    return () => clearTimeout(t);
+  }, [fetchInventory]);
+
+  // Infinite scroll: load next page when sentinel enters viewport
+  useEffect(() => {
+    if (!hasMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !loadingMore && !loading) {
+          fetchInventory(page + 1, true);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    const el = sentinelRef.current;
+    if (el) observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loading, page, fetchInventory]);
 
   function openCreate() {
     setEditing(null);
@@ -156,7 +188,7 @@ export default function InventoryClient({
         toast.success("Record Created", { description: "New inventory record has been added." });
       }
       setModalOpen(false);
-      fetchInventory();
+      fetchInventory(1, false);
       getProducts().then(setPaginatedProducts).catch(() => { });
     } catch (err: any) {
       if (err?.response?.status === 409) {
@@ -175,7 +207,7 @@ export default function InventoryClient({
     try {
       await deleteInventory(deleteTarget.id);
       setDeleteTarget(null);
-      fetchInventory();
+      fetchInventory(1, false);
       toast.success("Record Deleted", { description: "Inventory record has been removed." });
     } catch {
       toast.error("Delete Failed", { description: "Failed to delete record. Please try again." });
@@ -378,6 +410,19 @@ export default function InventoryClient({
           viewMode={viewMode}
         />
       </div>
+
+      {/* Infinite scroll sentinel */}
+      <div ref={sentinelRef} />
+      {loadingMore && (
+        <div className="flex justify-center py-4">
+          <span className="text-xs text-gray-400 animate-pulse">Loading more records...</span>
+        </div>
+      )}
+      {!hasMore && records.length > 0 && !loading && (
+        <div className="flex justify-center py-3">
+          <span className="text-xs text-gray-300">All {records.length} records loaded</span>
+        </div>
+      )}
 
       {/* Modals */}
       <InventoryDetailModal

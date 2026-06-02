@@ -7,19 +7,16 @@ export interface ProductFilters {
   category?: string;
   supplier?: string;
   ordering?: string;
+  page?: number;
 }
 
-/**
- * Universal product getter.
- * @param fetcher Server-side fetcher
- * @param filters Optional filter params
- */
 export async function getProducts(fetcher?: <T>(path: string) => Promise<T>, filters?: ProductFilters): Promise<PaginatedProducts> {
   const params = new URLSearchParams();
   if (filters?.search) params.set("search", filters.search);
   if (filters?.category) params.set("category", filters.category);
   if (filters?.supplier) params.set("supplier", filters.supplier);
   if (filters?.ordering) params.set("ordering", filters.ordering);
+  if (filters?.page && filters.page > 1) params.set("page", String(filters.page));
 
   const path = `/v1/products/?${params.toString()}`;
   try {
@@ -30,7 +27,7 @@ export async function getProducts(fetcher?: <T>(path: string) => Promise<T>, fil
     return data;
   } catch (error) {
     console.error("Failed to fetch products:", error);
-    return { count: 0, results: [] } as any;
+    return { count: 0, next: null, previous: null, results: [] };
   }
 }
 
