@@ -106,7 +106,7 @@ function DropdownFilter({
 
 function SearchBar({ search, setSearch, placeholder = "Search product..." }: Readonly<{ search: string; setSearch: (v: string) => void; placeholder?: string }>) {
   return (
-    <div className="flex items-center gap-2 bg-slate-50 border border-gray-700 rounded-lg px-2.5 h-8 focus-within:border-orange-200 focus-within:bg-white transition-all overflow-hidden flex-1">
+    <div className="flex items-center gap-2 bg-slate-50 border border-gray-400 rounded-lg px-2.5 h-8 focus-within:border-orange-200 focus-within:bg-white transition-all overflow-hidden flex-1">
       <Search size={13} className="text-gray-700 shrink-0" strokeWidth={3} />
       <input
         type="text"
@@ -145,7 +145,7 @@ export function ProductToolbar({
     setSortDir("desc");
   };
 
-  let mobileFilterBtnClass = "bg-white text-gray-400 border-slate-500";
+  let mobileFilterBtnClass = "bg-white text-gray-400 border-slate-400";
   if (filtersOpen) mobileFilterBtnClass = "bg-orange-500 text-white border-orange-500";
   else if (isFiltered) mobileFilterBtnClass = "bg-orange-50 text-orange-500 border-orange-300";
 

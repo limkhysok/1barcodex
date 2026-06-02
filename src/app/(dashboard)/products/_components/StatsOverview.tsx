@@ -29,7 +29,7 @@
 
         {/* ── MOBILE (< sm) ── */}
         <div className="sm:hidden grid grid-cols-3 gap-1.5">
-          <div className="bg-white border border-gray-600 rounded-md overflow-hidden flex flex-col">
+          <div className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col">
             <div className="bg-orange-500 flex items-center justify-center py-2.5 border-b border-orange-600">
               <Package size={18} className="text-white" strokeWidth={1.5} />
             </div>
@@ -39,7 +39,7 @@
             </div>
           </div>
 
-          <div className="bg-white border border-gray-600 rounded-md overflow-hidden flex flex-col">
+          <div className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col">
             <div className="bg-orange-500 flex items-center justify-center py-2.5 border-b border-orange-600">
               <Box size={18} className="text-white" strokeWidth={1.5} />
             </div>
@@ -49,7 +49,7 @@
             </div>
           </div>
 
-          <div className="bg-white border border-gray-600 rounded-md overflow-hidden flex flex-col">
+          <div className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col">
             <div className="bg-orange-500 flex items-center justify-center py-2.5 border-b border-orange-600">
               <Zap size={18} className="text-white" strokeWidth={1.5} />
             </div>

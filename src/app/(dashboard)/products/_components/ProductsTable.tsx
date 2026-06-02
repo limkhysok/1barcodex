@@ -114,110 +114,70 @@ export function ProductsTable({
     );
   }
 
-  // ── Mobile: compact rows ──
+  // ── Mobile: 1-col cards ──
   const mobileRows = (
-    <div className="sm:hidden">
-      <div className="px-3 py-1.5 flex items-center gap-2 border-b border-t border-gray-400 bg-white">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">No.</span>
-          <span className="text-slate-200">·</span>
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Category</span>
-          <span className="text-slate-200">·</span>
-          <span className="text-[9px] font-black uppercase tracking-widest text-gray-700">Name</span>
-        </div>
-        <div className="shrink-0 flex items-center gap-4">
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Reorder</span>
-          <span className="w-7" />
-        </div>
-      </div>
-
-      <div className="divide-y divide-slate-300">
-        {displayed.map((p) => (
-          <div
-            key={p.id}
-            className="relative group bg-white overflow-hidden hover:bg-slate-50 transition-all duration-300"
-          >
-            <div className="px-3 py-3 flex items-center gap-2">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="text-slate-300 text-[10px] font-bold shrink-0">{p.id}</span>
-                <span className="text-slate-300 shrink-0">·</span>
-                <span className="shrink-0 text-[9px] font-black text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100/50 uppercase tracking-tighter">
-                  {p.category}
-                </span>
-                <span className="text-slate-300 shrink-0">·</span>
-                <span className="text-[10px] font-black text-slate-900 truncate uppercase">{p.product_name}</span>
-              </div>
-              <div className="shrink-0 flex items-center gap-2 relative z-10">
-                <span className="text-[12px] font-black text-orange-600 tabular-nums leading-none bg-orange-50 w-7 h-7 flex items-center justify-center rounded-sm">
-                  {p.reorder_level}
-                </span>
-                <div className="flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => onView(p)}
-                    className="p-1.5 text-slate-400 hover:text-blue-500 transition-all cursor-pointer"
-                    title="View"
-                  >
-                    <Eye size={14} />
-                  </button>
-                  {canEdit && (
-                    <button
-                      type="button"
-                      onClick={() => onEdit(p)}
-                      className="p-1.5 text-slate-400 hover:text-orange-500 transition-all cursor-pointer"
-                      title="Edit"
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button
-                      type="button"
-                      onClick={() => onDelete(p)}
-                      className="p-1.5 text-slate-400 hover:text-red-500 transition-all cursor-pointer"
-                      title="Delete"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
+    <div className="sm:hidden grid grid-cols-1 gap-3 pt-1">
+      {displayed.map((p) => (
+        <div key={p.id} className="group relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:border-orange-300 hover:shadow-md hover:shadow-orange-500/10">
+          <button type="button" onClick={() => onView(p)} className="w-full text-left flex flex-row cursor-pointer">
+            <div className="w-28 shrink-0 bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
+              {p.product_picture ? (
+                <Image src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
+              ) : (
+                <Package size={28} strokeWidth={1} className="opacity-20" />
+              )}
+              <span className="absolute top-1.5 left-1.5 text-[13px] font-bold text-gray-500 tabular-nums bg-white/90 px-1.5 py-0.5 rounded-md border border-gray-200">#{p.id}</span>
+            </div>
+            <div className="flex-1 min-w-0 px-3 py-2.5 flex flex-col gap-1.5">
+              <span className="text-[13px] font-semibold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100 self-start truncate max-w-full">{p.category}</span>
+              <span className="text-[13px] font-black text-gray-900 leading-tight truncate group-hover:text-orange-600 transition-colors">{p.product_name}</span>
+              <span className="text-[13px] font-mono text-gray-400 truncate">{p.barcode}</span>
+              <div className="flex items-center justify-between pt-1.5 border-t border-gray-100">
+                <span className="text-[13px] text-gray-400 truncate">{p.supplier}</span>
+                <span className="text-[13px] font-bold text-orange-600 tabular-nums bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-100 shrink-0 ml-1">{p.reorder_level}</span>
               </div>
             </div>
+          </button>
+          <div className="absolute top-0 left-0 w-28 h-full bg-black/25 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center gap-1.5">
+            <button type="button" onClick={() => onView(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-blue-500 transition-colors cursor-pointer" title="View"><Eye size={13} strokeWidth={2.5} /></button>
+            {canEdit && <button type="button" onClick={() => onEdit(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-orange-500 transition-colors cursor-pointer" title="Edit"><Edit2 size={13} strokeWidth={2.5} /></button>}
+            {canDelete && <button type="button" onClick={() => onDelete(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-red-500 transition-colors cursor-pointer" title="Delete"><Trash2 size={13} strokeWidth={2.5} /></button>}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 
   // ── Tablet: 4-col cards ──
   const tabletGrid = (
-    <div className="hidden sm:grid lg:hidden grid-cols-4 gap-2 pt-1">
+    <div className="hidden sm:grid lg:hidden grid-cols-4 gap-3 pt-1">
       {displayed.map((p) => (
-        <div key={p.id} className="group relative bg-white border border-slate-500 rounded-sm overflow-hidden transition-all duration-300 hover:border-orange-400 hover:shadow-md hover:shadow-orange-500/10 hover:-translate-y-0.5">
+        <div key={p.id} className="group relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:border-orange-300 hover:shadow-md hover:shadow-orange-500/10 hover:-translate-y-0.5">
           {/* Card button — click anywhere to view */}
           <button type="button" onClick={() => onView(p)} className="w-full text-left flex flex-col cursor-pointer">
-            <div className="h-20 w-full bg-slate-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
+            <div className="h-24 w-full bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
               {p.product_picture ? (
                 <Image src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
               ) : (
-                <Package size={20} strokeWidth={1} className="opacity-20" />
+                <Package size={24} strokeWidth={1} className="opacity-20" />
               )}
-              <span className="absolute top-1 left-1 text-[8px] font-black text-slate-500 tabular-nums bg-white/80 px-1 py-0.5 rounded-sm">{p.id}</span>
+              <span className="absolute top-1.5 left-1.5 text-[13px] font-bold text-gray-500 tabular-nums bg-white/90 px-1.5 py-0.5 rounded-md border border-gray-200">#{p.id}</span>
             </div>
-            <div className="px-2 py-1.5 flex flex-col gap-1">
-              <span className="text-[8px] font-black text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100 uppercase tracking-widest self-start truncate max-w-full">{p.category}</span>
-              <span className="text-[11px] font-black text-slate-900 leading-tight truncate group-hover:text-orange-600 transition-colors">{p.product_name}</span>
-              <div className="flex items-center justify-between pt-1 border-t border-slate-500">
-                <span className="text-[9px] text-slate-400 truncate">{p.supplier}</span>
-                <span className="text-[10px] font-black text-orange-600 tabular-nums shrink-0 ml-1">{p.reorder_level}</span>
+            <div className="px-2.5 py-2 flex flex-col gap-1.5">
+              <span className="text-[13px] font-semibold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100 self-start truncate max-w-full">{p.category}</span>
+              <span className="text-[13px] font-black text-gray-900 leading-tight truncate group-hover:text-orange-600 transition-colors">{p.product_name}</span>
+              <span className="text-[13px] font-mono text-gray-400 truncate">{p.barcode}</span>
+              <div className="flex items-center justify-between pt-1.5 border-t border-gray-100">
+                <span className="text-[13px] text-gray-400 truncate">{p.supplier}</span>
+                <span className="text-[13px] font-bold text-orange-600 tabular-nums bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-100 shrink-0 ml-1">{p.reorder_level}</span>
               </div>
             </div>
           </button>
           {/* Action overlay — sibling to button, pointer-events-none so bg passes clicks to card */}
-          <div className="absolute top-0 inset-x-0 h-20 bg-black/30 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center gap-1">
-            <button type="button" onClick={() => onView(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-sm text-slate-600 hover:text-blue-500 transition-colors cursor-pointer" title="View"><Eye size={11} strokeWidth={2.5} /></button>
-            {canEdit && <button type="button" onClick={() => onEdit(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-sm text-slate-600 hover:text-orange-500 transition-colors cursor-pointer" title="Edit"><Edit2 size={11} strokeWidth={2.5} /></button>}
-            {canDelete && <button type="button" onClick={() => onDelete(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-sm text-slate-600 hover:text-red-500 transition-colors cursor-pointer" title="Delete"><Trash2 size={11} strokeWidth={2.5} /></button>}
+          <div className="absolute top-0 inset-x-0 h-24 bg-black/25 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center gap-1.5">
+            <button type="button" onClick={() => onView(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-blue-500 transition-colors cursor-pointer" title="View"><Eye size={12} strokeWidth={2.5} /></button>
+            {canEdit && <button type="button" onClick={() => onEdit(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-orange-500 transition-colors cursor-pointer" title="Edit"><Edit2 size={12} strokeWidth={2.5} /></button>}
+            {canDelete && <button type="button" onClick={() => onDelete(p)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-red-500 transition-colors cursor-pointer" title="Delete"><Trash2 size={12} strokeWidth={2.5} /></button>}
           </div>
         </div>
       ))}
