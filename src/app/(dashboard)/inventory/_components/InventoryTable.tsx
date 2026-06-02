@@ -28,7 +28,6 @@ interface InventoryTableProps {
   canDelete: boolean;
   ordering?: string;
   onSort: (col: string) => void;
-  viewMode?: "list" | "grid";
 }
 
 const SortIcon = ({ field, currentOrdering }: { field: string; currentOrdering: string }) => {
@@ -110,7 +109,6 @@ export function InventoryTable({
   canDelete,
   ordering = "",
   onSort,
-  viewMode = "list",
 }: Readonly<InventoryTableProps>) {
 
   if (loading && displayed.length === 0) {
@@ -135,111 +133,64 @@ export function InventoryTable({
     );
   }
 
-  // ── Mobile: compact rows ──
-  const mobileRows = (
-    <div className="sm:hidden">
-      <div className="px-3 py-1.5 flex items-center gap-2 border-b border-t border-slate-500 bg-white">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <span className="text-sm font-medium text-gray-800">No</span>
-          <span className="text-slate-200">·</span>
-          <span className="text-sm font-medium text-gray-800">Product</span>
-        </div>
-        <div className="shrink-0 flex items-center gap-4">
-          <span className="text-sm font-medium text-gray-800">Qty</span>
-          <span className="w-7" />
-        </div>
-      </div>
-      <div className="divide-y divide-slate-100 bg-white">
-        {displayed.map((r) => {
-          const isOut = r.quantity_on_hand === 0;
-          const isLow = r.reorder_status === "LOW" && !isOut;
-          let qtyClass = "text-orange-600 bg-orange-50";
-          if (isOut) qtyClass = "text-red-500 bg-red-50";
-          else if (isLow) qtyClass = "text-yellow-600 bg-yellow-50";
-
-          return (
-            <div key={r.id} className="group bg-white hover:bg-slate-50 transition-all duration-300">
-              <div className="px-3 py-3.5 flex items-center gap-3">
-                <button
-                  onClick={() => onView(r)}
-                  className="flex flex-col flex-1 min-w-0 text-left cursor-pointer"
-                >
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-sm font-normal text-gray-500 tabular-nums">{r.id}</span>
-                    <span className="text-slate-200">·</span>
-                    <span className="text-sm font-normal text-gray-900 truncate group-hover:text-orange-600 transition-colors">
-                      {r.product_details.product_name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin size={9} className="text-slate-300 shrink-0" />
-                    <span className="text-sm font-normal text-gray-500 truncate max-w-37.5">
-                      {r.site} · {r.location}
-                    </span>
-                  </div>
-                </button>
-                <div className="shrink-0 flex items-center gap-4">
-                  <span className={`text-sm font-normal tabular-nums leading-none w-8 h-8 flex items-center justify-center rounded-lg ${qtyClass}`}>
-                    {r.quantity_on_hand}
-                  </span>
-                  <div className="flex items-center">
-                    <button onClick={() => onView(r)} className="p-1.5 text-slate-800 hover:text-blue-500 transition-colors cursor-pointer" title="View">
-                      <Eye size={14} />
-                    </button>
-                    {canEdit && (
-                      <button onClick={() => onEdit(r)} className="p-1.5 text-slate-800 hover:text-orange-500 transition-colors cursor-pointer">
-                        <Edit2 size={14} />
-                      </button>
-                    )}
-                    {canDelete && (
-                      <button onClick={() => onDelete(r)} className="p-1.5 text-slate-800 hover:text-red-500 transition-colors cursor-pointer">
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  // ── Tablet: 2-col Grid ──
-  const tabletGrid = (
-    <div className="hidden sm:grid lg:hidden grid-cols-2 gap-2 p-1">
+  // ── Mobile + Tablet: card grid (1 col mobile, 4 cols tablet, hidden on desktop) ──
+  const responsiveCards = (
+    <div className="grid lg:hidden grid-cols-1 sm:grid-cols-4 gap-3">
       {displayed.map((r) => (
-        <div key={r.id} className="group relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:border-orange-300 hover:shadow-md hover:shadow-orange-500/10">
-          <button type="button" onClick={() => onView(r)} className="w-full text-left flex flex-col cursor-pointer">
-            <div className="h-20 w-full bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
+        <div key={r.id} className="group relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:border-orange-300 hover:shadow-md hover:shadow-orange-500/10 hover:-translate-y-0.5 flex flex-col">
+          <button type="button" onClick={() => onView(r)} className="w-full text-left flex flex-col cursor-pointer flex-1">
+            <div className="relative h-36 w-full bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors">
               {r.product_details.product_picture ? (
-                <img src={`${BASE_URL}${r.product_details.product_picture}`} alt={r.product_details.product_name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <img
+                  src={`${BASE_URL}${r.product_details.product_picture}`}
+                  alt={r.product_details.product_name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
               ) : (
-                <Package size={20} strokeWidth={1} className="opacity-20" />
+                <Package size={28} strokeWidth={1} className="opacity-20" />
               )}
-              <div className="absolute top-1 left-1 flex items-center gap-1.5">
-                <span className="text-[8px] font-bold text-gray-500 tabular-nums bg-white/80 px-1 py-0.5 rounded-md border border-gray-200">{r.id}</span>
+              <span className="absolute top-2 left-2 text-[10px] font-bold text-gray-500 tabular-nums bg-white/90 px-1.5 py-0.5 rounded-md border border-gray-200">
+                #{r.id}
+              </span>
+              <div className="absolute top-2 right-2">
                 <StockBadge r={r} />
               </div>
             </div>
-            <div className="px-2.5 py-2 flex flex-col gap-1.5">
-              <span className="text-sm font-normal text-gray-900 leading-tight truncate group-hover:text-orange-600 transition-colors">{r.product_details.product_name}</span>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 min-w-0">
-                  <MapPin size={9} className="text-slate-300 shrink-0" />
-                  <span className="text-sm font-normal text-gray-500 truncate">{r.site} · {r.location}</span>
-                </div>
+            <div className="px-3 py-2.5 flex flex-col gap-1.5 flex-1">
+              <p className="text-sm font-normal text-gray-900 leading-snug line-clamp-2 group-hover:text-orange-600 transition-colors">
+                {r.product_details.product_name}
+              </p>
+              <p className="text-sm font-normal font-mono text-gray-400 truncate">
+                {r.product_details.barcode || "—"}
+              </p>
+              <div className="flex items-center gap-1 min-w-0">
+                <MapPin size={10} className="text-slate-300 shrink-0" />
+                <span className="text-sm font-normal text-gray-500 truncate">
+                  {r.site}{r.location ? ` · ${r.location}` : ""}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-auto">
+                <span className="text-sm font-medium text-gray-400">Qty</span>
                 <span className="text-sm font-normal text-gray-900 tabular-nums">
-                  {r.quantity_on_hand}
+                  {r.quantity_on_hand.toLocaleString()}
                 </span>
               </div>
             </div>
           </button>
-          <div className="absolute top-0 inset-x-0 h-20 bg-black/25 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center gap-1.5">
-            <button onClick={() => onView(r)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-blue-500 transition-colors cursor-pointer" title="View"><Eye size={11} strokeWidth={2.5} /></button>
-            {canEdit && <button onClick={() => onEdit(r)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-orange-500 transition-colors cursor-pointer" title="Edit"><Edit2 size={11} strokeWidth={2.5} /></button>}
-            {canDelete && <button onClick={() => onDelete(r)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-red-500 transition-colors cursor-pointer" title="Delete"><Trash2 size={11} strokeWidth={2.5} /></button>}
+          <div className="absolute top-0 inset-x-0 h-36 bg-black/25 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center gap-1.5">
+            <button onClick={() => onView(r)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-blue-500 transition-colors cursor-pointer" title="View">
+              <Eye size={13} strokeWidth={2.5} />
+            </button>
+            {canEdit && (
+              <button onClick={() => onEdit(r)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-orange-500 transition-colors cursor-pointer" title="Edit">
+                <Edit2 size={13} strokeWidth={2.5} />
+              </button>
+            )}
+            {canDelete && (
+              <button onClick={() => onDelete(r)} className="pointer-events-auto p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-red-500 transition-colors cursor-pointer" title="Delete">
+                <Trash2 size={13} strokeWidth={2.5} />
+              </button>
+            )}
           </div>
         </div>
       ))}
@@ -320,60 +271,13 @@ export function InventoryTable({
     </div>
   );
 
-  // ── Desktop: Grid cards ──
-  const desktopGrid = (
-    <div className="hidden lg:grid grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
-      {displayed.map((r) => (
-        <div key={r.id} className="group relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:border-orange-300 hover:shadow-md hover:shadow-orange-500/10 hover:-translate-y-0.5 flex flex-col">
-          <button type="button" onClick={() => onView(r)} className="w-full text-left flex flex-col cursor-pointer flex-1">
-            <div className="relative aspect-square w-full bg-gray-50 flex items-center justify-center overflow-hidden border-b border-gray-200 group-hover:bg-orange-50 transition-colors">
-              {r.product_details.product_picture ? (
-                <img src={`${BASE_URL}${r.product_details.product_picture}`} alt={r.product_details.product_name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-              ) : (
-                <Package size={24} strokeWidth={1} className="opacity-20" />
-              )}
-              <div className="absolute top-2 left-2 flex flex-col gap-1.5">
-                <span className="text-[8px] font-bold text-gray-500 tabular-nums bg-white/90 px-1.5 py-0.5 rounded-md border border-gray-200 self-start">{r.id}</span>
-                <StockBadge r={r} />
-              </div>
-            </div>
-            <div className="p-3 flex flex-col gap-2">
-              <div>
-                <p className="text-sm font-normal text-gray-900 leading-tight truncate group-hover:text-orange-600 transition-colors">{r.product_details.product_name}</p>
-                <p className="text-sm font-normal text-gray-500 truncate">{r.product_details.category}</p>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-1 min-w-0">
-                  <MapPin size={9} className="text-slate-300 shrink-0" />
-                  <span className="text-sm font-normal text-gray-500 truncate">{r.site} · {r.location}</span>
-                </div>
-                <div className="flex items-center justify-between pt-1.5 border-t border-gray-100">
-                  <span className="text-sm font-medium text-gray-400">Quantity</span>
-                  <span className="text-sm font-normal text-gray-900 tabular-nums">
-                    {r.quantity_on_hand}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </button>
-          <div className="absolute top-0 inset-x-0 aspect-square bg-black/25 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center gap-1.5">
-            <button onClick={() => onView(r)} className="pointer-events-auto p-2 bg-white/95 rounded-lg text-gray-600 hover:text-blue-500 transition-colors cursor-pointer shadow-sm active:scale-90" title="View"><Eye size={13} strokeWidth={2.5} /></button>
-            {canEdit && <button onClick={() => onEdit(r)} className="pointer-events-auto p-2 bg-white/95 rounded-lg text-gray-600 hover:text-orange-500 transition-colors cursor-pointer shadow-sm active:scale-90" title="Edit"><Edit2 size={13} strokeWidth={2.5} /></button>}
-            {canDelete && <button onClick={() => onDelete(r)} className="pointer-events-auto p-2 bg-white/95 rounded-lg text-gray-600 hover:text-red-500 transition-colors cursor-pointer shadow-sm active:scale-90" title="Delete"><Trash2 size={13} strokeWidth={2.5} /></button>}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <>
       <div className={`h-0.5 w-full overflow-hidden rounded-full mb-1 transition-opacity duration-300 ${loading ? "opacity-100" : "opacity-0"}`}>
         <div className="h-full bg-orange-500 animate-pulse w-full" />
       </div>
-      {mobileRows}
-      {tabletGrid}
-      {viewMode === "list" ? desktopList : desktopGrid}
+      {responsiveCards}
+      {desktopList}
     </>
   );
 }
