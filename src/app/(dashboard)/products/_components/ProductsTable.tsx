@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import type { Product } from "@/src/types/product.types";
 import { Edit2, Trash2, Eye, Database, ArrowUp, ArrowDown, Package } from "lucide-react";
 import Image from "next/image";
@@ -92,7 +91,7 @@ export function ProductsTable({
     }
   };
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="w-7 h-7 rounded-full border-2 border-t-transparent animate-spin"
@@ -309,6 +308,9 @@ export function ProductsTable({
 
   return (
     <>
+      <div className={`h-0.5 w-full overflow-hidden rounded-full mb-1 transition-opacity duration-300 ${loading ? "opacity-100" : "opacity-0"}`}>
+        <div className="h-full bg-orange-500 animate-pulse w-full" />
+      </div>
       {mobileRows}
       {tabletGrid}
       {desktopList}

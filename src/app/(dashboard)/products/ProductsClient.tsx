@@ -20,6 +20,10 @@ import { ProductViewModal } from "./_components/ProductViewModal";
 
 const REORDER_PRESETS = new Set([5, 10, 15, 20]);
 
+function fetchPageSilent(pg: number) {
+  return getProducts(undefined, { page: pg }).catch(() => null);
+}
+
 function getSortParam(field: string, dir: SortDir): string | undefined {
   if (!field || !dir) return undefined;
   return dir === "desc" ? `-${field}` : field;
@@ -94,24 +98,27 @@ export default function ProductsClient({
     Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b))
   );
 
-  // On mount: crawl all pages with no filters to fully populate category/supplier dropdowns
+  // On mount: fetch all remaining pages in parallel to populate category/supplier dropdowns
   useEffect(() => {
     let cancelled = false;
     async function discover() {
-      let pg = 1;
-      while (true) {
-        const data = await getProducts(undefined, { page: pg }).catch(() => null);
-        if (cancelled || !data) break;
-        let catChanged = false, supChanged = false;
-        data.results.forEach(p => {
+      const pageSize = initialPaginated.results.length;
+      if (!pageSize || !initialPaginated.next) return; // only 1 page, already seeded
+      const totalPages = Math.ceil(initialPaginated.count / pageSize);
+      const results = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, i) => fetchPageSilent(i + 2))
+      );
+      if (cancelled) return;
+      let catChanged = false, supChanged = false;
+      for (const data of results) {
+        if (!data) continue;
+        for (const p of data.results) {
           if (!allCategoriesRef.current.has(p.category)) { allCategoriesRef.current.add(p.category); catChanged = true; }
           if (!allSuppliersRef.current.has(p.supplier)) { allSuppliersRef.current.add(p.supplier); supChanged = true; }
-        });
-        if (catChanged) setCategories(Array.from(allCategoriesRef.current).sort((a, b) => a.localeCompare(b)));
-        if (supChanged) setSuppliers(Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b)));
-        if (!data.next) break;
-        pg++;
+        }
       }
+      if (catChanged) setCategories(Array.from(allCategoriesRef.current).sort((a, b) => a.localeCompare(b)));
+      if (supChanged) setSuppliers(Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b)));
     }
     discover();
     return () => { cancelled = true; };

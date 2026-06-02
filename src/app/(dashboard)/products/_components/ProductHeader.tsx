@@ -11,12 +11,12 @@ export function ProductHeader({ onNew }: Readonly<ProductHeaderProps>) {
       <div className="sm:hidden flex items-center justify-between">
         <div className="flex flex-col">
           <h1 className="text-lg font-normal text-black-950 ">Product</h1>
-          <p className="text-xs text-slate-600">Overview</p>
+          <p className="text-xs text-slate-600">Overview of all listed products.</p>
         </div>
         <button
           onClick={onNew}
-          className="px-2 py-1 rounded-md text-[13px] font-regular bg-orange-500 text-white active:scale-[0.98] transition-all cursor-pointer">
-          Add
+          className="px-3 py-1.5 rounded-lg text-[13px] font-regular bg-orange-500 text-white active:scale-[0.98] transition-all cursor-pointer">
+          +
         </button>
       </div>
 

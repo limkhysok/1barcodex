@@ -53,13 +53,13 @@ function DropdownFilter({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={`px-2.5 py-1 border rounded-lg text-sm font-regular transition-all duration-150 focus:outline-none flex items-center gap-2 group ${btnCls} h-8 ${compact ? "min-w-0" : "min-w-30"}`}
+        className={`px-2.5 py-1 border rounded-lg text-[13px] lg:text-sm font-regular transition-all duration-150 focus:outline-none flex items-center gap-2 group ${btnCls} h-8 ${compact ? "min-w-0" : "min-w-30"}`}
       >
         <div className={`transition-colors duration-200 shrink-0 ${isActive ? "text-white" : "text-gray-700 group-hover:text-white"}`}>
           <Icon size={13} strokeWidth={3} />
         </div>
         {!compact && (
-          <span className={`truncate flex-1 text-left text-sm font-regular ${isActive ? "text-white" : "text-gray-500 group-hover:text-white"}`}>
+          <span className={`truncate flex-1 text-left text-[13px] lg:text-sm font-regular ${isActive ? "text-white" : "text-gray-500 group-hover:text-white"}`}>
             {value || label}
           </span>
         )}
@@ -79,14 +79,14 @@ function DropdownFilter({
           <ul className="divide-y divide-gray-50">
             <li>
               <button type="button" onClick={() => { onChange(""); setOpen(false); }}
-                className={`w-full text-left px-4 py-2 text-sm font-regular transition-colors ${value === "" ? "bg-slate-50 text-orange-500 border-l-2 border-orange-500" : "text-gray-500 hover:bg-orange-500 hover:text-white"}`}>
+                className={`w-full text-left px-4 py-2 text-[13px] lg:text-sm font-regular transition-colors ${value === "" ? "bg-slate-50 text-orange-500 border-l-2 border-orange-500" : "text-gray-500 hover:bg-orange-500 hover:text-white"}`}>
                 {label}
               </button>
             </li>
             {options.map((opt) => (
               <li key={opt}>
                 <button type="button" onClick={() => { onChange(opt); setOpen(false); }}
-                  className={`w-full text-left px-4 py-2 text-sm font-regular transition-colors flex items-center justify-between ${value === opt ? "bg-slate-50 text-orange-500 border-l-2 border-orange-500" : "text-gray-500 hover:bg-orange-500 hover:text-white"}`}>
+                  className={`w-full text-left px-4 py-2 text-[13px] lg:text-sm font-regular transition-colors flex items-center justify-between ${value === opt ? "bg-slate-50 text-orange-500 border-l-2 border-orange-500" : "text-gray-500 hover:bg-orange-500 hover:text-white"}`}>
                   {opt}
                   {value === opt && (
                     <svg className="w-3 h-3 text-orange-500" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
@@ -113,13 +113,14 @@ function SearchBar({ search, setSearch, placeholder = "Search product..." }: Rea
         placeholder={placeholder}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="bg-transparent border-none outline-none text-sm text-slate-900 placeholder:text-gray-500 w-full font-regular"
+        className="bg-transparent border-none outline-none text-[13px] lg:text-sm text-slate-900 placeholder:text-gray-500 w-full font-regular"
       />
-      {search && (
-        <button onClick={() => setSearch("")} className="text-gray-300 hover:text-slate-900 transition-colors cursor-pointer shrink-0">
-          <X size={13} strokeWidth={2} />
-        </button>
-      )}
+      <button
+        onClick={() => setSearch("")}
+        className={`shrink-0 transition-colors ${search ? "text-gray-300 hover:text-slate-900 cursor-pointer" : "opacity-0 pointer-events-none"}`}
+      >
+        <X size={13} strokeWidth={2} />
+      </button>
     </div>
   );
 }
@@ -156,7 +157,7 @@ export function ProductToolbar({
         <div className="relative" ref={filtersRef}>
           <button
             onClick={() => setFiltersOpen(!filtersOpen)}
-            className={`flex items-center gap-2 px-3 h-8 rounded-sm border text-[11px] font-black tracking-widest transition-all cursor-pointer ${mobileFilterBtnClass}`}
+            className={`flex items-center gap-2 px-3 h-8 rounded-lg border text-[13px] transition-all cursor-pointer ${mobileFilterBtnClass}`}
           >
             <Filter size={13} strokeWidth={3} />
             <span>Filter</span>
@@ -168,38 +169,38 @@ export function ProductToolbar({
           </button>
 
           {filtersOpen && (
-            <div className="absolute left-0 mt-3 z-50 w-72 bg-white border border-slate-500 rounded-sm shadow-2xl p-4 flex flex-col gap-5 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="space-y-2">
-                <span className="text-sm font-regular text-gray-500 flex items-center gap-2"><Tag size={10} /> Category</span>
-                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto pr-1">
+            <div className="absolute left-0 mt-2 z-50 w-60 bg-white border border-slate-500 rounded-sm shadow-2xl p-3 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="space-y-1">
+                <span className="text-[13px] font-regular text-gray-500 flex items-center gap-1.5"><Tag size={10} /> Category</span>
+                <div className="flex flex-col gap-0.5 max-h-36 overflow-y-auto pr-1">
                   {["Category", ...categories].map((cat) => {
                     const val = cat === "Category" ? "" : cat;
                     return (
                       <button key={cat} onClick={() => setCategoryFilter(val)}
-                        className={`w-full text-left px-3 py-2 text-sm font-regular transition-colors rounded-sm ${categoryFilter === val ? "bg-orange-500 text-white" : "text-gray-500 hover:bg-slate-50"}`}>
+                        className={`w-full text-left px-2.5 py-1.5 text-[13px] font-regular transition-colors rounded-sm ${categoryFilter === val ? "bg-orange-500 text-white" : "text-gray-500 hover:bg-slate-50"}`}>
                         {cat}
                       </button>
                     );
                   })}
                 </div>
               </div>
-              <div className="space-y-2">
-                <span className="text-sm font-regular text-gray-500 flex items-center gap-2"><Users size={10} /> Supplier</span>
-                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto pr-1">
+              <div className="space-y-1">
+                <span className="text-[13px] font-regular text-gray-500 flex items-center gap-1.5"><Users size={10} /> Supplier</span>
+                <div className="flex flex-col gap-0.5 max-h-36 overflow-y-auto pr-1">
                   {["Supplier", ...suppliers].map((sup) => {
                     const val = sup === "Supplier" ? "" : sup;
                     return (
                       <button key={sup} onClick={() => setSupplierFilter(val)}
-                        className={`w-full text-left px-3 py-2 text-sm font-regular transition-colors rounded-sm ${supplierFilter === val ? "bg-orange-500 text-white" : "text-gray-500 hover:bg-slate-50"}`}>
+                        className={`w-full text-left px-2.5 py-1.5 text-[13px] font-regular transition-colors rounded-sm ${supplierFilter === val ? "bg-orange-500 text-white" : "text-gray-500 hover:bg-slate-50"}`}>
                         {sup}
                       </button>
                     );
                   })}
                 </div>
               </div>
-              <div className="flex gap-2 pt-2 border-t border-slate-800">
-                <button onClick={clearAll} className="flex-1 py-2 text-sm font-regular text-gray-400 hover:text-red-500 border border-slate-500 rounded-sm cursor-pointer">Reset</button>
-                <button onClick={() => setFiltersOpen(false)} className="flex-1 py-2 text-sm font-regular bg-slate-900 text-white rounded-sm cursor-pointer">Done</button>
+              <div className="flex gap-2 pt-2 border-t border-slate-200">
+                <button onClick={clearAll} className="flex-1 py-1 text-[13px] font-regular text-gray-400 hover:text-red-500 border border-slate-500 rounded-lg cursor-pointer">Reset</button>
+                <button onClick={() => setFiltersOpen(false)} className="flex-1 py-1 text-[13px] font-regular bg-slate-900 text-white rounded-lg cursor-pointer">Done</button>
               </div>
             </div>
           )}
@@ -210,15 +211,17 @@ export function ProductToolbar({
 
       {/* ── TABLET (sm → lg) ── */}
       <div className="hidden sm:flex lg:hidden items-center gap-2">
-        <SearchBar search={search} setSearch={setSearch} />
-        <DropdownFilter label="Category" value={categoryFilter} onChange={setCategoryFilter} options={categories} icon={Tag} compact />
-        <DropdownFilter label="Supplier" value={supplierFilter} onChange={setSupplierFilter} options={suppliers} icon={Users} compact />
+        <DropdownFilter label="Category" value={categoryFilter} onChange={setCategoryFilter} options={categories} icon={Tag} />
+        <DropdownFilter label="Supplier" value={supplierFilter} onChange={setSupplierFilter} options={suppliers} icon={Users} />
         {isFiltered && (
-          <button onClick={clearAll} className="flex items-center gap-1.5 px-2.5 h-8 text-sm font-normal text-gray-600 hover:text-red-500 transition-colors border border-dashed border-slate-500 rounded-sm hover:border-red-200 hover:bg-red-50 shrink-0 cursor-pointer">
+          <button onClick={clearAll} className="flex items-center gap-1.5 px-2.5 h-8 text-[13px] font-normal text-gray-600 hover:text-red-500 transition-colors border border-dashed border-slate-500 rounded-sm hover:border-red-200 hover:bg-red-50 shrink-0 cursor-pointer">
             <X size={11} strokeWidth={3} />
             Clear
           </button>
         )}
+        <div className="ml-auto flex items-center gap-2">
+          <SearchBar search={search} setSearch={setSearch} />
+        </div>
       </div>
 
       {/* ── DESKTOP (≥ lg) ── */}
@@ -226,7 +229,7 @@ export function ProductToolbar({
         <DropdownFilter label="Category" value={categoryFilter} onChange={setCategoryFilter} options={categories} icon={Tag} />
         <DropdownFilter label="Supplier" value={supplierFilter} onChange={setSupplierFilter} options={suppliers} icon={Users} />
         {isFiltered && (
-          <button onClick={clearAll} className="flex items-center gap-2 px-3 h-8 text-sm font-normal text-gray-600 hover:text-red-500 transition-colors border border-dashed border-slate-500 rounded-sm hover:border-red-200 hover:bg-red-50 cursor-pointer">
+          <button onClick={clearAll} className="flex items-center gap-2 px-3 h-8 text-sm font-normal text-gray-600 hover:text-red-500 transition-colors border border-dashed border-slate-500 rounded-sm hover:border-red-200 hover:bg-red-50 cursor-pointer" >
             <X size={12} strokeWidth={3} />
             Clear All
           </button>
@@ -236,33 +239,6 @@ export function ProductToolbar({
         </div>
       </div>
 
-      {/* ── Active Filter Pills (tablet + desktop) ── */}
-      {isFiltered && (
-        <div className="hidden sm:flex flex-wrap items-center gap-2 py-0.5">
-          <span className="text-sm font-regular text-gray-600 mr-1">Active:</span>
-          {search && (
-            <span className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 text-slate-900 text-[10px] font-bold border border-slate-500 rounded-sm">
-              <Search size={9} className="text-slate-400" />
-              &ldquo;{search}&rdquo;
-              <button onClick={() => setSearch("")} className="ml-0.5 text-slate-400 hover:text-red-500 transition-colors cursor-pointer"><X size={11} strokeWidth={3} /></button>
-            </span>
-          )}
-          {categoryFilter && (
-            <span className="flex items-center gap-1.5 px-2 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold border border-orange-100 rounded-sm">
-              <Tag size={9} className="text-orange-400" />
-              {categoryFilter}
-              <button onClick={() => setCategoryFilter("")} className="ml-0.5 text-orange-400 hover:text-red-500 transition-colors cursor-pointer"><X size={11} strokeWidth={3} /></button>
-            </span>
-          )}
-          {supplierFilter && (
-            <span className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-orange-600 text-[10px] font-bold border border-blue-100 rounded-sm">
-              <Users size={9} className="text-orange-400" />
-              {supplierFilter}
-              <button onClick={() => setSupplierFilter("")} className="ml-0.5 text-orange-400 hover:text-red-500 transition-colors cursor-pointer"><X size={11} strokeWidth={3} /></button>
-            </span>
-          )}
-        </div>
-      )}
     </div>
   );
 }
