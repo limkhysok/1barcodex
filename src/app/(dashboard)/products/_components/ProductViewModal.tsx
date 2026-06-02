@@ -13,9 +13,9 @@ interface ProductViewModalProps {
 
 function Row({ label, value }: Readonly<{ label: string; value: React.ReactNode }>) {
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-slate-500 last:border-0">
-      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 w-28 shrink-0 pt-0.5">{label}</span>
-      <span className="text-[12px] font-semibold text-gray-800 break-all">{value}</span>
+    <div className="flex items-start gap-3 py-2.5 border-b border-gray-100 last:border-0">
+      <span className="text-[13px] font-medium text-gray-600 w-28 shrink-0">{label}</span>
+      <span className="text-[13px] font-medium text-gray-800 break-all">{value}</span>
     </div>
   );
 }
@@ -27,8 +27,7 @@ export function ProductViewModal({ product, onClose }: Readonly<ProductViewModal
   const resolvedPicture = rawPicture?.startsWith("http") ? rawPicture : `${BASE_URL}${rawPicture}`;
   const imageUrl = rawPicture ? resolvedPicture : null;
 
-  const createdAt = new Date(product.created_at).toLocaleString();
-  const updatedAt = new Date(product.updated_at).toLocaleString();
+  const createdAt = new Date(product.created_at).toLocaleDateString("en-GB");
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
@@ -37,53 +36,66 @@ export function ProductViewModal({ product, onClose }: Readonly<ProductViewModal
         onClick={onClose}
         aria-label="Close modal"
       />
-      <div className="relative bg-white rounded-none shadow-xl w-full sm:max-w-md overflow-hidden">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-500">
-          <p className="text-[9px] font-black uppercase tracking-widest text-orange-500">Product</p>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
+              <Package size={17} strokeWidth={1.8} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-[15px] font-bold text-gray-900">{product.product_name}</h2>
+              <p className="text-[13px] text-gray-400">#{product.id}</p>
+            </div>
+          </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-all cursor-pointer"
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all shrink-0 active:scale-95 cursor-pointer"
           >
-            <X size={16} />
+            <X size={16} strokeWidth={2.5} />
           </button>
         </div>
 
-        {/* Image */}
-        <div className="px-5 pt-4">
-          {imageUrl ? (
-            <div className="w-full h-40 rounded-sm overflow-hidden bg-gray-50 border border-slate-500 relative">
-              <Image src={imageUrl} alt={product.product_name} fill className="object-contain" unoptimized />
-            </div>
-          ) : (
-            <div className="w-full h-40 rounded-sm bg-gray-50 border border-slate-500 flex flex-col items-center justify-center gap-2">
-              <div className="w-10 h-10 rounded-sm bg-gray-200 flex items-center justify-center">
-                <Package size={18} className="text-gray-400" />
-              </div>
-              <span className="text-[9px] font-black uppercase tracking-widest text-gray-300">No Image</span>
-            </div>
-          )}
-        </div>
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
 
-        {/* Details */}
-        <div className="px-5 py-4">
-          <Row label="ID" value={`#${product.id}`} />
-          <Row label="Product Name" value={product.product_name} />
-          <Row label="Barcode" value={product.barcode} />
-          <Row label="Category" value={product.category} />
-          <Row label="Supplier" value={product.supplier} />
-          <Row label="Cost / Unit" value={`$${Number(product.cost_per_unit).toFixed(2)}`} />
-          <Row label="Reorder Level" value={product.reorder_level} />
-          <Row label="Created" value={createdAt} />
-          <Row label="Updated" value={updatedAt} />
+            {/* Image — full width on mobile, left panel on sm+ */}
+            <div className="sm:row-span-2 sm:border-r border-gray-100">
+              {imageUrl ? (
+                <div className="relative w-full h-48 sm:h-full sm:min-h-52 bg-gray-50">
+                  <Image src={imageUrl} alt={product.product_name} fill className="object-contain" unoptimized />
+                </div>
+              ) : (
+                <div className="w-full h-48 sm:h-full sm:min-h-52 bg-gray-50 flex flex-col items-center justify-center gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center">
+                    <Package size={20} className="text-gray-400" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[13px] text-gray-300">No Image</span>
+                </div>
+              )}
+            </div>
+
+            {/* Details */}
+            <div className="px-5 py-3">
+              <span className="inline-flex text-[13px] font-semibold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100 mb-3">
+                {product.category}
+              </span>
+              <Row label="Barcode" value={<span className="text-[13px] font-sm ">{product.barcode}</span>} />
+              <Row label="Supplier" value={product.supplier} />
+              <Row label="Cost / Unit" value={`$${Number(product.cost_per_unit).toFixed(2)}`} />
+              <Row label="Reorder Level" value={product.reorder_level} />
+              <Row label="Created" value={createdAt} />
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-black px-5 py-3 bg-gray-50/50 flex justify-end">
+        <div className="border-t border-gray-100 px-5 py-3 bg-white shrink-0 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-1.5 rounded-sm text-[11px] font-black tracking-widest uppercase text-gray-500 bg-white border border-slate-500 hover:bg-gray-50 active:scale-[0.98] transition cursor-pointer"
+            className="px-5 py-2 rounded-xl text-[13px] font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 active:scale-[0.97] transition cursor-pointer"
           >
             Close
           </button>

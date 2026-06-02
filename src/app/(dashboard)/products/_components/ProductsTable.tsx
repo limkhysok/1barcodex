@@ -234,7 +234,7 @@ export function ProductsTable({
                 <div className="flex items-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => onView(p)}
-                    className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-all cursor-pointer"
+                    className="p-1.5 text-slate-800 hover:text-blue-500 hover:bg-blue-50 rounded transition-all cursor-pointer"
                     title="View Product"
                   >
                     <Eye size={16} strokeWidth={2.5} />
@@ -242,7 +242,7 @@ export function ProductsTable({
                   {canEdit && (
                     <button
                       onClick={() => onEdit(p)}
-                      className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded transition-all cursor-pointer"
+                      className="p-1.5 text-slate-800 hover:text-orange-500 hover:bg-orange-50 rounded transition-all cursor-pointer"
                       title="Edit Product"
                     >
                       <Edit2 size={16} strokeWidth={2.5} />
@@ -251,7 +251,7 @@ export function ProductsTable({
                   {canDelete && (
                     <button
                       onClick={() => onDelete(p)}
-                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all cursor-pointer"
+                      className="p-1.5 text-slate-800 hover:text-red-500 hover:bg-red-50 rounded transition-all cursor-pointer"
                       title="Delete Product"
                     >
                       <Trash2 size={16} strokeWidth={2.5} />
