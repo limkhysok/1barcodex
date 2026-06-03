@@ -7,8 +7,7 @@ import { getStaffUsers, createStaffUser, updateStaffUser, deleteStaffUser } from
 import { toast } from "sonner";
 import {
   Users,
-  Mail,
-  User as UserIcon,
+  User as
   Search,
   ArrowUp,
   ArrowDown,
@@ -52,8 +51,8 @@ const Header = ({
   return (
     <th
       onClick={() => isSortable && field && handleSort(field)}
-      className={`px-5 py-4 text-left text-[9px] font-black tracking-widest uppercase transition-all duration-200 select-none ${isSortable ? "cursor-pointer hover:bg-slate-100/50" : ""
-        } ${isActive ? "text-orange-600 bg-orange-50/30" : "text-slate-400"} ${className || ""}`}
+      className={`px-4 py-2 text-left text-sm font-medium transition-all duration-200 select-none ${isSortable ? "cursor-pointer hover:bg-slate-100/50" : ""
+        } ${isActive ? "text-orange-600 bg-orange-50/30" : "text-gray-800"} ${className || ""}`}
     >
       <div className={`flex items-center ${className?.includes('center') ? 'justify-center' : ''} ${className?.includes('right') ? 'justify-end' : ''}`}>
         {label}
@@ -62,6 +61,12 @@ const Header = ({
     </th>
   );
 };
+
+function RoleBadge({ user }: Readonly<{ user: User }>) {
+  if (user.is_superuser) return <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100">Superadmin</span>;
+  if (user.is_boss)      return <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-100">Boss</span>;
+  return                        <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-200">Staff</span>;
+}
 
 export default function StaffClient() {
   const { role, isLoading: authLoading } = useAuth();
@@ -84,7 +89,6 @@ export default function StaffClient() {
   const [formData, setFormData] = useState({
     username: "",
     name: "",
-    email: "",
     password: "",
     is_boss: false,
     is_staff: true,
@@ -117,7 +121,6 @@ export default function StaffClient() {
     setFormData({
       username: "",
       name: "",
-      email: "",
       password: "",
       is_boss: false,
       is_staff: true,
@@ -131,8 +134,7 @@ export default function StaffClient() {
     setFormData({
       username: user.username,
       name: user.name,
-      email: user.email,
-      password: "", // Keep password empty on edit unless user wants to change it
+      password: "",
       is_boss: false,
       is_staff: true,
     });
@@ -215,7 +217,7 @@ export default function StaffClient() {
     else setOrdering(field);
   };
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="w-7 h-7 rounded-full border-2 border-t-transparent animate-spin"
@@ -254,15 +256,20 @@ export default function StaffClient() {
 
       {/* ── MOBILE search row ── */}
       <div className="sm:hidden">
-        <div className="relative group">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+        <div className="flex items-center gap-2 bg-slate-50 border border-gray-400 rounded-lg px-2.5 h-8 focus-within:border-orange-200 focus-within:bg-white transition-all overflow-hidden">
+          <Search size={13} className="text-gray-700 shrink-0" strokeWidth={3} />
           <input
             type="text"
             placeholder="Search staff..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white border border-slate-200 pl-9 pr-4 py-2 text-sm placeholder:text-slate-300 focus:outline-none focus:border-orange-500 transition-all rounded-md"
+            className="bg-transparent border-none outline-none text-[13px] text-slate-900 placeholder:text-gray-500 w-full font-regular"
           />
+          {search && (
+            <button onClick={() => setSearch("")} className="text-gray-300 hover:text-slate-900 cursor-pointer shrink-0">
+              <CloseIcon size={13} strokeWidth={2} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -273,15 +280,20 @@ export default function StaffClient() {
           <p className="text-sm text-slate-600">View and manage authorized staff members.</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative group w-52">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+          <div className="flex items-center gap-2 bg-slate-50 border border-gray-400 rounded-lg px-2.5 h-8 w-52 focus-within:border-orange-200 focus-within:bg-white transition-all overflow-hidden">
+            <Search size={13} className="text-gray-700 shrink-0" strokeWidth={3} />
             <input
               type="text"
               placeholder="Search staff..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-slate-200 pl-9 pr-4 py-1.5 text-sm placeholder:text-slate-300 focus:outline-none focus:border-orange-500 transition-all rounded-md"
+              className="bg-transparent border-none outline-none text-[13px] text-slate-900 placeholder:text-gray-500 w-full font-regular"
             />
+            {search && (
+              <button onClick={() => setSearch("")} className="text-gray-300 hover:text-slate-900 cursor-pointer shrink-0">
+                <CloseIcon size={13} strokeWidth={2} />
+              </button>
+            )}
           </div>
           <button
             onClick={openCreateModal}
@@ -301,15 +313,20 @@ export default function StaffClient() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="relative group w-64">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+          <div className="flex items-center gap-2 bg-slate-50 border border-gray-400 rounded-lg px-2.5 h-8 w-64 focus-within:border-orange-200 focus-within:bg-white transition-all overflow-hidden">
+            <Search size={13} className="text-gray-700 shrink-0" strokeWidth={3} />
             <input
               type="text"
               placeholder="Search staff..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-slate-200 pl-9 pr-4 py-1.5 text-sm placeholder:text-slate-300 focus:outline-none focus:border-orange-500 transition-all rounded-md"
+              className="bg-transparent border-none outline-none text-[13px] text-slate-900 placeholder:text-gray-500 w-full font-regular"
             />
+            {search && (
+              <button onClick={() => setSearch("")} className="text-gray-300 hover:text-slate-900 cursor-pointer shrink-0">
+                <CloseIcon size={13} strokeWidth={2} />
+              </button>
+            )}
           </div>
           <button
             onClick={openCreateModal}
@@ -320,8 +337,13 @@ export default function StaffClient() {
         </div>
       </div>
 
+      {/* Loading progress bar */}
+      <div className={`h-0.5 w-full overflow-hidden rounded-full transition-opacity duration-300 ${loading ? "opacity-100" : "opacity-0"}`}>
+        <div className="h-full bg-orange-500 animate-pulse w-full" />
+      </div>
+
       {/* Table Section */}
-      <div className="overflow-hidden bg-white border border-slate-500 rounded-sm">
+      <div className="overflow-hidden bg-white border border-slate-500 rounded-lg">
         {error && (
           <div className="flex items-center justify-center py-20 px-4">
             <p className="max-w-md text-center py-4 text-[10px] font-black text-red-500 bg-red-50/50 rounded-sm border border-red-100 uppercase tracking-[0.2em] leading-loose">
@@ -340,47 +362,36 @@ export default function StaffClient() {
         {!error && displayed.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50/50 border-b border-slate-500">
+              <thead className="bg-slate-50/50 border-b border-gray-600">
                 <tr>
-                  <Header label="#" field="id" ordering={ordering} handleSort={handleSort} className="pl-6 w-16" />
-                  <Header label="Name" field="name" ordering={ordering} handleSort={handleSort} />
+                  <Header label="No" field="id" ordering={ordering} handleSort={handleSort} className="pl-6 w-16" />
+                  <Header label="Full Name" field="name" ordering={ordering} handleSort={handleSort} />
                   <Header label="Username" field="username" ordering={ordering} handleSort={handleSort} />
-                  <Header label="Email" field="email" ordering={ordering} handleSort={handleSort} />
-                  <Header label="Status" ordering={ordering} handleSort={handleSort} className="w-24 text-center" />
+                  <Header label="Role" ordering={ordering} handleSort={handleSort} className="w-32" />
                   <Header label="Actions" ordering={ordering} handleSort={handleSort} className="w-32 pr-6 text-right" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-400 bg-white">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {displayed.map((u) => (
                   <tr key={u.id} className="group hover:bg-orange-50/60 transition-colors">
-                    <td className="pl-6 px-5 py-4">
-                      <span className="text-[11px] font-black text-slate-500 tabular-nums group-hover:text-orange-600 transition-colors">#{u.id}</span>
+                    <td className="pl-6 px-4 py-2">
+                      <span className="text-[11px] font-black text-slate-500 tabular-nums group-hover:text-orange-600 transition-colors">{u.id}</span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-2">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors">
-                          <UserIcon size={14} />
-                        </div>
+                        
                         <span className="text-[13px] font-black text-slate-900 uppercase tracking-tight group-hover:text-orange-600 transition-colors">
                           {u.name}
                         </span>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
-                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{u.username}</span>
+                    <td className="px-4 py-2">
+                      <span className="text-[13px] font-medium text-slate-900">{u.username}</span>
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 text-slate-400 group-hover:text-slate-600 transition-colors">
-                        <Mail size={12} />
-                        <span className="text-[11px] font-bold lowercase tracking-tight">{u.email}</span>
-                      </div>
+                    <td className="px-4 py-2">
+                      <RoleBadge user={u} />
                     </td>
-                    <td className="px-5 py-4 text-center">
-                      <span className="inline-flex items-center gap-1.5 text-[8px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100">
-                        <span className="w-1 h-1 rounded-full bg-green-500" /> ACTIVE
-                      </span>
-                    </td>
-                    <td className="pr-6 px-5 py-4 text-right">
+                    <td className="pr-6 px-4 py-2 text-right">
                       {u.is_superuser ? (
                         <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest italic pr-2">System Admin</span>
                       ) : (
@@ -421,106 +432,118 @@ export default function StaffClient() {
       </div>
       {/* Staff Management Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white border border-slate-500 shadow-2xl rounded-sm overflow-hidden animate-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="px-6 py-4 bg-slate-50 border-b border-slate-500 flex items-center justify-between">
-              <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-950 flex items-center gap-2">
-                {modalMode === "create" ? <Plus size={16} strokeWidth={3} className="text-orange-500" /> : <Edit2 size={16} strokeWidth={3} className="text-orange-500" />}
-                {modalMode === "create" ? "Add New Staff Member" : "Edit Staff Member"}
-              </h3>
-              <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-950 transition-colors">
-                <CloseIcon size={18} />
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
+          <button className="absolute inset-0 bg-black/20 backdrop-blur-sm cursor-default" onClick={() => setModalOpen(false)} aria-label="Close modal" />
+          <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-400 shrink-0 bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
+                  {modalMode === "create"
+                    ? <Plus size={18} strokeWidth={2.5} className="text-white" />
+                    : <Edit2 size={16} strokeWidth={2.5} className="text-white" />}
+                </div>
+                <div>
+                  <h2 className="text-[15px] font-bold text-gray-900">
+                    {modalMode === "create" ? "New Staff Member" : "Edit Staff Member"}
+                  </h2>
+                  <p className="text-[13px] text-gray-400">
+                    {modalMode === "create" ? "Fill in the details below" : "Update staff details below"}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all shrink-0 active:scale-95"
+              >
+                <CloseIcon size={16} strokeWidth={2.5} />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="space-y-4">
-                {/* Username & Name */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label htmlFor="staff-username" className="text-[9px] font-black uppercase tracking-widest text-slate-400">Username</label>
-                    <input
-                      id="staff-username"
-                      required
-                      type="text"
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      className="w-full bg-white border border-slate-300 px-3 py-2 text-[11px] font-bold tracking-tight focus:border-orange-500 focus:outline-none transition-all rounded-sm"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label htmlFor="staff-name" className="text-[9px] font-black uppercase tracking-widest text-slate-400">Full Name</label>
-                    <input
-                      id="staff-name"
-                      required
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-white border border-slate-300 px-3 py-2 text-[11px] font-bold tracking-tight focus:border-orange-500 focus:outline-none transition-all rounded-sm"
-                    />
-                  </div>
-                </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/40 min-h-0 pb-8">
 
-                {/* Email */}
-                <div className="space-y-1">
-                  <label htmlFor="staff-email" className="text-[9px] font-black uppercase tracking-widest text-slate-400">Email Address</label>
+              {/* Username & Full Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="staff-username" className="text-[13px] font-medium text-gray-800">Username</label>
+                    <span className="text-[13px] font-medium px-2 py-0.5 rounded-full text-orange-500 bg-orange-50">Required</span>
+                  </div>
                   <input
-                    id="staff-email"
+                    id="staff-username"
                     required
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-white border border-slate-300 px-3 py-2 text-[11px] font-bold lowercase tracking-tight focus:border-orange-500 focus:outline-none transition-all rounded-sm"
+                    type="text"
+                    placeholder="e.g. john_doe"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-600 text-[13px] text-gray-800 placeholder:text-gray-400 outline-none focus:ring-1 focus:border-orange-400 focus:bg-white transition"
                   />
                 </div>
-
-                {/* Password */}
-                <div className="space-y-1">
-                  <label htmlFor="staff-password" className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                    {modalMode === "create" ? "Initial Password" : "Change Password (optional)"}
-                  </label>
-                  <div className="relative group/pass">
-                    <input
-                      id="staff-password"
-                      required={modalMode === "create"}
-                      type={showPassword ? "text" : "password"}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder={modalMode === "edit" ? "LEAVE BLANK TO KEEP CURRENT" : ""}
-                      className="w-full bg-white border border-slate-300 pl-3 pr-10 py-2 text-[11px] font-bold tracking-tight focus:border-orange-500 focus:outline-none transition-all rounded-sm placeholder:text-[8px] placeholder:text-slate-300"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-500 transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="staff-name" className="text-[13px] font-medium text-gray-800">Full Name</label>
+                    <span className="text-[13px] font-medium px-2 py-0.5 rounded-full text-orange-500 bg-orange-50">Required</span>
                   </div>
+                  <input
+                    id="staff-name"
+                    required
+                    type="text"
+                    placeholder="e.g. John Doe"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-600 text-[13px] text-gray-800 placeholder:text-gray-400 outline-none focus:ring-1 focus:border-orange-400 focus:bg-white transition"
+                  />
                 </div>
-
               </div>
 
-              {/* Modal Footer */}
-              <div className="pt-4 flex items-center gap-3">
+              {/* Password */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="staff-password" className="text-[13px] font-medium text-gray-800">Password</label>
+                  <span className={`text-[13px] font-medium px-2 py-0.5 rounded-full ${modalMode === "edit" ? "text-gray-300 bg-gray-50" : "text-orange-500 bg-orange-50"}`}>
+                    {modalMode === "edit" ? "Optional" : "Required"}
+                  </span>
+                </div>
+                <div className="relative">
+                  <input
+                    id="staff-password"
+                    required={modalMode === "create"}
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder={modalMode === "edit" ? "Leave blank to keep current" : "Enter password"}
+                    className="w-full px-3 py-2 pr-10 rounded-lg border border-gray-600 text-[13px] text-gray-800 placeholder:text-gray-400 outline-none focus:ring-1 focus:border-orange-400 focus:bg-white transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 border border-slate-300 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-950 hover:border-slate-500 transition-all rounded-sm"
+                  className="flex-1 py-2 rounded-xl text-[13px] font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 active:scale-[0.97] transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 px-4 py-2.5 bg-orange-500 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-orange-600 transition-all rounded-sm shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-2 rounded-xl text-[13px] font-medium text-white bg-orange-500 hover:bg-orange-600 active:scale-[0.97] transition disabled:opacity-60 flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 size={12} className="animate-spin" />
-                      Processing...
+                      <Loader2 size={13} className="animate-spin" />
+                      Processing…
                     </>
                   ) : (
                     submitText

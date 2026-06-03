@@ -351,7 +351,7 @@
                 type="button"
                 onClick={() => fetchStats(range, customStart || undefined, customEnd || undefined)}
                 disabled={loading}
-                className="group flex items-center gap-2 px-4 h-8 text-[10px] font-black uppercase tracking-widest border border-gray-600 rounded-md text-slate-400 hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
+                className="group flex items-center gap-2 px-4 h-8 text-[13px] font-regular  border border-slate-900 rounded-md text-slate-900 hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
               >
                 <RefreshCw
                   size={12}

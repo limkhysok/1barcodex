@@ -821,6 +821,33 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
         inventory: item.inventory,
         quantity: Math.abs(item.quantity),
       })));
+      // Seed extraRecords so Product/Barcode columns resolve even when these
+      // inventory IDs aren't in the current paginated inventory prop.
+      setExtraRecords(
+        editTarget.items.map((item) => ({
+          id: item.inventory,
+          product: 0,
+          product_details: {
+            id: 0,
+            barcode: item.barcode,
+            product_name: item.product_name,
+            category: "",
+            supplier: "",
+            cost_per_unit: item.cost_per_unit,
+            reorder_level: 0,
+            product_picture: null,
+          },
+          site: "",
+          location: "",
+          product_description: "",
+          quantity_on_hand: 0,
+          stock_value: "0",
+          reorder_status: "No" as const,
+          order_date: "",
+          created_at: "",
+          updated_at: "",
+        }))
+      );
     } else {
       setEditTxType("Receive");
       setEditItems([emptyItem()]);
