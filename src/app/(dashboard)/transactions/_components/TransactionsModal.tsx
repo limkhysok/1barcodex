@@ -130,8 +130,8 @@ function useCameraScanner(readerId: string, onScan: (decodedText: string) => Pro
 
 function Row({ label, value }: Readonly<{ label: string; value: React.ReactNode }>) {
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-gray-100 last:border-0">
-      <span className="text-[13px] font-medium text-gray-400 w-24 shrink-0">{label}</span>
+    <div className="flex items-start gap-3 py-2.5 border-b border-gray-600 last:border-0">
+      <span className="text-[13px] font-medium text-gray-800 w-24 shrink-0">{label}</span>
       <span className="text-[13px] font-medium text-gray-800 break-all">{value}</span>
     </div>
   );
@@ -148,14 +148,13 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
 
   const totalQuantity = viewTarget.items.reduce((sum, i) => sum + Math.abs(i.quantity), 0);
   const isReceive = viewTarget.transaction_type === "Receive";
-
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
       <button className="absolute inset-0 bg-black/20 backdrop-blur-sm cursor-default" onClick={onClose} aria-label="Close modal" />
       <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">
+        <div className="flex items-center justify-between px-5 py-4 shrink-0 bg-white">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
               <ArrowRightLeft size={17} strokeWidth={1.8} className="text-white" />
@@ -175,10 +174,10 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 mx-5 border border-gray-700 rounded-lg ">
 
             {/* Hero panel — full width on mobile, left column on sm+ */}
-            <div className={`sm:row-span-2 sm:border-r border-gray-100 ${isReceive ? "bg-green-50" : "bg-red-50"}`}>
+            <div className={`sm:row-span-2 sm:border-r border-l-0 border-gray-700 rounded-lg ${isReceive ? "bg-green-50" : "bg-red-50"}`}>
               <div className="w-full h-40 sm:h-full sm:min-h-52 flex flex-col items-center justify-center gap-3">
                 <span className={`text-5xl font-bold tabular-nums leading-none ${isReceive ? "text-green-600" : "text-red-500"}`}>
                   {isReceive ? "+" : "-"}{totalQuantity}
@@ -193,33 +192,37 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
 
             {/* Meta details */}
             <div className="px-5 py-3">
-              <Row label="By" value={viewTarget.performed_by_username} />
               <Row label="Date" value={<span suppressHydrationWarning>{formatDateTime(viewTarget.transaction_date).split(" ")[0]}</span>} />
               <Row label="Items" value={`${viewTarget.items.length} ${viewTarget.items.length === 1 ? "item" : "items"}`} />
-              <Row label="Total Qty" value={totalQuantity} />
+              <Row label="By" value={viewTarget.performed_by_username} />
+
+
             </div>
           </div>
 
           {/* Items table */} 
-          <div className="px-5 pb-5 pt-2">
-            <p className="text-[13px] font-medium text-gray-400 mb-3">Item Registry</p>
-            <div className="border border-gray-100 rounded-xl overflow-hidden">
-              <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100">
-                <span className="flex-1 text-[12px] font-medium text-gray-500">Product</span>
-                <span className="w-28 shrink-0 text-[12px] font-medium text-gray-500">Barcode</span>
-                <span className="w-14 shrink-0 text-[12px] font-medium text-gray-500 text-right">Qty</span>
+          <div className="px-5 pb-5 pt-5">
+            <div className="border border-gray-600 rounded-lg overflow-hidden">
+              <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-500">
+                <span className="text-sm font-medium text-gray-700 w-28 shrink-0">No</span>
+                <span className="flex-1 text-sm font-medium text-gray-700">Product</span>
+                <span className="w-28 shrink-0 text-sm font-medium text-gray-700">Barcode</span>
+                <span className="w-14 shrink-0 text-sm font-medium text-gray-700 text-right">Quantity</span>
               </div>
-              <div className="divide-y divide-gray-50">
-                {viewTarget.items.map((item) => {
+              <div className="divide-y divide-gray-600">
+                {viewTarget.items.map((item, idx) => {
                   return (
                     <div key={item.id} className="flex items-center gap-4 px-4 py-2.5 hover:bg-gray-50/60 transition-colors">
+                      <div className="w-28 shrink-0">
+                        <span className="text-[13px] font-medium text-gray-800 tabular-nums">{String(idx + 1).padStart(2, "0")}</span>
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-medium text-gray-900 truncate">{item.product_name}</p>
                       </div>
                       <div className="w-28 shrink-0 min-w-0">
-                        <span className="text-[12px] font-mono text-gray-400 truncate block">{item.barcode || "—"}</span>
+                        <span className="text-[13px] font-mono text-gray-900 truncate block">{item.barcode || "—"}</span>
                       </div>
-                      <div className="w-14 shrink-0 text-right">
+                      <div className="w-14 shrink-0 text-center">
                         <span className="text-[13px] font-bold text-gray-900 tabular-nums">{Math.abs(item.quantity)}</span>
                       </div>
                     </div>

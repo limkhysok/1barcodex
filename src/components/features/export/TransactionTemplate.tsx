@@ -2,7 +2,7 @@ import React from "react";
 
 const NAVY = "#1c3456";
 const BORDER_COLOR = "#000000";
-const OUTER_BORDER = `2px solid ${NAVY}`;
+const OUTER_BORDER = `0px solid ${NAVY}`;
 
 export const ROWS_PER_PAGE = 25;
 
@@ -19,14 +19,21 @@ const CELL_HEADER: React.CSSProperties = {
   backgroundColor: "#ffffff",
   color: "#000000",
   textAlign: "center",
-  fontWeight: "bold",
+  fontWeight: "normal",
+  fontSize: "14px",
   verticalAlign: "middle",
+  padding: "0px 5px 10px 5px",
+  
 };
 
 const CELL_BODY: React.CSSProperties = {
   ...CELL_BASE,
   backgroundColor: "#ffffff",
+  color: "#000000",
   verticalAlign: "middle",
+  textAlign: "center",
+  fontSize: "13px",
+  padding: "0px 5px 10px 5px",
 };
 
 const CELL_BODY_ALT: React.CSSProperties = {
@@ -41,8 +48,10 @@ const CELL_SUMMARY: React.CSSProperties = {
   ...CELL_BASE,
   backgroundColor: "#ffffff",
   verticalAlign: "middle",
-  borderTopColor: NAVY,
-  borderTopWidth: "2px",
+  borderTopColor: "#000000",
+  borderTopWidth: "0px",
+  fontSize: "14px",
+  padding: "0px 5px 10px 5px",
 };
 
 const TITLE: Record<"Sale" | "Receive", string> = {
@@ -53,10 +62,10 @@ const TITLE: Record<"Sale" | "Receive", string> = {
 const TableHead = () => (
   <thead>
     <tr>
-      <th style={{ ...CELL_HEADER, width: "35px" }}>ល.រ</th>
-      <th style={{ ...CELL_HEADER, width: "22%" }}>លេខកូដ</th>
+      <th style={{ ...CELL_HEADER, width: "33px", }}>ល.រ</th>
       <th style={{ ...CELL_HEADER }}>បរិយាយមុខទំនិញ</th>
-      <th style={{ ...CELL_HEADER, width: "12%" }}>ឯកតា</th>
+      <th style={{ ...CELL_HEADER, width: "22%" }}>លេខកូដ</th>
+      <th style={{ ...CELL_HEADER, width: "14%" }}>ឯកតា</th>
       <th style={{ ...CELL_HEADER, width: "12%" }}>បរិមាណ</th>
       <th style={{ ...CELL_HEADER, width: "15%" }}>ផ្សេងៗ</th>
     </tr>
@@ -106,7 +115,7 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
             style={{
               width: "794px",
               minHeight: "1123px",
-              padding: "70px 60px 50px",
+              padding: "50px 60px 50px",
               backgroundColor: "#ffffff",
               color: "#000000",
               fontFamily: "var(--font-kantumruy, 'KantumruyPro', sans-serif)",
@@ -121,7 +130,7 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
                 <h1 style={{ fontSize: "22px", fontWeight: "bold", margin: "0 0 6px 0", color: "#000000" }}>
                   {title}
                 </h1>
-                <p style={{ fontSize: "13px", margin: 0, color: "#444" }}>{displayDate}</p>
+                <p style={{ fontSize: "15px", margin: 0, color: "#0d0d0d", fontWeight: "normal" }}>{displayDate}</p>
               </div>
             )}
 
@@ -132,7 +141,7 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
                 marginBottom: "10px",
                 fontSize: "10px",
                 color: "#888",
-                borderBottom: `1px solid ${BORDER_COLOR}`,
+                borderBottom: `0px solid ${BORDER_COLOR}`,
                 paddingBottom: "6px",
               }}>
                 (បន្ត) ទំព័រទី {pageIndex + 1}/{chunks.length}
@@ -155,8 +164,8 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
                   return (
                     <tr key={`${startIndex + idx}-${item.barcode}`}>
                       <td style={isAlt ? CELL_CENTER_ALT : CELL_CENTER}>{startIndex + idx + 1}</td>
-                      <td style={{ ...(isAlt ? CELL_BODY_ALT : CELL_BODY), paddingLeft: "8px" }}>{item.barcode}</td>
                       <td style={{ ...(isAlt ? CELL_BODY_ALT : CELL_BODY), paddingLeft: "8px" }}>{item.product_name}</td>
+                      <td style={{ ...(isAlt ? CELL_BODY_ALT : CELL_BODY), paddingLeft: "8px" }}>{item.barcode}</td>
                       <td style={isAlt ? CELL_CENTER_ALT : CELL_CENTER}>{item.unit ?? "Pcs"}</td>
                       <td style={isAlt ? CELL_CENTER_ALT : CELL_CENTER}>{Math.abs(item.quantity)}</td>
                       <td style={isAlt ? CELL_BODY_ALT : CELL_BODY}></td>
@@ -180,10 +189,10 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
                 {isLast && (
                   <tr>
                     <td style={CELL_SUMMARY}></td>
-                    <td style={{ ...CELL_SUMMARY, textAlign: "right", fontWeight: "bold", paddingRight: "8px" }}>មុខទំនិញសរុប</td>
-                    <td style={{ ...CELL_SUMMARY, textAlign: "center", fontWeight: "bold" }}>{items.length}</td>
-                    <td style={{ ...CELL_SUMMARY, textAlign: "right", fontWeight: "bold", paddingRight: "8px" }}>បរិមាណសរុប</td>
-                    <td style={{ ...CELL_SUMMARY, textAlign: "center", fontWeight: "bold" }}>{items.reduce((sum, i) => sum + Math.abs(i.quantity), 0)}</td>
+                    <td style={{ ...CELL_SUMMARY, textAlign: "right", fontWeight: "semibold", paddingRight: "8px" }}>មុខទំនិញសរុប</td>
+                    <td style={{ ...CELL_SUMMARY, textAlign: "center", fontWeight: "semibold" }}>{items.length}</td>
+                    <td style={{ ...CELL_SUMMARY, textAlign: "right", fontWeight: "semibold", paddingRight: "8px" }}>បរិមាណសរុប</td>
+                    <td style={{ ...CELL_SUMMARY, textAlign: "center", fontWeight: "semibold" }}>{items.reduce((sum, i) => sum + Math.abs(i.quantity), 0)}</td>
                     <td style={CELL_SUMMARY}></td>
                   </tr>
                 )}
@@ -195,18 +204,13 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
               <div style={{ display: "flex", justifyContent: "space-evenly", marginTop: "56px", padding: "0 20px" }}>
                 {(["ផ្នែកជាង", "ប្រធានឃ្លាំង"] as const).map((label) => (
                   <div key={label} style={{ textAlign: "center", width: "130px" }}>
-                    <p style={{ fontSize: "13px", fontWeight: "bold", margin: "0 0 55px 0", color: NAVY }}>{label}</p>
-                    <div style={{ borderBottom: `2px solid ${NAVY}`, width: "100%" }} />
-                    <p style={{ fontSize: "11px", color: "#888", marginTop: "5px" }}>ហត្ថលេខា</p>
+                    <p style={{ fontSize: "14px", fontWeight: "normal", margin: "0 0 55px 0", color: "#000000" }}>{label}</p>
+                    <div style={{ borderBottom: `1px solid #000000`, width: "100%" }} />
+                    <p style={{ fontSize: "14px", color: "#000000", marginTop: "7px" }}>ហត្ថលេខា</p>
                   </div>
                 ))}
               </div>
             )}
-
-            {/* Page number — all pages */}
-            <div style={{ marginTop: "auto", paddingTop: "16px", textAlign: "right", fontSize: "10px", color: "#999" }}>
-              ទំព័រ {pageIndex + 1}/{chunks.length}
-            </div>
           </div>
         );
       })}
