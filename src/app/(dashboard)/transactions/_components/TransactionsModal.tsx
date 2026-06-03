@@ -25,7 +25,16 @@ const TYPE_CONFIG: Record<string, { label: string; bg: string; text: string; dot
 
 type ItemDraft = { id: string; inventory: number; quantity: number };
 
-const emptyItem = (): ItemDraft => ({ id: crypto.randomUUID(), inventory: 0, quantity: 1 });
+function generateId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
+    (+c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))).toString(16)
+  );
+}
+
+const emptyItem = (): ItemDraft => ({ id: generateId(), inventory: 0, quantity: 1 });
 import InventoryPicker from "./InventoryPicker";
 import { scanBarcode } from "@/src/services/inventory.service";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
@@ -369,7 +378,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
           );
         }
 
-        return [...currentItems, { id: crypto.randomUUID(), inventory: invId, quantity: 1 }];
+        return [...currentItems, { id: generateId(), inventory: invId, quantity: 1 }];
       });
 
       if (alreadyExists) {
@@ -782,7 +791,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
           );
         }
 
-        return [...currentItems, { id: crypto.randomUUID(), inventory: invId, quantity: 1 }];
+        return [...currentItems, { id: generateId(), inventory: invId, quantity: 1 }];
       });
 
       if (alreadyExists) {
