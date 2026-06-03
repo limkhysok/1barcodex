@@ -56,7 +56,6 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
 
   const [typeFilter, setTypeFilter] = useState<TxTypeFilter>("");
   const [dateFilter, setDateFilter] = useState<string>("");
-  const [sortBy, setSortBy] = useState<string>("-transaction_date");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -110,7 +109,7 @@ const [pdfPanelOpen, setPdfPanelOpen] = useState(false);
     setError("");
     const txPromise = getTransactions({
       type: typeFilter || undefined,
-      ordering: sortBy || "-transaction_date",
+      ordering: "-transaction_date",
       date_filter: dateFilter || undefined,
       page: nextPage,
     });
@@ -124,7 +123,7 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
       })
       .catch(() => setError("Failed to load data."))
       .finally(() => { setLoading(false); setLoadingMore(false); });
-  }, [typeFilter, sortBy, dateFilter]);
+  }, [typeFilter, dateFilter]);
 
   useEffect(() => {
     fetchAll(1, false);
@@ -339,8 +338,6 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
           setTypeFilter={setTypeFilter as (v: string) => void}
           dateFilter={dateFilter}
           setDateFilter={setDateFilter}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
           totalResults={displayed.length}
         />
       </div>
@@ -357,8 +354,6 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
           canEdit={canEdit}
           canDelete={canDelete}
           onActionClick={handleActionClick}
-          ordering={sortBy}
-          onSort={setSortBy}
         />
       </div>
 

@@ -233,7 +233,7 @@ export function TransactionsTable({
           <tr>
             <Header label="No" field="id" className="w-[11%]" ordering={ordering} handleSort={onSort} />
             <Header label="Products" field="items_count" className="w-[14%]" ordering={ordering} handleSort={onSort} />
-            <Header label="Total Qty" field="total_qty" className="w-[12%]" ordering={ordering} handleSort={onSort} />
+            <Header label="Total Quantity" field="total_qty" className="w-[12%]" ordering={ordering} handleSort={onSort} />
             <Header label="Type" field="transaction_type" className="w-[12%]" ordering={ordering} handleSort={onSort} />
             <Header label="Date" field="transaction_date" className="w-[19%]" ordering={ordering} handleSort={onSort} />
             <Header label="Actions" className="w-[14%]" ordering={ordering} />

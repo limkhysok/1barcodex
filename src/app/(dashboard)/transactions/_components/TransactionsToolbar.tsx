@@ -7,7 +7,6 @@ import {
   Filter,
   Activity,
   Clock,
-  ArrowUpDown,
 } from "lucide-react";
 
 interface TransactionsToolbarProps {
@@ -15,8 +14,6 @@ interface TransactionsToolbarProps {
   setTypeFilter: (v: string) => void;
   dateFilter: string;
   setDateFilter: (v: string) => void;
-  sortBy: string;
-  setSortBy: (v: string) => void;
   totalResults: number;
 }
 
@@ -103,7 +100,6 @@ function DropdownFilter({
 export function TransactionsToolbar({
   typeFilter, setTypeFilter,
   dateFilter, setDateFilter,
-  sortBy, setSortBy,
   totalResults,
 }: Readonly<TransactionsToolbarProps>) {
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -123,7 +119,6 @@ export function TransactionsToolbar({
   const clearAll = () => {
     setTypeFilter("");
     setDateFilter("");
-    setSortBy("-transaction_date");
   };
 
   const typeOptions = [
@@ -140,16 +135,7 @@ export function TransactionsToolbar({
     { key: "this_month", label: "This Month" },
   ];
 
-  const sortOptions = [
-    { key: "-transaction_date", label: "Date (Newest)" },
-    { key: "transaction_date", label: "Date (Oldest)" },
-    { key: "-items_count", label: "Items (High)" },
-    { key: "items_count", label: "Items (Low)" },
-    { key: "-total_qty", label: "Quantity (High)" },
-    { key: "total_qty", label: "Quantity (Low)" },
-  ];
-
-  let mobileFilterBtnClass = "bg-white text-gray-400 border-slate-400";
+let mobileFilterBtnClass = "bg-white text-gray-400 border-slate-400";
   if (filtersOpen) mobileFilterBtnClass = "bg-orange-500 text-white border-orange-500";
   else if (activeCount > 0) mobileFilterBtnClass = "bg-orange-50 text-orange-500 border-orange-300";
 
@@ -221,7 +207,6 @@ export function TransactionsToolbar({
       <div className="hidden lg:flex items-center gap-2">
         <DropdownFilter label="All Types" value={typeFilter} onChange={setTypeFilter} options={typeOptions} icon={Activity} />
         <DropdownFilter label="All Time" value={dateFilter} onChange={setDateFilter} options={dateOptions} icon={Clock} />
-        <DropdownFilter label="Sort" value={sortBy} onChange={setSortBy} options={sortOptions} icon={ArrowUpDown} />
         {isFiltered && (
           <button onClick={clearAll} className="flex items-center gap-2 px-3 h-8 text-sm font-normal text-gray-600 hover:text-red-500 transition-colors border border-dashed border-slate-500 rounded-sm hover:border-red-200 hover:bg-red-50 cursor-pointer">
             <X size={12} strokeWidth={3} />
