@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { Transaction, TransactionPayload } from "@/src/types/transaction.types";
 import type { InventoryRecord } from "@/src/types/inventory.types";
 import { getTransactions, createTransaction, updateTransaction, deleteTransaction, getTransactionStats, type TransactionStats } from "@/src/services/transaction.service";
@@ -57,7 +57,6 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
   const [typeFilter, setTypeFilter] = useState<TxTypeFilter>("");
   const [dateFilter, setDateFilter] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("-transaction_date");
-  const [search, setSearch] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -79,8 +78,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
   const [editSaving, setEditSaving] = useState(false);
   const [editFormError, setEditFormError] = useState("");
 
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const [pdfPanelOpen, setPdfPanelOpen] = useState(false);
+const [pdfPanelOpen, setPdfPanelOpen] = useState(false);
   const pdfAutoDate = true;
   const [pdfDate, setPdfDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [pdfType, setPdfType] = useState<"Receive" | "Sale">("Receive");
@@ -112,35 +110,37 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
     setError("");
     const txPromise = getTransactions({
       type: typeFilter || undefined,
-      ordering: "-transaction_date",
+      ordering: sortBy || "-transaction_date",
+      date_filter: dateFilter || undefined,
       page: nextPage,
     });
     const statsPromise = append ? Promise.resolve(null) : getTransactionStats();
     Promise.all([txPromise, statsPromise])
       .then(([txData, newStats]) => {
-        setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results);
+setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results);
         setHasMore(txData.next !== null);
         setPage(nextPage);
         if (newStats !== null) setStats(newStats);
       })
       .catch(() => setError("Failed to load data."))
       .finally(() => { setLoading(false); setLoadingMore(false); });
-  }, [typeFilter]);
+  }, [typeFilter, sortBy, dateFilter]);
 
   useEffect(() => {
     fetchAll(1, false);
   }, [fetchAll]);
 
-  // Infinite scroll
+  // Infinite scroll — root must be the <main> scroll container, not the window
   useEffect(() => {
     if (!hasMore) return;
+    const scrollRoot = sentinelRef.current?.closest("main") ?? null;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && hasMore && !loadingMore && !loading) {
           fetchAll(page + 1, true);
         }
       },
-      { rootMargin: "200px" }
+      { root: scrollRoot, rootMargin: "200px" }
     );
     const el = sentinelRef.current;
     if (el) observer.observe(el);
@@ -311,91 +311,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
     };
   }
 
-  const displayed = useMemo(() => {
-    let list = [...transactions];
-
-    // Search
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter((t) => {
-        const idMatch = t.id.toString().includes(q);
-        const userMatch = t.performed_by_username.toLowerCase().includes(q);
-        const itemMatch = t.items.some(i => i.product_name.toLowerCase().includes(q));
-        return idMatch || userMatch || itemMatch;
-      });
-    }
-
-    // Filter by Type
-    if (typeFilter) {
-      list = list.filter((t) => t.transaction_type === typeFilter);
-    }
-
-    // Filter by Date
-    if (dateFilter) {
-      const now = new Date();
-      if (dateFilter === "today") {
-        const todayStr = now.toISOString().slice(0, 10);
-        list = list.filter((t) => t.transaction_date.startsWith(todayStr));
-      } else if (dateFilter === "yesterday") {
-        const yest = new Date(now);
-        yest.setDate(yest.getDate() - 1);
-        const yestStr = yest.toISOString().slice(0, 10);
-        list = list.filter((t) => t.transaction_date.startsWith(yestStr));
-      } else if (dateFilter === "this_week") {
-        const limit = new Date(now);
-        limit.setDate(limit.getDate() - 7);
-        limit.setHours(0, 0, 0, 0);
-        list = list.filter((t) => new Date(t.transaction_date) >= limit);
-      } else if (dateFilter === "this_month") {
-        const limit = new Date(now);
-        limit.setMonth(limit.getMonth() - 1);
-        limit.setHours(0, 0, 0, 0);
-        list = list.filter((t) => new Date(t.transaction_date) >= limit);
-      } else if (dateFilter === "7d" || dateFilter === "30d") {
-        const days = dateFilter === "7d" ? 7 : 30;
-        const limit = new Date();
-        limit.setDate(limit.getDate() - days);
-        limit.setHours(0, 0, 0, 0);
-        list = list.filter((t) => new Date(t.transaction_date) >= limit);
-      } else {
-        list = list.filter((t) => t.transaction_date.startsWith(dateFilter));
-      }
-    }
-
-    // Sort
-    list.sort((a, b) => {
-      if (sortBy === "transaction_date") {
-        return a.transaction_date.localeCompare(b.transaction_date);
-      }
-      if (sortBy === "-transaction_date") {
-        return b.transaction_date.localeCompare(a.transaction_date);
-      }
-      if (sortBy === "id") {
-        return a.id - b.id;
-      }
-      if (sortBy === "-id") {
-        return b.id - a.id;
-      }
-      if (sortBy === "items_count") {
-        return a.items.length - b.items.length;
-      }
-      if (sortBy === "-items_count") {
-        return b.items.length - a.items.length;
-      }
-      if (sortBy === "total_qty") {
-        const qtyA = a.items.reduce((sum, i) => sum + Math.abs(i.quantity), 0);
-        const qtyB = b.items.reduce((sum, i) => sum + Math.abs(i.quantity), 0);
-        return qtyA - qtyB;
-      }
-      if (sortBy === "-total_qty") {
-        const qtyA = a.items.reduce((sum, i) => sum + Math.abs(i.quantity), 0);
-        const qtyB = b.items.reduce((sum, i) => sum + Math.abs(i.quantity), 0);
-        return qtyB - qtyA;
-      }
-      return 0;
-    });
-    return list;
-  }, [transactions, typeFilter, dateFilter, sortBy]);
+  const displayed = transactions;
 
   return (
     <div className="px-4 py-5 sm:px-5 sm:py-5 space-y-3">
@@ -417,7 +333,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
 
       <StatsOverview stats={stats} />
 
-      <div className="py-3">
+      <div className="pb-1">
         <TransactionsToolbar
           typeFilter={typeFilter}
           setTypeFilter={setTypeFilter as (v: string) => void}
@@ -425,11 +341,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
           setDateFilter={setDateFilter}
           sortBy={sortBy}
           setSortBy={setSortBy}
-          search={search}
-          setSearch={setSearch}
           totalResults={displayed.length}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
         />
       </div>
 
@@ -445,7 +357,6 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
           canEdit={canEdit}
           canDelete={canDelete}
           onActionClick={handleActionClick}
-          viewMode={viewMode}
           ordering={sortBy}
           onSort={setSortBy}
         />

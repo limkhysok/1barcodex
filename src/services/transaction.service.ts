@@ -8,6 +8,7 @@ export async function getTransactions(params?: {
   barcode?: string;
   search?: string;
   ordering?: string;
+  date_filter?: string;
   page?: number;
 }, fetcher?: <T>(path: string) => Promise<T>): Promise<PaginatedTransactions> {
   const query = new URLSearchParams();
@@ -15,6 +16,7 @@ export async function getTransactions(params?: {
   if (params?.barcode) query.set("barcode", params.barcode);
   if (params?.search) query.set("search", params.search);
   if (params?.ordering) query.set("ordering", params.ordering);
+  if (params?.date_filter) query.set("date_filter", params.date_filter);
   if (params?.page && params.page > 1) query.set("page", String(params.page));
 
   const path = `/v1/transactions/?${query.toString()}`;
