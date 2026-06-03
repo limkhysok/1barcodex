@@ -5,6 +5,6 @@ import { getDashboardStats } from "@/src/services/dashboard.service";
 import DashboardClient from "./DashboardClient";
 
 export default async function DashboardPage() {
-  const stats = await getDashboardStats(serverFetch, { range: "30_days" });
-  return <DashboardClient initialStats={stats} initialRange="30_days" />;
+  const stats = await getDashboardStats(serverFetch, { range: "7_days" });
+  return <DashboardClient initialStats={stats} initialRange="7_days" />;
 }

@@ -211,7 +211,7 @@ interface DashboardClientProps {
   initialRange?: RangeLabel;
 }
 
-export default function DashboardClient({ initialStats, initialRange = "30_days" }: Readonly<DashboardClientProps>) {
+export default function DashboardClient({ initialStats, initialRange = "7_days" }: Readonly<DashboardClientProps>) {
   const [range, setRange]             = useState<RangeLabel>(initialRange);
   const [customStart, setCustomStart] = useState(() => {
     const d = new Date();
@@ -278,7 +278,7 @@ const chartData = useMemo(() => {
           const d = new Date(ms);
           const isoKey = d.toISOString().slice(0, 10);
           groups[isoKey] = {
-            date: d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "2-digit" }),
+            date: d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" }),
             isoKey,
             receive: 0,
             sale: 0,
@@ -292,7 +292,7 @@ const chartData = useMemo(() => {
       const isoKey = dateObj.toISOString().slice(0, 10);
       if (rangeStart && isoKey < rangeStart) return;
       if (rangeEnd   && isoKey > rangeEnd)   return;
-      if (!groups[isoKey]) groups[isoKey] = { date: dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "2-digit" }), isoKey, receive: 0, sale: 0 };
+      if (!groups[isoKey]) groups[isoKey] = { date: dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" }), isoKey, receive: 0, sale: 0 };
       if (tx.transaction_type === "Receive") groups[isoKey].receive += tx.total_quantity;
       else groups[isoKey].sale += tx.total_quantity;
     });
@@ -375,100 +375,76 @@ const chartData = useMemo(() => {
 
         {/* MOBILE (< sm) */}
         <div className="sm:hidden grid grid-cols-3 gap-1.5">
-          <Link href="/products" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col">
-            <div className="bg-orange-500 flex items-center justify-center py-2.5 border-b border-orange-600">
-              <Package size={18} className="text-white" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col items-center justify-center px-1 py-2">
-              <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Products</p>
-              <p className="text-base font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-0.5">{(products?.total ?? 0).toLocaleString()}</p>
-            </div>
+          <Link href="/products" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
+            <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Product</p>
+            <p className="text-base font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-0.5">{(products?.total ?? 0).toLocaleString()}</p>
+            <Package size={18} className="text-orange-500 absolute right-2 top-2" strokeWidth={1.5} />
           </Link>
 
-          <Link href="/inventory" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col">
-            <div className={`flex items-center justify-center py-2.5 border-b ${(inventory?.needs_reorder ?? 0) > 0 ? "bg-red-500 border-red-600" : "bg-orange-500 border-orange-600"}`}>
-              <AlertCircle size={18} className="text-white" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col items-center justify-center px-1 py-2">
-              <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Low Stock</p>
-              <p className={`text-base font-medium leading-none tabular-nums tracking-tighter mt-0.5 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-slate-900"}`}>{(inventory?.needs_reorder ?? 0).toLocaleString()}</p>
-            </div>
+          <Link href="/inventory" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
+            <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Low Stock</p>
+            <p className={`text-base font-medium leading-none tabular-nums tracking-tighter mt-0.5 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-slate-900"}`}>{(inventory?.needs_reorder ?? 0).toLocaleString()}</p>
+            <AlertCircle size={18} className={`absolute right-2 top-2 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-orange-500"}`} strokeWidth={1.5} />
           </Link>
 
-          <Link href="/transactions" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col">
-            <div className="bg-orange-500 flex items-center justify-center py-2.5 border-b border-orange-600">
-              <Boxes size={18} className="text-white" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col items-center justify-center px-1 py-2">
-              <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Transactions</p>
-              <p className="text-base font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-0.5">{(transactions?.total ?? 0).toLocaleString()}</p>
-            </div>
+          <Link href="/transactions" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
+            <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Transaction</p>
+            <p className="text-base font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-0.5">{(transactions?.total ?? 0).toLocaleString()}</p>
+            <Boxes size={18} className="text-orange-500 absolute right-2 top-2" strokeWidth={1.5} />
           </Link>
         </div>
 
         {/* TABLET (sm → lg) */}
         <div className="hidden sm:grid lg:hidden grid-cols-3 gap-2">
-          <Link href="/products" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex hover:shadow-md transition-shadow duration-200">
-            <div className="w-16 shrink-0 bg-orange-500 flex items-center justify-center border-r border-orange-600 group-hover:bg-orange-600 transition-colors duration-200">
-              <Package size={22} className="text-white group-hover:scale-110 transition-transform duration-200" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col justify-center px-4 py-3">
-              <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Products</p>
+          <Link href="/products" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Product</p>
               <p className="text-xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{(products?.total ?? 0).toLocaleString()}</p>
             </div>
+            <Package size={22} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1.5} />
           </Link>
 
-          <Link href="/inventory" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex hover:shadow-md transition-shadow duration-200">
-            <div className={`w-16 shrink-0 flex items-center justify-center border-r transition-colors duration-200 ${(inventory?.needs_reorder ?? 0) > 0 ? "bg-red-500 border-red-600 group-hover:bg-red-600" : "bg-orange-500 border-orange-600 group-hover:bg-orange-600"}`}>
-              <AlertCircle size={22} className="text-white group-hover:scale-110 transition-transform duration-200" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col justify-center px-4 py-3">
+          <Link href="/inventory" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
               <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Low Stock</p>
               <p className={`text-xl font-medium leading-none tabular-nums tracking-tighter mt-1 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-slate-900"}`}>{(inventory?.needs_reorder ?? 0).toLocaleString()}</p>
             </div>
+            <AlertCircle size={22} className={`group-hover:scale-110 transition-transform duration-200 shrink-0 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-orange-500"}`} strokeWidth={1.5} />
           </Link>
 
-          <Link href="/transactions" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex hover:shadow-md transition-shadow duration-200">
-            <div className="w-16 shrink-0 bg-orange-500 flex items-center justify-center border-r border-orange-600 group-hover:bg-orange-600 transition-colors duration-200">
-              <Boxes size={22} className="text-white group-hover:scale-110 transition-transform duration-200" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col justify-center px-4 py-3">
-              <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Transactions</p>
+          <Link href="/transactions" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Transaction</p>
               <p className="text-xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{(transactions?.total ?? 0).toLocaleString()}</p>
             </div>
+            <Boxes size={22} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1.5} />
           </Link>
         </div>
 
         {/* DESKTOP (≥ lg) */}
-        <div className="hidden lg:grid grid-cols-3 gap-3">
-          <Link href="/products" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex hover:shadow-md transition-shadow duration-200">
-            <div className="w-20 shrink-0 bg-orange-500 flex items-center justify-center border-r border-orange-600 group-hover:bg-orange-600 transition-colors duration-200">
-              <Package size={30} className="text-white group-hover:scale-110 transition-transform duration-200" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col justify-center px-5 py-4">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Products</p>
+        <div className="hidden lg:grid grid-cols-3 gap-5">
+          <Link href="/products" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-base font-regular text-slate-900">Product</p>
               <p className="text-2xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{(products?.total ?? 0).toLocaleString()}</p>
             </div>
+            <Package size={40} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1} />
           </Link>
 
-          <Link href="/inventory" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex hover:shadow-md transition-shadow duration-200">
-            <div className={`w-20 shrink-0 flex items-center justify-center border-r transition-colors duration-200 ${(inventory?.needs_reorder ?? 0) > 0 ? "bg-red-500 border-red-600 group-hover:bg-red-600" : "bg-orange-500 border-orange-600 group-hover:bg-orange-600"}`}>
-              <AlertCircle size={30} className="text-white group-hover:scale-110 transition-transform duration-200" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col justify-center px-5 py-4">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Low Stock</p>
+          <Link href="/inventory" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-base font-regular text-slate-900">Low Stock</p>
               <p className={`text-2xl font-medium leading-none tabular-nums tracking-tighter mt-1 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-slate-900"}`}>{(inventory?.needs_reorder ?? 0).toLocaleString()}</p>
             </div>
+            <AlertCircle size={40} className={`group-hover:scale-110 transition-transform duration-200 shrink-0 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-orange-500"}`} strokeWidth={1} />
           </Link>
 
-          <Link href="/transactions" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex hover:shadow-md transition-shadow duration-200">
-            <div className="w-20 shrink-0 bg-orange-500 flex items-center justify-center border-r border-orange-600 group-hover:bg-orange-600 transition-colors duration-200">
-              <Boxes size={30} className="text-white group-hover:scale-110 transition-transform duration-200" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col justify-center px-5 py-4">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Transactions</p>
+          <Link href="/transactions" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-base font-regular text-slate-900">Transaction</p>
               <p className="text-2xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{(transactions?.total ?? 0).toLocaleString()}</p>
             </div>
+            <Boxes size={40} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1} />
           </Link>
         </div>
 
@@ -477,19 +453,19 @@ const chartData = useMemo(() => {
       {/* ── ANALYTICS + SIGNAL LOG ── */}
       <div className={`grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5 items-stretch transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
         <div className="lg:col-span-2 bg-white border border-gray-600 rounded-lg flex flex-col overflow-hidden min-w-0">
-          <div className="px-6 py-3 border-b border-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="px-5 py-3 border-b border-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-2">
               <Activity size={20} className="text-orange-500 shrink-0" strokeWidth={2} />
               <h2 className="text-base font-regular text-slate-900">Analytics Summary</h2>
             </div>
             <div className="flex items-center gap-4 sm:gap-6">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-[9px] font-medium uppercase text-slate-400 tracking-widest">Receive</span>
+                <span className="text-[13px] font-regular text-slate-900">Receive</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-orange-500" />
-                <span className="text-[9px] font-medium uppercase text-slate-400 tracking-widest">Sale</span>
+                <span className="text-[13px] font-regular text-slate-900">Sale</span>
               </div>
             </div>
           </div>
@@ -499,8 +475,8 @@ const chartData = useMemo(() => {
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} dy={10} />
-                  <YAxis width={32} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#1a1a1a', fontSize: 11, fontWeight: 400 }} dy={10} />
+                  <YAxis width={32} axisLine={false} tickLine={false} tick={{ fill: '#1a1a1a', fontSize: 11, fontWeight: 400 }} />
                   <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#e2e8f0', strokeWidth: 1, strokeDasharray: '4 2' }} />
                   <Area type="monotone" dataKey="receive" stroke="#22C55E" strokeWidth={1.5} fill="#22C55E" fillOpacity={0.05} />
                   <Area type="monotone" dataKey="sale" stroke="#F97316" strokeWidth={1.5} fill="#F97316" fillOpacity={0.05} />
@@ -516,36 +492,36 @@ const chartData = useMemo(() => {
         </div>
 
         <div className="bg-white border border-gray-600 rounded-lg flex flex-col overflow-hidden">
-          <div className="px-6 py-3 border-b border-gray-600 flex items-center justify-between">
+          <div className="px-5 py-3 border-b border-gray-600 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock size={20} className="text-orange-500 shrink-0" strokeWidth={2} />
               <h2 className="text-base font-regular text-slate-900">Signal Log</h2>
             </div>
-            <Link href="/transactions" className="group/hist text-[10px] font-medium text-slate-400 uppercase tracking-widest hover:text-orange-500 transition-colors flex items-center gap-1">
+            <Link href="/transactions" className="group/hist text-sm text-slate-800 hover:text-orange-500 transition-colors flex items-center gap-1">
               History <ChevronRight size={10} strokeWidth={3} className="transition-transform duration-150 group-hover/hist:translate-x-0.5" />
             </Link>
           </div>
-          <div className="overflow-y-auto divide-y divide-slate-100 max-h-[clamp(220px,45vh,700px)]">
+          <div className="overflow-y-auto divide-y divide-slate-400 max-h-[clamp(220px,45vh,700px)]">
             {(transactions?.recent_activity ?? []).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 gap-3">
                 <Clock size={36} strokeWidth={1} className="text-slate-300" />
                 <p className="text-xs font-normal text-slate-400">No transactions in this period</p>
               </div>
             ) : (transactions?.recent_activity ?? []).map((txn, i) => (
-              <Link key={txn.id} href="/transactions" className={`group/row flex items-center gap-4 px-6 py-3.5 hover:bg-orange-50/40 transition-colors ${i % 2 === 1 ? "bg-slate-50/30" : ""}`}>
+              <Link key={txn.id} href="/transactions" className={`group/row flex items-center gap-4 px-5 py-3.5 hover:bg-orange-50/40 transition-colors ${i % 2 === 1 ? "bg-slate-50/30" : ""}`}>
                 <div className={`w-8 h-8 rounded-md shrink-0 flex items-center justify-center transition-all duration-200 group-hover/row:scale-110 group-hover/row:shadow-sm ${txn.transaction_type === "Receive" ? "bg-green-50 text-green-600 group-hover/row:bg-green-500 group-hover/row:text-white" : "bg-orange-50 text-orange-600 group-hover/row:bg-orange-500 group-hover/row:text-white"}`}>
                   {txn.transaction_type === "Receive" ? <ArrowDownLeft size={15} strokeWidth={2} /> : <ArrowUpRight size={15} strokeWidth={2} />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-medium text-slate-800">#{txn.id}</span>
-                    <span className={`text-[9px] font-medium uppercase px-1.5 py-0.5 rounded ${txn.transaction_type === "Receive" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>{txn.transaction_type}</span>
+                    <span className="text-xs font-medium text-slate-800">No.{txn.id}</span>
+                    <span className={`text-[13px] font-semibold px-2 py-0.5 rounded-full ${txn.transaction_type === "Receive" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>{txn.transaction_type}</span>
                   </div>
-                  <p className="text-[10px] font-normal text-slate-400 truncate">By {txn.performed_by ?? "Unknown"} · {txn.item_count} items</p>
+                  <p className="text-[13px] font-normal text-slate-800 truncate">By {txn.performed_by ?? "Unknown"} · {txn.item_count} items</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[10px] font-medium text-slate-600 tabular-nums">{new Date(txn.transaction_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                  <p className="text-[9px] font-normal text-slate-400 tabular-nums">{formatTxDate(txn.transaction_date)}</p>
+                  <p className="text-[13px] font-regular text-slate-800 tabular-nums">{new Date(txn.transaction_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-[13px] font-regular text-slate-800 tabular-nums">{formatTxDate(txn.transaction_date)}</p>
                 </div>
               </Link>
             ))}
