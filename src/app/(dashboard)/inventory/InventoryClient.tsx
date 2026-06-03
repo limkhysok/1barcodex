@@ -106,7 +106,7 @@ export default function InventoryClient({
     else setLoading(true);
     setError("");
 
-    getInventory({ search: search.trim() || undefined, ordering: ordering || undefined, site: siteFilter || undefined, reorder_status: statusFilter || undefined, page: nextPage })
+    getInventory({ ordering: ordering || undefined, site: siteFilter || undefined, reorder_status: statusFilter || undefined, page: nextPage })
       .then((data) => {
         setRecords((prev) => append ? [...prev, ...data.results] : data.results);
         setHasMore(data.next !== null);
@@ -114,7 +114,7 @@ export default function InventoryClient({
       })
       .catch(() => setError("Failed to load inventory."))
       .finally(() => { setLoading(false); setLoadingMore(false); });
-  }, [search, ordering, siteFilter, statusFilter]);
+  }, [ordering, siteFilter, statusFilter]);
 
   // Debounced re-fetch when search or ordering changes (reset to page 1)
   const filtersMounted = useRef(false);

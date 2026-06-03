@@ -3,7 +3,7 @@
 import React from "react";
 import type { Transaction, TransactionPayload } from "@/src/types/transaction.types";
 import type { InventoryRecord } from "@/src/types/inventory.types";
-import { X, ArrowRightLeft } from "lucide-react";
+import { X, ArrowRightLeft, Trash2 } from "lucide-react";
 function formatDateTime(ts: string): string {
   const d = new Date(ts);
   const day = String(d.getDate()).padStart(2, "0");
@@ -23,11 +23,9 @@ const TYPE_CONFIG: Record<string, { label: string; bg: string; text: string; dot
   Sale: { label: "Sale", bg: "bg-red-50", text: "text-red-600", dot: "bg-red-500" },
 };
 
-type ItemDraft = { id: number; inventory: number; quantity: number };
+type ItemDraft = { id: string; inventory: number; quantity: number };
 
-let itemIdCounter = 0;
-function getNextItemId() { return ++itemIdCounter; }
-const emptyItem = (): ItemDraft => ({ id: getNextItemId(), inventory: 0, quantity: 1 });
+const emptyItem = (): ItemDraft => ({ id: crypto.randomUUID(), inventory: 0, quantity: 1 });
 import InventoryPicker from "./InventoryPicker";
 import { scanBarcode } from "@/src/services/inventory.service";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
@@ -163,7 +161,7 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
               <ArrowRightLeft size={17} strokeWidth={1.8} className="text-white" />
             </div>
             <div>
-              <h2 className="text-[15px] font-bold text-gray-900">Transaction #{viewTarget.id}</h2>
+              <h2 className="text-lg font-Regular text-gray-900">Transaction #{viewTarget.id}</h2>
               <p className="text-[13px] text-gray-400" suppressHydrationWarning>{formatDateTime(viewTarget.transaction_date)}</p>
             </div>
           </div>
@@ -202,7 +200,7 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
             </div>
           </div>
 
-          {/* Items table */}
+          {/* Items table */} 
           <div className="px-5 pb-5 pt-2">
             <p className="text-[13px] font-medium text-gray-400 mb-3">Item Registry</p>
             <div className="border border-gray-100 rounded-xl overflow-hidden">
@@ -213,14 +211,13 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
               </div>
               <div className="divide-y divide-gray-50">
                 {viewTarget.items.map((item) => {
-                  const rec = inventory.find((r) => r.id === item.inventory);
                   return (
                     <div key={item.id} className="flex items-center gap-4 px-4 py-2.5 hover:bg-gray-50/60 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-medium text-gray-900 truncate">{item.product_name}</p>
                       </div>
                       <div className="w-28 shrink-0 min-w-0">
-                        <span className="text-[12px] font-mono text-gray-400 truncate block">{rec?.product_details.barcode ?? "—"}</span>
+                        <span className="text-[12px] font-mono text-gray-400 truncate block">{item.barcode || "—"}</span>
                       </div>
                       <div className="w-14 shrink-0 text-right">
                         <span className="text-[13px] font-bold text-gray-900 tabular-nums">{Math.abs(item.quantity)}</span>
@@ -262,22 +259,40 @@ export const DeleteConfirmModal: React.FC<DeleteModalProps> = ({ deleteTarget, o
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
       <button className="absolute inset-0 bg-black/20 backdrop-blur-sm cursor-default" onClick={onClose} aria-label="Close modal" />
-      <div className="relative bg-white rounded-t-md sm:rounded-sm shadow-xl w-full sm:max-w-sm overflow-hidden">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm overflow-hidden flex flex-col">
 
-        <div className="px-5 py-5">
-          <p className="text-[13px] font-bold text-gray-800">
-            Are you sure to delete Transaction{" "}
-            <span className="font-black text-black">#{deleteTarget.id}</span>?
-          </p>
-          <p className="text-[11px] text-gray-500 mt-1">This action cannot be undone. All details of this transaction will be permanently removed.</p>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-red-500 flex items-center justify-center shrink-0">
+              <Trash2 size={17} strokeWidth={1.8} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-Regular text-gray-900">Delete Transaction</h2>
+            </div>
+          </div>
+          <button onClick={onClose} disabled={deleting} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all shrink-0 active:scale-95 cursor-pointer disabled:opacity-40">
+            <X size={16} strokeWidth={2.5} />
+          </button>
         </div>
-        <div className="border-t border-black px-5 py-3 bg-gray-50/50 flex justify-end gap-2">
+
+        {/* Body */}
+        <div className="px-5 py-5">
+          <p className="text-[13px] font-medium text-gray-700">
+            Are you sure you want to delete{" "}
+            <span className="font-semibold text-gray-900">Transaction #{deleteTarget.id}</span>?
+          </p>
+          <p className="text-[13px] text-gray-400 mt-1.5">This action cannot be undone. All details of this transaction will be permanently removed.</p>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-100 px-5 py-3 bg-white shrink-0 flex justify-end gap-2">
           <button onClick={onClose} disabled={deleting}
-            className="w-20 py-1.5 rounded-sm text-[11px] font-black tracking-widest uppercase text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 active:scale-[0.98] transition disabled:opacity-60 cursor-pointer">
+            className="px-5 py-2 rounded-xl text-[13px] font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 active:scale-[0.97] transition disabled:opacity-60 cursor-pointer">
             Cancel
           </button>
           <button onClick={onConfirm} disabled={deleting}
-            className="w-20 py-1.5 rounded-sm text-[11px] font-black tracking-widest uppercase text-white bg-red-500 hover:bg-red-600 active:scale-[0.98] transition disabled:opacity-60 cursor-pointer">
+            className="px-5 py-2 rounded-xl text-[13px] font-medium text-white bg-red-500 hover:bg-red-600 active:scale-[0.97] transition disabled:opacity-60 cursor-pointer">
             {deleting ? "Deleting…" : "Delete"}
           </button>
         </div>
@@ -351,7 +366,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
           );
         }
 
-        return [...currentItems, { id: getNextItemId(), inventory: invId, quantity: 1 }];
+        return [...currentItems, { id: crypto.randomUUID(), inventory: invId, quantity: 1 }];
       });
 
       if (alreadyExists) {
@@ -438,7 +453,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
               <ArrowRightLeft size={17} strokeWidth={1.8} className="text-white" />
             </div>
             <div>
-              <h2 className="text-[15px] font-bold text-gray-900">New Transaction</h2>
+              <h2 className="text-lg font-Regular text-gray-900">New Transaction</h2>
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all shrink-0 active:scale-95 cursor-pointer">
@@ -455,7 +470,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
                 <span className="text-gray-800">Scanner</span>
               </p>
               <div className="flex items-center gap-2">
-                <span className={`text-[12px] font-black tracking-widest uppercase ${txType === "Receive" ? "text-green-600" : "text-gray-300"}`}>Receive</span>
+                <span className={`text-sm font_regular  ${txType === "Receive" ? "text-green-600" : "text-gray-400"}`}>Receive</span>
                 <button
                   type="button"
                   onClick={() => setTxType(txType === "Receive" ? "Sale" : "Receive")}
@@ -463,7 +478,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
                 >
                   <div className={`absolute top-1 left-1 w-2.5 h-2.5 rounded-full shadow-sm transition-transform duration-200 transform ${txType === "Sale" ? "translate-x-5 bg-red-600" : "translate-x-0 bg-green-600"}`} />
                 </button>
-                <span className={`text-[12px] font-black tracking-widest uppercase ${txType === "Sale" ? "text-red-600" : "text-gray-300"}`}>Sale</span>
+                <span className={`text-sm font_regular ${txType === "Sale" ? "text-red-600" : "text-gray-400"}`}>Sale</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -490,10 +505,10 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
                       if (value !== "") handleScanBarcodeWithValue(value);
                     }
                   }}
-                  className="w-full pl-9 pr-12 py-1.5 rounded-sm border-2 border-black text-[12px] bg-white text-black outline-none focus:border-[#FA4900] transition-all placeholder:text-gray-300 font-mono tracking-widest uppercase"
+                  className="w-full pl-9 pr-12 py-1.5 rounded-lg border border-black text-[12px] bg-white text-black outline-none focus:border-[#FA4900] transition-all placeholder:text-gray-300 font-mono tracking-widest uppercase"
                 />
                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="none">
+                  <svg className="w-6 h-6 text-gray-800" viewBox="0 0 24 24" fill="none">
                     <rect x="2" y="4" width="1.5" height="16" rx="0.5" fill="currentColor" />
                     <rect x="7" y="4" width="1.5" height="16" rx="0.5" fill="currentColor" />
                     <rect x="12" y="4" width="2" height="16" rx="0.5" fill="currentColor" />
@@ -506,7 +521,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
               <button
                 type="button"
                 onClick={toggleCamera}
-                className={`shrink-0 p-2 rounded-sm transition-all shadow-md group/cam ${isCameraOpen ? "bg-red-600 text-white" : "bg-black text-white hover:bg-gray-800 active:scale-95"}`}
+                className={`shrink-0 p-1.5 rounded-md transition-all shadow-md group/cam ${isCameraOpen ? "bg-red-600 text-white" : "bg-black text-white hover:bg-gray-800 active:scale-95"}`}
                 title={isCameraOpen ? "Close Camera" : "Open Camera Scanner"}
               >
                 {isCameraOpen ? (
@@ -558,13 +573,13 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
           {/* Merged Item Registry + Receipt */}
           <div>
 
-            <div className="border border-black overflow-hidden">
+            <div className="border border-black rounded-lg overflow-hidden">
               {/* Header */}
               <div className="flex items-center gap-1 sm:gap-4 px-2 py-2 bg-slate-50 border-b border-black">
-                <span className="hidden sm:inline-block w-5 shrink-0 text-[12px] font-black text-gray-700 text-center">N0</span>
-                <span className="flex-1 sm:w-64 sm:shrink-0 text-[12px] font-black text-gray-700">Product</span>
-                <span className="w-28 shrink-0 text-[12px] font-black text-gray-700">Barcode</span>
-                <span className="w-16 sm:w-24 shrink-0 text-[12px] font-black text-gray-700 text-left sm:pr-2">Quantity</span>
+                <span className="hidden sm:inline-block w-5 shrink-0 text-sm font-regular text-gray-800 text-center">No</span>
+                <span className="flex-1 sm:w-64 sm:shrink-0 text-sm font-regular text-gray-800">Product</span>
+                <span className="w-28 shrink-0 text-sm font-regular text-gray-800">Barcode</span>
+                <span className="w-16 sm:w-24 shrink-0 text-sm font-regular text-gray-800 text-left sm:pr-2">Quantity</span>
                 <span className="w-5 shrink-0" />
               </div>
               {/* Rows */}
@@ -575,7 +590,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
                     <div key={item.id} className="p-3 sm:p-0 sm:px-2 sm:py-1.5 hover:bg-slate-50/60 transition-colors group/item relative">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         {/* N0 - desktop only */}
-                        <span className="hidden sm:inline-block w-5 shrink-0 text-[10px] font-black text-gray-300 text-center">{String(idx + 1).padStart(2, "0")}</span>
+                        <span className="hidden sm:inline-block w-5 shrink-0 text-[13px] font-regular text-gray-700 text-center">{String(idx + 1).padStart(2, "0")}</span>
                         {/* Product */}
                         <div className="flex-1 sm:w-64 sm:shrink-0 min-w-0">
                           <InventoryPicker
@@ -586,17 +601,17 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
                           />
                         </div>
                         {/* Mobile: barcode info line */}
-                        <div className="sm:hidden flex items-center gap-2 text-[10px] font-mono text-gray-500">
-                          <span className="font-black text-[8px] uppercase tracking-tighter text-gray-400">BC:</span>
+                        <div className="sm:hidden flex items-center gap-2 text-[13px] text-gray-700">
+                          <span className="font-black text-[13px] text-gray-700">BC:</span>
                           <span className="truncate block">{rec?.product_details.barcode ?? "—"}</span>
                         </div>
                         {/* Barcode - desktop only */}
                         <div className="hidden sm:block w-28 shrink-0 min-w-0">
-                          <span className="text-[11px] font-mono text-gray-700 truncate block">{rec?.product_details.barcode ?? "—"}</span>
+                          <span className="text-[13px] font-mono text-gray-700 truncate block">{rec?.product_details.barcode ?? "—"}</span>
                         </div>
                         {/* Quantity controls */}
                         <div className="flex items-center justify-between sm:justify-start gap-3 sm:w-24 sm:shrink-0 mt-1 sm:mt-0">
-                          <span className="sm:hidden text-[9px] font-black uppercase text-gray-400">Quantity</span>
+                          <span className="sm:hidden text-[13px] text-gray-700">Quantity</span>
                           <div className="flex items-center gap-1">
                             <button
                               type="button"
@@ -648,12 +663,9 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
               <button
                 type="button"
                 onClick={addItem}
-                className="w-full py-2.5 bg-white border-t border-dashed border-slate-200 text-[10px] text-slate-400 font-black tracking-[0.2em] uppercase hover:bg-slate-50 hover:text-black transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
+                className="w-full py-3 bg-white border-t border-dashed cursor-pointer border-slate-200 text-xs text-slate-700 font-semibold uppercase hover:bg-slate-50 hover:text-black transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Include Entry
+                + Add More
               </button>
             </div>
             {(() => {
@@ -661,15 +673,15 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
               if (filled.length === 0) return null;
               const totalQuantity = filled.reduce((sum, i) => sum + i.quantity, 0);
               return (
-                <div className="border border-black border-t-0 bg-slate-50">
+                <div className="border border-black bg-slate-50 rounded-lg mt-3">
                   <div className="grid grid-cols-2 divide-x divide-black/10 border-b border-black/10">
-                    <div className="flex flex-col items-center justify-center py-2 gap-0.5">
-                      <span className="text-[8px] font-black tracking-[0.2em] uppercase text-gray-400">Items</span>
-                      <span className="text-[15px] font-black tabular-nums text-gray-900 leading-none">{filled.length}</span>
+                    <div className="flex flex-row items-center justify-center py-2 gap-0.5">
+                      <span className="text-sm font-regular text-gray-600">Item: </span>
+                      <span className="text-sm font-medium tabular-nums text-gray-900 leading-none">{filled.length}</span>
                     </div>
-                    <div className="flex flex-col items-center justify-center py-2 gap-0.5">
-                      <span className="text-[8px] font-black tracking-[0.2em] uppercase text-gray-400">Quantities</span>
-                      <span className="text-[15px] font-black tabular-nums text-gray-900 leading-none">{totalQuantity}</span>
+                    <div className="flex flex-row items-center justify-center py-2 gap-0.5">
+                      <span className="text-sm font-regular text-gray-600">Quantity: </span>
+                      <span className="text-sm font-medium tabular-nums text-gray-900 leading-none">{totalQuantity}</span>
                     </div>
                   </div>
                 </div>
@@ -767,7 +779,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
           );
         }
 
-        return [...currentItems, { id: getNextItemId(), inventory: invId, quantity: 1 }];
+        return [...currentItems, { id: crypto.randomUUID(), inventory: invId, quantity: 1 }];
       });
 
       if (alreadyExists) {
@@ -802,7 +814,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
       setTimeout(() => editScanInputRef.current?.focus(), 150);
       setEditTxType(editTarget.transaction_type);
       setEditItems(editTarget.items.map((item) => ({
-        id: getNextItemId(),
+        id: crypto.randomUUID(),
         inventory: item.inventory,
         quantity: Math.abs(item.quantity),
       })));
@@ -845,30 +857,19 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
       <button className="absolute inset-0 bg-black/20 backdrop-blur-sm cursor-default" onClick={onClose} aria-label="Close modal" />
-      <div className="relative bg-white rounded-t-md sm:rounded-sm shadow-2xl w-full sm:max-w-xl flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-black shrink-0 bg-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-sm bg-black flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
-              </svg>
+            <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
+              <ArrowRightLeft size={17} strokeWidth={1.8} className="text-white" />
             </div>
             <div>
-              <h2 className="text-base font-black text-gray-900 uppercase tracking-tight">Edit Transaction #{editTarget.id}</h2>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="flex items-center gap-1 text-[8px] font-bold tracking-widest uppercase text-[#FA4900]">
-                  <span className="w-1 h-1 rounded-full bg-[#FA4900] animate-pulse" />{" "}
-                  Edit Mode
-                </span>
-              </div>
+              <h2 className="text-lg font-Regular text-gray-900">Edit Transaction #{editTarget.id}</h2>
             </div>
           </div>
-          <button onClick={onClose}
-            className="p-1.5 rounded-sm text-gray-400 hover:text-black hover:bg-gray-100 transition-all shrink-0 active:scale-95">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button onClick={onClose} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all shrink-0 active:scale-95 cursor-pointer">
+            <X size={16} strokeWidth={2.5} />
           </button>
         </div>
 
@@ -876,20 +877,20 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
           {/* Scanner Terminal */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400 flex items-center gap-2">
+              <p className="text-[12px] font-black tracking-[0.2em] uppercase text-gray-400 flex items-center gap-2">
                 <span className="w-3 h-0.5 bg-gray-200" />
-                <span className="text-gray-800">Scanner Terminal</span>
+                <span className="text-gray-800">Scanner</span>
               </p>
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-black tracking-widest uppercase ${editTxType === "Receive" ? "text-green-600" : "text-gray-300"}`}>Receive</span>
+                <span className={`text-sm font_regular  ${editTxType === "Receive" ? "text-green-600" : "text-gray-400"}`}>Receive</span>
                 <button
                   type="button"
                   onClick={() => setEditTxType(editTxType === "Receive" ? "Sale" : "Receive")}
-                  className="relative w-8 h-4 rounded-full bg-slate-100 border border-slate-200 transition-colors duration-200 focus:outline-none"
+                  className={`relative w-10 h-5 rounded-full border transition-colors duration-200 focus:outline-none cursor-pointer ${editTxType === "Sale" ? "bg-red-100 border-red-300" : "bg-green-100 border-green-300"}`}
                 >
-                  <div className={`absolute top-0.5 left-0.5 w-2.5 h-2.5 rounded-full shadow-sm transition-transform duration-200 transform ${editTxType === "Sale" ? "translate-x-4 bg-red-600" : "bg-green-600"}`} />
+                  <div className={`absolute top-1 left-1 w-2.5 h-2.5 rounded-full shadow-sm transition-transform duration-200 transform ${editTxType === "Sale" ? "translate-x-5 bg-red-600" : "translate-x-0 bg-green-600"}`} />
                 </button>
-                <span className={`text-[10px] font-black tracking-widest uppercase ${editTxType === "Sale" ? "text-red-600" : "text-gray-300"}`}>Sale</span>
+                <span className={`text-sm font_regular ${editTxType === "Sale" ? "text-red-600" : "text-gray-400"}`}>Sale</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -913,10 +914,10 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
                       if (value !== "") handleScanBarcodeWithValue(value);
                     }
                   }}
-                  className="w-full pl-9 pr-12 py-1.5 rounded-sm border-2 border-black text-[12px] bg-white text-black outline-none focus:border-[#FA4900] transition-all placeholder:text-gray-300 font-mono tracking-widest uppercase"
+                  className="w-full pl-9 pr-12 py-1.5 rounded-lg border border-black text-[12px] bg-white text-black outline-none focus:border-[#FA4900] transition-all placeholder:text-gray-300 font-mono tracking-widest uppercase"
                 />
                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="none">
+                  <svg className="w-6 h-6 text-gray-800" viewBox="0 0 24 24" fill="none">
                     <rect x="2" y="4" width="1.5" height="16" rx="0.5" fill="currentColor" />
                     <rect x="7" y="4" width="1.5" height="16" rx="0.5" fill="currentColor" />
                     <rect x="12" y="4" width="2" height="16" rx="0.5" fill="currentColor" />
@@ -929,7 +930,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
               <button
                 type="button"
                 onClick={toggleCamera}
-                className={`shrink-0 p-2 rounded-sm transition-all shadow-md group/cam ${isCameraOpen ? "bg-red-600 text-white" : "bg-black text-white hover:bg-gray-800 active:scale-95"}`}
+                className={`shrink-0 p-1.5 rounded-md transition-all shadow-md group/cam ${isCameraOpen ? "bg-red-600 text-white" : "bg-black text-white hover:bg-gray-800 active:scale-95"}`}
                 title={isCameraOpen ? "Close Camera" : "Open Camera Scanner"}
               >
                 {isCameraOpen ? (
@@ -981,23 +982,16 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
 
           {/* Merged Item Registry + Receipt */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-800 flex items-center gap-2">
-                <span className="w-3 h-0.5 bg-gray-200" />{" "}
-                Item Registry
-              </p>
-              <span className="text-[10px] font-bold text-gray-400 tabular-nums uppercase tracking-widest">
-                {editItems.filter(i => i.inventory > 0).length} ITEMS
-              </span>
-            </div>
-            <div className="border border-black overflow-hidden">
-              <div className="flex items-center gap-1 sm:gap-2 px-3 py-2 bg-slate-50 border-b border-black">
-                <span className="hidden sm:inline-block w-5 shrink-0 text-[10px] font-black text-gray-700 tracking-widest text-center">N0</span>
-                <span className="flex-1 sm:w-64 sm:shrink-0 text-[10px] font-black text-gray-700 uppercase tracking-widest">Product</span>
-                <span className="w-28 shrink-0 text-[10px] font-black text-gray-700 uppercase tracking-widest">Barcode</span>
-                <span className="w-16 sm:w-24 shrink-0 text-[10px] font-black text-gray-700 uppercase tracking-widest text-right">Quantity</span>
+            <div className="border border-black rounded-lg overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center gap-1 sm:gap-4 px-2 py-2 bg-slate-50 border-b border-black">
+                <span className="hidden sm:inline-block w-5 shrink-0 text-sm font-regular text-gray-800 text-center">No</span>
+                <span className="flex-1 sm:w-64 sm:shrink-0 text-sm font-regular text-gray-800">Product</span>
+                <span className="w-28 shrink-0 text-sm font-regular text-gray-800">Barcode</span>
+                <span className="w-16 sm:w-24 shrink-0 text-sm font-regular text-gray-800 text-left sm:pr-2">Quantity</span>
                 <span className="w-5 shrink-0" />
               </div>
+              {/* Rows */}
               <div className="divide-y divide-black/10">
                 {editItems.map((item, idx) => {
                   const rec = allEditInventory.find((r) => r.id === item.inventory);
@@ -1005,7 +999,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
                     <div key={item.id} className="p-3 sm:p-0 sm:px-2 sm:py-1.5 hover:bg-slate-50/60 transition-colors group/item relative">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         {/* N0 - desktop only */}
-                        <span className="hidden sm:inline-block w-5 shrink-0 text-[10px] font-black text-gray-300 text-center">{String(idx + 1).padStart(2, "0")}</span>
+                        <span className="hidden sm:inline-block w-5 shrink-0 text-[13px] font-regular text-gray-700 text-center">{String(idx + 1).padStart(2, "0")}</span>
                         {/* Product */}
                         <div className="flex-1 sm:w-64 sm:shrink-0 min-w-0">
                           <InventoryPicker
@@ -1016,17 +1010,17 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
                           />
                         </div>
                         {/* Mobile: barcode info line */}
-                        <div className="sm:hidden flex items-center gap-2 text-[10px] font-mono text-gray-500">
-                          <span className="font-black text-[8px] uppercase tracking-tighter text-gray-400">BC:</span>
+                        <div className="sm:hidden flex items-center gap-2 text-[13px] text-gray-700">
+                          <span className="font-black text-[13px] text-gray-700">BC:</span>
                           <span className="truncate block">{rec?.product_details.barcode ?? "—"}</span>
                         </div>
                         {/* Barcode - desktop only */}
                         <div className="hidden sm:block w-28 shrink-0 min-w-0">
-                          <span className="text-[11px] font-mono text-gray-700 truncate block">{rec?.product_details.barcode ?? "—"}</span>
+                          <span className="text-[13px] font-mono text-gray-700 truncate block">{rec?.product_details.barcode ?? "—"}</span>
                         </div>
                         {/* Quantity controls */}
                         <div className="flex items-center justify-between sm:justify-start gap-3 sm:w-24 sm:shrink-0 mt-1 sm:mt-0">
-                          <span className="sm:hidden text-[9px] font-black uppercase text-gray-400">Quantity</span>
+                          <span className="sm:hidden text-[13px] text-gray-700">Quantity</span>
                           <div className="flex items-center gap-1">
                             <button
                               type="button"
@@ -1078,12 +1072,9 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
               <button
                 type="button"
                 onClick={addEditItem}
-                className="w-full py-2.5 bg-white border-t border-dashed border-slate-200 text-[10px] text-slate-400 font-black tracking-[0.2em] uppercase hover:bg-slate-50 hover:text-black transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
+                className="w-full py-3 bg-white border-t border-dashed cursor-pointer border-slate-200 text-xs text-slate-700 font-semibold uppercase hover:bg-slate-50 hover:text-black transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Include Entry
+                + Add More
               </button>
             </div>
             {(() => {
@@ -1091,15 +1082,15 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
               if (filled.length === 0) return null;
               const totalQty = filled.reduce((sum, i) => sum + i.quantity, 0);
               return (
-                <div className="border border-black border-t-0 bg-slate-50">
-                  <div className="grid grid-cols-2 divide-x divide-black/10">
-                    <div className="flex flex-col items-center justify-center py-2 gap-0.5">
-                      <span className="text-[8px] font-black tracking-[0.2em] uppercase text-gray-400">Items</span>
-                      <span className="text-[15px] font-black tabular-nums text-gray-900 leading-none">{filled.length}</span>
+                <div className="border border-black bg-slate-50 rounded-lg mt-3">
+                  <div className="grid grid-cols-2 divide-x divide-black/10 border-b border-black/10">
+                    <div className="flex flex-row items-center justify-center py-2 gap-0.5">
+                      <span className="text-sm font-regular text-gray-600">Item: </span>
+                      <span className="text-sm font-medium tabular-nums text-gray-900 leading-none">{filled.length}</span>
                     </div>
-                    <div className="flex flex-col items-center justify-center py-2 gap-0.5">
-                      <span className="text-[8px] font-black tracking-[0.2em] uppercase text-gray-400">Quantities</span>
-                      <span className="text-[15px] font-black tabular-nums text-gray-900 leading-none">{totalQty}</span>
+                    <div className="flex flex-row items-center justify-center py-2 gap-0.5">
+                      <span className="text-sm font-regular text-gray-600">Quantity: </span>
+                      <span className="text-sm font-medium tabular-nums text-gray-900 leading-none">{totalQty}</span>
                     </div>
                   </div>
                 </div>
@@ -1108,9 +1099,9 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
           </div>
         </div>
 
-        <div className="border-t border-black px-5 py-3 shrink-0 space-y-3 bg-gray-50/50">
+        <div className="border-t border-gray-100 px-5 py-3 shrink-0 space-y-3 bg-white">
           {formError && (
-            <p className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 rounded-sm px-3 py-2 flex items-center gap-2 uppercase tracking-widest">
+            <p className="text-[13px] font-medium text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2 flex items-center gap-2">
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
@@ -1119,16 +1110,16 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
           )}
           <div className="flex justify-end gap-2">
             <button type="button" onClick={onClose}
-              className="w-30 py-1.5 rounded-sm text-[11px] font-black tracking-widest uppercase text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 active:scale-[0.98] transition cursor-pointer">
+              className="px-5 py-2 rounded-xl text-[13px] font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 active:scale-[0.97] transition cursor-pointer">
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSubmit}
               disabled={saving}
-              className="px-8 py-1.5 rounded-sm text-[11px] font-black tracking-widest uppercase text-white bg-black active:scale-[0.98] transition disabled:opacity-60 shadow-lg transform hover:-translate-y-0.5 cursor-pointer"
+              className="px-6 py-2 rounded-xl text-[13px] font-medium text-white bg-orange-500 hover:bg-orange-600 active:scale-[0.97] transition disabled:opacity-60 cursor-pointer"
             >
-              {saving ? "Updating..." : "Update Transaction"}
+              {saving ? "Updating..." : "Save Changes"}
             </button>
           </div>
         </div>

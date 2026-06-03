@@ -2,7 +2,7 @@ export interface TransactionItem {
   id: number;
   inventory: number;
   product_name: string;
-  barcode?: string;
+  barcode: string;
   quantity: number;
   cost_per_unit: string;
   line_total: string;

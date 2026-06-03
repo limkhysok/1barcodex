@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { Transaction, TransactionPayload } from "@/src/types/transaction.types";
-import type { InventoryRecord } from "@/src/types/inventory.types";
 import { getTransactions, createTransaction, updateTransaction, deleteTransaction, getTransactionStats, type TransactionStats } from "@/src/services/transaction.service";
 import { getInventory } from "@/src/services/inventory.service";
 import type { PaginatedInventory, PaginatedTransactions } from "@/src/types/api.types";
@@ -234,15 +233,12 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
 
 const handlePrint = async (t: Transaction) => {
     if (!t) return;
-    const printItems: TemplateItem[] = t.items.map((item) => {
-      const rec = inventory.find((r: InventoryRecord) => r.id === item.inventory);
-      return {
-        barcode: rec?.product_details.barcode ?? "",
-        product_name: item.product_name,
-        unit: "Pcs",
-        quantity: Math.abs(item.quantity),
-      };
-    });
+    const printItems: TemplateItem[] = t.items.map((item) => ({
+      barcode: item.barcode,
+      product_name: item.product_name,
+      unit: "Pcs",
+      quantity: Math.abs(item.quantity),
+    }));
     await exportTemplateAsPdf(printItems, t.transaction_type);
   };
 
@@ -284,9 +280,8 @@ const handlePrint = async (t: Transaction) => {
   }
 
   function txItemToTemplateItem(item: Transaction["items"][number]): TemplateItem {
-    const rec = inventory.find((r) => r.id === item.inventory);
     return {
-      barcode: rec?.product_details.barcode ?? "",
+      barcode: item.barcode,
       product_name: item.product_name,
       unit: "Pcs",
       quantity: Math.abs(item.quantity),
