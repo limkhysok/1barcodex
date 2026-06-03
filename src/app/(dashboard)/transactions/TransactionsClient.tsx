@@ -64,10 +64,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
-
-  const [pendingExportItems, setPendingExportItems] = useState<TemplateItem[]>([]);
+const [pendingExportItems, setPendingExportItems] = useState<TemplateItem[]>([]);
   const [pendingExportType, setPendingExportType] = useState<"Sale" | "Receive">("Sale");
   const templateRef = useRef<HTMLDivElement>(null);
 
@@ -96,14 +93,7 @@ const [pdfPanelOpen, setPdfPanelOpen] = useState(false);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  useEffect(() => {
-    if (menuOpenId === null) return;
-    function onScroll() { setMenuOpenId(null); }
-    window.addEventListener("scroll", onScroll, true);
-    return () => window.removeEventListener("scroll", onScroll, true);
-  }, [menuOpenId]);
-
-  const fetchAll = useCallback((nextPage = 1, append = false) => {
+const fetchAll = useCallback((nextPage = 1, append = false) => {
     if (append) setLoadingMore(true);
     else setLoading(true);
     setError("");
@@ -242,13 +232,7 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
     }
   }
 
-  const handleActionClick = (e: React.MouseEvent, t: Transaction) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    setMenuPos({ top: r.bottom + 4, left: r.right - 80 });
-    setMenuOpenId(menuOpenId === t.id ? null : t.id);
-  };
-
-  const handlePrint = async (t: Transaction) => {
+const handlePrint = async (t: Transaction) => {
     if (!t) return;
     const printItems: TemplateItem[] = t.items.map((item) => {
       const rec = inventory.find((r: InventoryRecord) => r.id === item.inventory);
@@ -259,7 +243,6 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
         quantity: Math.abs(item.quantity),
       };
     });
-    setMenuOpenId(null);
     await exportTemplateAsPdf(printItems, t.transaction_type);
   };
 
@@ -353,7 +336,6 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
           onDelete={setDeleteTarget}
           canEdit={canEdit}
           canDelete={canDelete}
-          onActionClick={handleActionClick}
         />
       </div>
 
@@ -373,54 +355,7 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
         </div>
       )}
 
-      {/* Floating Actions Menu */}
-      {menuOpenId !== null && (() => {
-        const t = transactions.find((tx) => tx.id === menuOpenId);
-        if (!t) return null;
-        return (
-          <>
-            <button
-              type="button"
-              className="fixed inset-0 z-9998 bg-transparent cursor-default w-full h-full border-none outline-none"
-              onClick={() => setMenuOpenId(null)}
-              aria-label="Close menu"
-            />
-            <div
-              style={{ position: "fixed", top: menuPos.top, left: menuPos.left, zIndex: 9999 }}
-              className="bg-white border border-slate-950/10 rounded-sm shadow-2xl overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200 min-w-32"
-            >
-              <button type="button" onClick={() => { setViewTarget(t); setMenuOpenId(null); }}
-                className="w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-orange-500 hover:text-white transition-colors flex items-center gap-2.5">
-                <svg className="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                View Details
-              </button>
-              {canEdit && (
-                <button type="button" onClick={() => { setEditTarget(t); setMenuOpenId(null); }}
-                  className="w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-orange-500 hover:text-white transition-colors flex items-center gap-2.5">
-                  <svg className="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg>
-                  Edit
-                </button>
-              )}
-              <button type="button" onClick={() => { handlePrint(t); setMenuOpenId(null); }}
-                className="w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-orange-500 hover:text-white transition-colors flex items-center gap-2.5">
-                <svg className="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6.72 3.99A.75.75 0 017.5 3.75h9a.75.75 0 01.75.75v3h-10.5v-3zM3 16.25v-3a3 3 0 013-3h12a3 3 0 013 3v3a.75.75 0 01-.75.75H18v3.75a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V17H3.75a.75.75 0 01-.75-.75zM9 15.75v3h6v-3H9z" /></svg>
-                Print PDF
-              </button>
-              {canDelete && (
-                <div className="border-t border-slate-50 mt-1 pt-1">
-                  <button type="button" onClick={() => { setDeleteTarget(t); setMenuOpenId(null); }}
-                    className="w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center gap-2.5">
-                    <svg className="w-3.5 h-3.5 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clipRule="evenodd" /></svg>
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
-          </>
-        );
-      })()}
-
-      <NewTransactionModal
+<NewTransactionModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         inventory={inventory}
