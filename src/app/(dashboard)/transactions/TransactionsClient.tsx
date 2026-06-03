@@ -6,7 +6,6 @@ import type { InventoryRecord } from "@/src/types/inventory.types";
 import { getTransactions, createTransaction, updateTransaction, deleteTransaction, getTransactionStats, type TransactionStats } from "@/src/services/transaction.service";
 import { getInventory } from "@/src/services/inventory.service";
 import type { PaginatedInventory, PaginatedTransactions } from "@/src/types/api.types";
-import TransactionTemplate from "@/src/components/features/export/TransactionTemplate";
 type TxTypeFilter = "" | "Receive" | "Sale";
 type TemplateItem = { barcode: string; product_name: string; unit: string; quantity: number };
 import { useAuth } from "@/src/context/AuthContext";
@@ -20,6 +19,7 @@ import {
   DeleteConfirmModal,
 } from "./_components/TransactionsModal";
 import { TransactionsHeader } from "./_components/TransactionsHeader";
+import TransactionTemplate from "@/src/components/features/export/TransactionTemplate";
 
 function waitTwoFrames(): Promise<void> {
   return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -64,7 +64,7 @@ const TransactionsClient: React.FC<TransactionsClientProps> = ({
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-const [pendingExportItems, setPendingExportItems] = useState<TemplateItem[]>([]);
+  const [pendingExportItems, setPendingExportItems] = useState<TemplateItem[]>([]);
   const [pendingExportType, setPendingExportType] = useState<"Sale" | "Receive">("Sale");
   const templateRef = useRef<HTMLDivElement>(null);
 
@@ -382,7 +382,7 @@ const handlePrint = async (t: Transaction) => {
         deleting={deleting}
       />
 
-      {/* Hidden TransactionTemplate for html2canvas capture */}
+      {/* Hidden template rendered off-screen for html2canvas capture */}
       <div
         ref={templateRef}
         aria-hidden="true"

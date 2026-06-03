@@ -1,19 +1,23 @@
 import React from "react";
 
+const NAVY = "#1c3456";
 const BORDER_COLOR = "#000000";
+const OUTER_BORDER = `2px solid ${NAVY}`;
+
 export const ROWS_PER_PAGE = 25;
 
 const CELL_BASE: React.CSSProperties = {
   border: `1px solid ${BORDER_COLOR}`,
   fontSize: "12px",
   lineHeight: "1.6",
-  padding: "8px 4px",
+  padding: "7px 5px",
   boxSizing: "border-box",
 };
 
 const CELL_HEADER: React.CSSProperties = {
   ...CELL_BASE,
-  backgroundColor: "#f2f2f2",
+  backgroundColor: "#ffffff",
+  color: "#000000",
   textAlign: "center",
   fontWeight: "bold",
   verticalAlign: "middle",
@@ -21,12 +25,24 @@ const CELL_HEADER: React.CSSProperties = {
 
 const CELL_BODY: React.CSSProperties = {
   ...CELL_BASE,
+  backgroundColor: "#ffffff",
   verticalAlign: "middle",
 };
 
-const CELL_CENTER: React.CSSProperties = {
+const CELL_BODY_ALT: React.CSSProperties = {
   ...CELL_BODY,
-  textAlign: "center",
+  backgroundColor: "#ffffff",
+};
+
+const CELL_CENTER: React.CSSProperties = { ...CELL_BODY, textAlign: "center" };
+const CELL_CENTER_ALT: React.CSSProperties = { ...CELL_BODY_ALT, textAlign: "center" };
+
+const CELL_SUMMARY: React.CSSProperties = {
+  ...CELL_BASE,
+  backgroundColor: "#ffffff",
+  verticalAlign: "middle",
+  borderTopColor: NAVY,
+  borderTopWidth: "2px",
 };
 
 const TITLE: Record<"Sale" | "Receive", string> = {
@@ -67,7 +83,6 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
     : "ថ្ងៃទី....... ខែ....... ឆ្នាំ ........";
   const items = transaction.items;
 
-  // Split items into pages
   const chunks: typeof items[] = [];
   if (items.length === 0) {
     chunks.push([]);
@@ -91,7 +106,7 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
             style={{
               width: "794px",
               minHeight: "1123px",
-              padding: "90px 68px",
+              padding: "70px 60px 50px",
               backgroundColor: "#ffffff",
               color: "#000000",
               fontFamily: "var(--font-kantumruy, 'KantumruyPro', sans-serif)",
@@ -102,19 +117,24 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
           >
             {/* Header — first page only */}
             {isFirst && (
-              <div style={{ textAlign: "center", marginBottom: "30px" }}>
-                <h1 style={{ fontSize: "22px", fontWeight: "bold", margin: "0 0 8px 0" }}>
+              <div style={{ textAlign: "center", marginBottom: "28px" }}>
+                <h1 style={{ fontSize: "22px", fontWeight: "bold", margin: "0 0 6px 0", color: "#000000" }}>
                   {title}
                 </h1>
-                <p style={{ fontSize: "14px", margin: 0 }}>
-                  {displayDate}
-                </p>
+                <p style={{ fontSize: "13px", margin: 0, color: "#444" }}>{displayDate}</p>
               </div>
             )}
 
             {/* Continuation label */}
             {!isFirst && (
-              <div style={{ textAlign: "right", marginBottom: "8px", fontSize: "11px", color: "#666" }}>
+              <div style={{
+                textAlign: "right",
+                marginBottom: "10px",
+                fontSize: "10px",
+                color: "#888",
+                borderBottom: `1px solid ${BORDER_COLOR}`,
+                paddingBottom: "6px",
+              }}>
                 (បន្ត) ទំព័រទី {pageIndex + 1}/{chunks.length}
               </div>
             )}
@@ -125,21 +145,26 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
                 width: "100%",
                 borderCollapse: "collapse",
                 tableLayout: "fixed",
+                border: OUTER_BORDER,
               }}
             >
               <TableHead />
               <tbody>
-                {chunk.map((item, idx) => (
-                  <tr key={`${startIndex + idx}-${item.barcode}`}>
-                    <td style={CELL_CENTER}>{startIndex + idx + 1}</td>
-                    <td style={{ ...CELL_BODY, paddingLeft: "8px" }}>{item.barcode}</td>
-                    <td style={{ ...CELL_BODY, paddingLeft: "8px" }}>{item.product_name}</td>
-                    <td style={CELL_CENTER}>{item.unit ?? "Pcs"}</td>
-                    <td style={CELL_CENTER}>{Math.abs(item.quantity)}</td>
-                    <td style={CELL_BODY}></td>
-                  </tr>
-                ))}
-                {/* Pad last page with empty rows if fewer than 5 items */}
+                {chunk.map((item, idx) => {
+                  const isAlt = (startIndex + idx) % 2 === 1;
+                  return (
+                    <tr key={`${startIndex + idx}-${item.barcode}`}>
+                      <td style={isAlt ? CELL_CENTER_ALT : CELL_CENTER}>{startIndex + idx + 1}</td>
+                      <td style={{ ...(isAlt ? CELL_BODY_ALT : CELL_BODY), paddingLeft: "8px" }}>{item.barcode}</td>
+                      <td style={{ ...(isAlt ? CELL_BODY_ALT : CELL_BODY), paddingLeft: "8px" }}>{item.product_name}</td>
+                      <td style={isAlt ? CELL_CENTER_ALT : CELL_CENTER}>{item.unit ?? "Pcs"}</td>
+                      <td style={isAlt ? CELL_CENTER_ALT : CELL_CENTER}>{Math.abs(item.quantity)}</td>
+                      <td style={isAlt ? CELL_BODY_ALT : CELL_BODY}></td>
+                    </tr>
+                  );
+                })}
+
+                {/* Empty filler rows (min 5 rows on last page) */}
                 {isLast && chunk.length < 5 && (["r0","r1","r2","r3","r4"] as const).slice(chunk.length).map((rowKey) => (
                   <tr key={`empty-${startIndex}-${rowKey}`}>
                     <td style={{ ...CELL_BODY, height: "32px" }}>&nbsp;</td>
@@ -150,32 +175,38 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
                     <td style={CELL_BODY}></td>
                   </tr>
                 ))}
-                {/* Summary rows — last page only */}
+
+                {/* Summary row — last page only */}
                 {isLast && (
                   <tr>
-                    <td style={CELL_BODY}></td>
-                    <td style={{ ...CELL_BODY, textAlign: "right", fontWeight: "bold", paddingRight: "6px" }}>មុខទំនិញសរុប</td>
-                    <td style={{ ...CELL_CENTER, fontWeight: "bold" }}>{items.length}</td>
-                    <td style={{ ...CELL_BODY, textAlign: "right", fontWeight: "bold", paddingRight: "6px" }}>បរិមាណសរុប</td>
-                    <td style={{ ...CELL_CENTER, fontWeight: "bold" }}>{items.reduce((sum, i) => sum + Math.abs(i.quantity), 0)}</td>
-                    <td style={CELL_BODY}></td>
+                    <td style={CELL_SUMMARY}></td>
+                    <td style={{ ...CELL_SUMMARY, textAlign: "right", fontWeight: "bold", paddingRight: "8px" }}>មុខទំនិញសរុប</td>
+                    <td style={{ ...CELL_SUMMARY, textAlign: "center", fontWeight: "bold" }}>{items.length}</td>
+                    <td style={{ ...CELL_SUMMARY, textAlign: "right", fontWeight: "bold", paddingRight: "8px" }}>បរិមាណសរុប</td>
+                    <td style={{ ...CELL_SUMMARY, textAlign: "center", fontWeight: "bold" }}>{items.reduce((sum, i) => sum + Math.abs(i.quantity), 0)}</td>
+                    <td style={CELL_SUMMARY}></td>
                   </tr>
                 )}
               </tbody>
             </table>
 
-            {/* Footer — last page only */}
+            {/* Signature footer — last page only */}
             {isLast && (
-              <div style={{ display: "flex", justifyContent: "space-evenly", marginTop: "60px", padding: "0 20px" }}>
+              <div style={{ display: "flex", justifyContent: "space-evenly", marginTop: "56px", padding: "0 20px" }}>
                 {(["ផ្នែកជាង", "ប្រធានឃ្លាំង"] as const).map((label) => (
-                  <div key={label} style={{ textAlign: "center", width: "120px" }}>
-                    <p style={{ fontSize: "13px", fontWeight: "bold", margin: "0 0 60px 0" }}>{label}</p>
-                    <div style={{ borderBottom: "1px solid black", width: "100%" }} />
-                    <p style={{ fontSize: "11px", color: "#666", marginTop: "4px" }}>ហត្ថលេខា</p>
+                  <div key={label} style={{ textAlign: "center", width: "130px" }}>
+                    <p style={{ fontSize: "13px", fontWeight: "bold", margin: "0 0 55px 0", color: NAVY }}>{label}</p>
+                    <div style={{ borderBottom: `2px solid ${NAVY}`, width: "100%" }} />
+                    <p style={{ fontSize: "11px", color: "#888", marginTop: "5px" }}>ហត្ថលេខា</p>
                   </div>
                 ))}
               </div>
             )}
+
+            {/* Page number — all pages */}
+            <div style={{ marginTop: "auto", paddingTop: "16px", textAlign: "right", fontSize: "10px", color: "#999" }}>
+              ទំព័រ {pageIndex + 1}/{chunks.length}
+            </div>
           </div>
         );
       })}

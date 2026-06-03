@@ -3,6 +3,7 @@
 import React from "react";
 import type { Transaction, TransactionPayload } from "@/src/types/transaction.types";
 import type { InventoryRecord } from "@/src/types/inventory.types";
+import { X, ArrowRightLeft } from "lucide-react";
 function formatDateTime(ts: string): string {
   const d = new Date(ts);
   const day = String(d.getDate()).padStart(2, "0");
@@ -129,6 +130,15 @@ function useCameraScanner(readerId: string, onScan: (decodedText: string) => Pro
 
 // ─── ViewTransactionModal ───────────────────────────────────────────────────
 
+function Row({ label, value }: Readonly<{ label: string; value: React.ReactNode }>) {
+  return (
+    <div className="flex items-start gap-3 py-2.5 border-b border-gray-100 last:border-0">
+      <span className="text-[13px] font-medium text-gray-400 w-24 shrink-0">{label}</span>
+      <span className="text-[13px] font-medium text-gray-800 break-all">{value}</span>
+    </div>
+  );
+}
+
 type ViewModalProps = {
   viewTarget: Transaction | null;
   onClose: () => void;
@@ -139,104 +149,96 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
   if (!viewTarget) return null;
 
   const totalQuantity = viewTarget.items.reduce((sum, i) => sum + Math.abs(i.quantity), 0);
+  const isReceive = viewTarget.transaction_type === "Receive";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
       <button className="absolute inset-0 bg-black/20 backdrop-blur-sm cursor-default" onClick={onClose} aria-label="Close modal" />
-      <div className="relative bg-white rounded-t-md sm:rounded-sm shadow-2xl w-full sm:max-w-xl flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-black shrink-0 bg-white">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-sm bg-black flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+            <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
+              <ArrowRightLeft size={17} strokeWidth={1.8} className="text-white" />
             </div>
             <div>
-              <h2 className="text-base font-black text-gray-900 uppercase tracking-tight">Transaction #{viewTarget.id}</h2>
-              <p className="text-[10px] text-gray-400 mt-0.5 font-medium" suppressHydrationWarning>{formatDateTime(viewTarget.transaction_date)}</p>
+              <h2 className="text-[15px] font-bold text-gray-900">Transaction #{viewTarget.id}</h2>
+              <p className="text-[13px] text-gray-400" suppressHydrationWarning>{formatDateTime(viewTarget.transaction_date)}</p>
             </div>
           </div>
-          <button onClick={onClose}
-            className="p-1.5 rounded-sm text-gray-400 hover:text-black hover:bg-gray-100 transition-all shrink-0 active:scale-95">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all shrink-0 active:scale-95 cursor-pointer"
+          >
+            <X size={16} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-white min-h-0">
-          {/* Meta */}
-          <div className="flex items-center gap-3">
-            {(() => {
-              const cfg = TYPE_CONFIG[viewTarget.transaction_type];
-              return (
-                <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
-                  {cfg.label}
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+
+            {/* Hero panel — full width on mobile, left column on sm+ */}
+            <div className={`sm:row-span-2 sm:border-r border-gray-100 ${isReceive ? "bg-green-50" : "bg-red-50"}`}>
+              <div className="w-full h-40 sm:h-full sm:min-h-52 flex flex-col items-center justify-center gap-3">
+                <span className={`text-5xl font-bold tabular-nums leading-none ${isReceive ? "text-green-600" : "text-red-500"}`}>
+                  {isReceive ? "+" : "-"}{totalQuantity}
                 </span>
-              );
-            })()}
-            <span className="text-[10px] text-gray-400 font-medium">by <span className="font-black text-gray-700">{viewTarget.performed_by_username}</span></span>
+                <span className={`text-[13px] font-semibold px-2.5 py-0.5 rounded-full border ${
+                  isReceive ? "text-green-600 bg-green-100 border-green-200" : "text-red-500 bg-red-100 border-red-200"
+                }`}>
+                  {viewTarget.transaction_type}
+                </span>
+              </div>
+            </div>
+
+            {/* Meta details */}
+            <div className="px-5 py-3">
+              <Row label="By" value={viewTarget.performed_by_username} />
+              <Row label="Date" value={<span suppressHydrationWarning>{formatDateTime(viewTarget.transaction_date).split(" ")[0]}</span>} />
+              <Row label="Items" value={`${viewTarget.items.length} ${viewTarget.items.length === 1 ? "item" : "items"}`} />
+              <Row label="Total Qty" value={totalQuantity} />
+            </div>
           </div>
 
-          {/* Item table */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-800 flex items-center gap-2">
-                <span className="w-3 h-0.5 bg-gray-200" />{" "}
-                Item Registry
-              </p>
-              <span className="text-[10px] font-bold text-gray-400 tabular-nums uppercase tracking-widest">
-                {viewTarget.items.length} ITEMS
-              </span>
-            </div>
-            <div className="border border-black overflow-hidden">
-              <div className="flex items-center gap-1 sm:gap-4 px-3 py-2 bg-slate-50 border-b border-black">
-                <span className="hidden sm:inline-block w-5 shrink-0 text-[10px] font-black text-gray-700 tracking-widest text-center">N0</span>
-                <span className="flex-1 sm:w-64 sm:shrink-0 text-[10px] font-black text-gray-700 uppercase tracking-widest text-left">Product</span>
-                <span className="w-28 shrink-0 text-[10px] font-black text-gray-700 uppercase tracking-widest">Barcode</span>
-                <span className="w-16 sm:w-24 shrink-0 text-[10px] font-black text-gray-700 uppercase tracking-widest text-right">Quantity</span>
+          {/* Items table */}
+          <div className="px-5 pb-5 pt-2">
+            <p className="text-[13px] font-medium text-gray-400 mb-3">Item Registry</p>
+            <div className="border border-gray-100 rounded-xl overflow-hidden">
+              <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100">
+                <span className="flex-1 text-[12px] font-medium text-gray-500">Product</span>
+                <span className="w-28 shrink-0 text-[12px] font-medium text-gray-500">Barcode</span>
+                <span className="w-14 shrink-0 text-[12px] font-medium text-gray-500 text-right">Qty</span>
               </div>
-              <div className="divide-y divide-black/10">
-                {viewTarget.items.map((item, idx) => {
+              <div className="divide-y divide-gray-50">
+                {viewTarget.items.map((item) => {
                   const rec = inventory.find((r) => r.id === item.inventory);
                   return (
-                    <div key={item.id} className="flex items-center gap-1 sm:gap-4 px-3 py-2.5 hover:bg-slate-50/60 transition-colors">
-                      <span className="hidden sm:inline-block w-5 shrink-0 text-[10px] font-black text-gray-300 text-center">{String(idx + 1).padStart(2, "0")}</span>
-                      <div className="flex-1 sm:w-64 sm:shrink-0 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{item.product_name}</p>
+                    <div key={item.id} className="flex items-center gap-4 px-4 py-2.5 hover:bg-gray-50/60 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium text-gray-900 truncate">{item.product_name}</p>
                       </div>
                       <div className="w-28 shrink-0 min-w-0">
-                        <span className="text-[11px] font-mono text-gray-800 truncate block">{rec?.product_details.barcode ?? "—"}</span>
+                        <span className="text-[12px] font-mono text-gray-400 truncate block">{rec?.product_details.barcode ?? "—"}</span>
                       </div>
-                      <div className="w-16 sm:w-24 shrink-0 text-right">
-                        <span className="text-sm font-black text-gray-900 tabular-nums">{Math.abs(item.quantity)}</span>
+                      <div className="w-14 shrink-0 text-right">
+                        <span className="text-[13px] font-bold text-gray-900 tabular-nums">{Math.abs(item.quantity)}</span>
                       </div>
                     </div>
                   );
-                })
-                }</div>
-            </div>
-            <div className="border border-black border-t-0 bg-slate-50">
-              <div className="grid grid-cols-2 divide-x divide-black/10">
-                <div className="flex flex-col items-center justify-center py-2 gap-0.5">
-                  <span className="text-[8px] font-black tracking-[0.2em] uppercase text-gray-400">Items</span>
-                  <span className="text-[15px] font-black tabular-nums text-gray-900 leading-none">{viewTarget.items.length}</span>
-                </div>
-                <div className="flex flex-col items-center justify-center py-2 gap-0.5">
-                  <span className="text-[8px] font-black tracking-[0.2em] uppercase text-gray-400">Quantities</span>
-                  <span className="text-[15px] font-black tabular-nums text-gray-900 leading-none">{totalQuantity}</span>
-                </div>
+                })}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-black px-5 py-3 shrink-0 bg-gray-50/50 flex justify-end">
-          <button type="button" onClick={onClose}
-            className="w-30 py-1.5 rounded-sm text-[11px] font-black tracking-widest uppercase text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 active:scale-[0.98] transition cursor-pointer">
+        {/* Footer */}
+        <div className="border-t border-gray-100 px-5 py-3 bg-white shrink-0 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 rounded-xl text-[13px] font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 active:scale-[0.97] transition cursor-pointer"
+          >
             Close
           </button>
         </div>
@@ -428,25 +430,19 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
       <button className="absolute inset-0 bg-black/20 backdrop-blur-sm cursor-default" onClick={onClose} aria-label="Close modal" />
-      <div className="relative bg-white rounded-t-md sm:rounded-sm shadow-2xl w-full sm:max-w-xl flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-black shrink-0 bg-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-sm bg-black flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-              </svg>
+            <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
+              <ArrowRightLeft size={17} strokeWidth={1.8} className="text-white" />
             </div>
             <div>
-              <h2 className="text-base font-black text-gray-900 uppercase tracking-tight">New Transaction</h2>
-
+              <h2 className="text-[15px] font-bold text-gray-900">New Transaction</h2>
             </div>
           </div>
-          <button onClick={onClose}
-            className="p-1.5 rounded-sm text-gray-400 hover:text-black hover:bg-gray-100 transition-all shrink-0 active:scale-95">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button onClick={onClose} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all shrink-0 active:scale-95 cursor-pointer">
+            <X size={16} strokeWidth={2.5} />
           </button>
         </div>
 
@@ -682,9 +678,9 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
 
-        <div className="border-t border-black px-5 py-3 shrink-0 space-y-3 bg-gray-50/50">
+        <div className="border-t border-gray-100 px-5 py-3 shrink-0 space-y-3 bg-white">
           {formError && (
-            <p className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 rounded-sm px-3 py-1 flex items-center gap-2 uppercase tracking-widest">
+            <p className="text-[13px] font-medium text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2 flex items-center gap-2">
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
@@ -693,18 +689,17 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
           )}
           <div className="flex justify-end gap-2">
             <button type="button" onClick={onClose}
-              className="w-30 py-1.5 rounded-sm text-[11px] font-black tracking-widest uppercase text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 active:scale-[0.98] transition cursor-pointer">
+              className="px-5 py-2 rounded-xl text-[13px] font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 active:scale-[0.97] transition cursor-pointer">
               Cancel
             </button>
             <button
               type="button"
               onClick={(e) => handleSubmit(e, false)}
               disabled={saving}
-              className="px-8 py-1.5 rounded-sm text-[11px] font-black tracking-widest uppercase text-white bg-black active:scale-[0.98] transition disabled:opacity-60 shadow-lg transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center"
+              className="px-6 py-2 rounded-xl text-[13px] font-medium text-white bg-orange-500 hover:bg-orange-600 active:scale-[0.97] transition disabled:opacity-60 cursor-pointer"
             >
               {saving ? "Creating..." : "Create"}
             </button>
-
           </div>
         </div>
       </div>
