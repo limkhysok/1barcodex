@@ -2,13 +2,13 @@ import React from "react";
 
 const NAVY = "#1c3456";
 const BORDER_COLOR = "#000000";
-const OUTER_BORDER = `0px solid ${NAVY}`;
+const OUTER_BORDER = `2px solid #000000`;
 
 export const ROWS_PER_PAGE = 25;
 
 const CELL_BASE: React.CSSProperties = {
   border: `1px solid ${BORDER_COLOR}`,
-  fontSize: "12px",
+  fontSize: "13px",
   lineHeight: "1.6",
   padding: "7px 5px",
   boxSizing: "border-box",
@@ -49,7 +49,7 @@ const CELL_SUMMARY: React.CSSProperties = {
   backgroundColor: "#ffffff",
   verticalAlign: "middle",
   borderTopColor: "#000000",
-  borderTopWidth: "0px",
+  borderTopWidth: "1px",
   fontSize: "14px",
   padding: "0px 5px 10px 5px",
 };
