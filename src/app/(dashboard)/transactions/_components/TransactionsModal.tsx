@@ -826,7 +826,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
       setTimeout(() => editScanInputRef.current?.focus(), 150);
       setEditTxType(editTarget.transaction_type);
       setEditItems(editTarget.items.map((item) => ({
-        id: crypto.randomUUID(),
+        id: generateId(),
         inventory: item.inventory,
         quantity: Math.abs(item.quantity),
       })));

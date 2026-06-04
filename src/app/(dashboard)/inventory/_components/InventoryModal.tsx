@@ -3,19 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { InventoryRecord, InventoryPayload } from "@/src/types/inventory.types";
 import type { Product } from "@/src/types/product.types";
-import { 
-  Package, 
-  LayoutGrid,
-  X, 
-  Plus, 
-  Check
-} from "lucide-react";
+import { Package, LayoutGrid, Plus, Check } from "lucide-react";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 const inputCls =
-  "w-full px-3 py-1.5 rounded-sm border border-slate-200 text-[13px] text-slate-800 placeholder:text-slate-300 outline-none focus:ring-2 focus:border-transparent bg-slate-50 focus:bg-white transition";
-const ringStyle = { "--tw-ring-color": "#FA4900" } as React.CSSProperties;
+  "w-full px-3 py-2 rounded-lg border border-gray-600 text-[13px] text-gray-800 placeholder:text-gray-700 outline-none focus:ring-1 focus:border-orange-400 focus:bg-white transition";
 
 function Field({
   label,
@@ -25,6 +18,7 @@ function Field({
   onChange,
   placeholder,
   required = true,
+  optional,
 }: Readonly<{
   label: string;
   id: string;
@@ -33,21 +27,26 @@ function Field({
   onChange: (v: string) => void;
   placeholder?: string;
   required?: boolean;
+  optional?: boolean;
 }>) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-gray-400">
-        {label}
-      </label>
+      <div className="flex items-center justify-between">
+        <label htmlFor={id} className="text-[13px] font-medium text-gray-800">
+          {label}
+        </label>
+        <span className={`text-[13px] font-medium px-2 py-0.5 rounded-full ${optional ? "text-gray-300 bg-gray-50" : "text-orange-500 bg-orange-50"}`}>
+          {optional ? "Optional" : "Required"}
+        </span>
+      </div>
       <input
         id={id}
         type={type}
         placeholder={placeholder}
         value={value}
-        required={required}
+        required={!optional && required}
         onChange={(e) => onChange(e.target.value)}
         className={inputCls}
-        style={ringStyle}
       />
     </div>
   );
@@ -85,10 +84,15 @@ function SiteCombobox({
   }
 
   return (
-    <div className="space-y-1.5" ref={ref}>
-      <label htmlFor="site" className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-gray-400">
-        Site
-      </label>
+    <div className={`space-y-1.5 ${open ? "relative z-60" : "relative z-0"}`} ref={ref}>
+      <div className="flex items-center justify-between">
+        <label htmlFor="site" className="text-[13px] font-medium text-gray-800">
+          Site
+        </label>
+        <span className="text-[13px] font-medium px-2 py-0.5 rounded-full text-orange-500 bg-orange-50">
+          Required
+        </span>
+      </div>
       <div className="relative">
         <input
           id="site"
@@ -103,32 +107,34 @@ function SiteCombobox({
             setOpen(true);
           }}
           className={inputCls}
-          style={ringStyle}
         />
         {open && (filtered.length > 0 || showCustom) && (
-          <ul className="absolute z-200 top-full mt-1 w-full bg-white border border-slate-200 rounded-sm shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1">
+          <ul className="absolute z-200 top-full mt-1.5 w-full bg-white border border-gray-400 shadow-xl rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 divide-y divide-gray-100">
             {filtered.map((site) => {
               const active = value === site;
               return (
-                <li key={site} >
+                <li key={site}>
                   <button
                     type="button"
                     onClick={() => select(site)}
-                    className={`w-full text-left px-3 py-1.5 text-[11px] font-semibold tracking-wide flex items-center justify-between gap-2 transition ${active ? "bg-black text-white" : "text-slate-700 hover:bg-slate-50"
-                      }`}
+                    className={`w-full text-left px-4 py-2 flex items-center justify-between transition-all duration-150 ${
+                      active ? "bg-orange-500 text-white" : "text-gray-700 hover:bg-orange-50"
+                    }`}
                   >
-                    {site}
-                    {active && <Check size={14} strokeWidth={3} />}
+                    <span className={`text-[13px] font-medium ${active ? "text-white" : "text-gray-700"}`}>
+                      {site}
+                    </span>
+                    {active && <Check size={13} strokeWidth={3} className="text-white" />}
                   </button>
                 </li>
               );
             })}
             {showCustom && (
-              <li className="border-t border-black">
+              <li>
                 <button
                   type="button"
                   onClick={() => select(input.trim())}
-                  className="w-full text-left px-3 py-2.5 text-[11px] font-semibold tracking-wide text-orange-500 hover:bg-orange-50 transition flex items-center gap-2"
+                  className="w-full text-left px-4 py-2 text-[13px] font-medium text-orange-500 hover:bg-orange-50 transition flex items-center gap-2"
                 >
                   <Plus size={14} strokeWidth={3} />
                   Use &ldquo;{input.trim()}&rdquo;
@@ -175,7 +181,7 @@ function FilterableProductSelect({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const selectedLabel = selected ? `${selected.product_name} (${selected.barcode})`.toLowerCase() : "";
-    if (!q || q === selectedLabel) return products.slice(0, 50); // limit for performance
+    if (!q || q === selectedLabel) return products.slice(0, 50);
     return products.filter(
       (p) =>
         p.product_name.toLowerCase().includes(q) ||
@@ -184,10 +190,15 @@ function FilterableProductSelect({
   }, [products, search, selected]);
 
   return (
-    <div className="space-y-1.5" ref={ref}>
-      <label htmlFor="product" className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-gray-400">
-        Product
-      </label>
+    <div className={`space-y-1.5 ${open ? "relative z-60" : "relative z-0"}`} ref={ref}>
+      <div className="flex items-center justify-between">
+        <label htmlFor="product" className="text-[13px] font-medium text-gray-800">
+          Product
+        </label>
+        <span className="text-[13px] font-medium px-2 py-0.5 rounded-full text-orange-500 bg-orange-50">
+          Required
+        </span>
+      </div>
       <div className="relative">
         <input
           id="product"
@@ -201,15 +212,14 @@ function FilterableProductSelect({
             setOpen(true);
           }}
           className={`${inputCls} pr-10`}
-          style={ringStyle}
         />
-        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
-          <LayoutGrid size={18} strokeWidth={2.5} />
+        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+          <LayoutGrid size={16} strokeWidth={2} />
         </div>
         {open && (
-          <ul className="absolute z-200 top-full mt-1 w-full bg-white border border-black rounded-sm shadow-lg overflow-hidden max-h-52 overflow-y-auto">
+          <ul className="absolute z-100 top-full mt-1.5 w-full bg-white border border-gray-400 shadow-xl rounded-lg overflow-hidden max-h-52 overflow-y-auto no-scrollbar divide-y divide-gray-100">
             {filtered.length === 0 && (
-              <li className="px-2 py-3 text-xs text-gray-400 font-black uppercase tracking-widest text-center">No products found</li>
+              <li className="px-4 py-3 text-[13px] text-gray-400 text-center">No products found</li>
             )}
             {filtered.map((p) => {
               const active = value === p.id;
@@ -222,10 +232,11 @@ function FilterableProductSelect({
                       setSearch(`${p.product_name} (${p.barcode})`);
                       setOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-2 text-[11px] font-semibold tracking-wide flex items-center justify-between gap-2 transition ${active ? "bg-black text-white" : "text-slate-700 hover:bg-slate-50"
-                      }`}
+                    className={`w-full text-left px-4 py-2 flex items-center gap-3 transition-all duration-150 ${
+                      active ? "bg-orange-500 text-white" : "text-gray-700 hover:bg-orange-50"
+                    }`}
                   >
-                    <div className="w-8 h-8 rounded-sm bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${active ? "bg-white/20" : "bg-gray-50 border border-gray-100"}`}>
                       {p.product_picture ? (
                         <img
                           src={`${BASE_URL}${p.product_picture}`}
@@ -233,11 +244,15 @@ function FilterableProductSelect({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <Package size={14} className="text-slate-200" />
+                        <Package size={14} className={active ? "text-white/60" : "text-gray-300"} />
                       )}
                     </div>
-                    <span className="truncate uppercase font-black">{p.product_name}</span>
-                    <span className={`ml-auto font-mono text-[10px] shrink-0 font-bold ${active ? "text-white/60" : "text-gray-400"}`}>{p.barcode}</span>
+                    <span className={`truncate text-[13px] font-medium ${active ? "text-white" : "text-gray-800"}`}>
+                      {p.product_name}
+                    </span>
+                    <span className={`ml-auto font-mono text-[13px] text-left text-gray-800 shrink-0 ${active ? "text-white/70" : "text-gray-400"}`}>
+                      {p.barcode}
+                    </span>
                   </button>
                 </li>
               );
@@ -281,27 +296,31 @@ export function InventoryModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
       <button className="absolute inset-0 bg-black/20 backdrop-blur-sm cursor-default" onClick={onClose} aria-label="Close modal" />
-      <div className="relative bg-white rounded-t-sm sm:rounded-sm shadow-2xl w-full sm:max-w-lg flex flex-col max-h-[90vh]">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-black shrink-0 bg-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-400 shrink-0 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-sm bg-black flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
               <Package size={18} className="text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="text-base font-black text-gray-900 uppercase tracking-tight">{editing ? "Edit Record" : "New Record"}</h2>
-              <p className="text-[10px] text-gray-400 font-medium">{editing ? "Update inventory details below" : "Fill in the inventory details below"}</p>
+              <h2 className="text-[15px] font-bold text-gray-900">{editing ? "Edit Record" : "New Record"}</h2>
+              <p className="text-[13px] text-gray-400">{editing ? "Update inventory details below" : "Fill in the inventory details below"}</p>
             </div>
           </div>
-          <button onClick={onClose}
-            className="p-1.5 rounded-sm text-gray-400 hover:text-black hover:bg-gray-100 transition-all shrink-0 active:scale-95">
-            <X size={20} strokeWidth={3} />
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all shrink-0 active:scale-95"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={onSave} className="flex-1 overflow-y-auto p-5 space-y-4 bg-white min-h-0">
+        <form onSubmit={onSave} className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/40 min-h-0 pb-32">
 
           <FilterableProductSelect
             products={products}
@@ -319,6 +338,7 @@ export function InventoryModal({
               id="location"
               value={form.location}
               placeholder="A1-Shelf-5"
+              optional
               onChange={(v) => setForm((f) => ({ ...f, location: v }))}
             />
           </div>
@@ -336,8 +356,8 @@ export function InventoryModal({
             if (!selectedProduct) return null;
             const needsReorder = form.quantity_on_hand <= selectedProduct.reorder_level;
             return (
-              <div className="grid grid-cols-[80px_1fr] gap-4 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-sm">
-                <div className="w-20 h-20 rounded-sm bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
+              <div className="grid grid-cols-[80px_1fr] gap-4 px-4 py-3.5 bg-orange-50/50 border border-orange-100 rounded-xl">
+                <div className="w-20 h-20 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
                   {selectedProduct.product_picture ? (
                     <img
                       src={`${BASE_URL}${selectedProduct.product_picture}`}
@@ -345,18 +365,19 @@ export function InventoryModal({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Package size={24} className="text-slate-100" />
+                    <Package size={24} className="text-gray-200" />
                   )}
                 </div>
                 <div className="flex flex-col justify-center gap-2">
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-gray-400 mb-1.5 leading-none">Status Assessment</p>
-                  <div className="flex items-center justify-between">
-                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full border ${needsReorder ? "bg-red-50 text-red-600 border-red-100" : "bg-green-50 text-green-600 border-green-100"
-                      }`}>
+                  <p className="text-[11px] font-medium text-gray-400 mb-1 leading-none">Status Assessment</p>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full border ${
+                      needsReorder ? "bg-red-50 text-red-600 border-red-100" : "bg-green-50 text-green-600 border-green-100"
+                    }`}>
                       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${needsReorder ? "bg-red-500" : "bg-green-500"}`} />
                       {needsReorder ? "Needs Reorder" : "Optimal Stock"}
                     </span>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <span className="text-[11px] font-medium text-gray-400">
                       Threshold: {selectedProduct.reorder_level} units
                     </span>
                   </div>
@@ -366,7 +387,10 @@ export function InventoryModal({
           })()}
 
           {formError && (
-            <p className="text-xs font-black uppercase tracking-widest text-red-500 bg-red-50 border border-red-100 px-4 py-2.5">
+            <p className="text-[13px] font-medium text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2 flex items-center gap-2">
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
               {formError}
             </p>
           )}
@@ -375,14 +399,14 @@ export function InventoryModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 rounded-sm text-[12px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer"
+              className="flex-1 py-2 rounded-xl text-[13px] font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 active:scale-[0.97] transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-2 rounded-sm text-[12px] font-black uppercase tracking-wider text-white bg-orange-500 hover:bg-orange-600 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-50"
+              className="flex-1 py-2 rounded-xl text-[13px] font-medium text-white bg-orange-500 hover:bg-orange-600 active:scale-[0.97] transition disabled:opacity-60"
             >
               {saveLabel}
             </button>
