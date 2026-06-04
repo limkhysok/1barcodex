@@ -45,9 +45,10 @@ export async function scanBarcode(barcode: string): Promise<ScanResult> {
   try {
     const { data } = await api.get<ScanResult>("/v1/inventory/scan/", { params: { barcode } });
     return data;
-  } catch (err: any) {
-    if (err?.response?.status === 404) {
-      return { found: false, inventory: [], detail: err.response.data?.detail || "Not found" };
+  } catch (err: unknown) {
+    const error = err as { response?: { status?: number; data?: { detail?: string } } };
+    if (error?.response?.status === 404) {
+      return { found: false, inventory: [], detail: error.response.data?.detail || "Not found" };
     }
     throw err;
   }

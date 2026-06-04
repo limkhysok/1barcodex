@@ -166,7 +166,7 @@ export default function ProductsClient({
       })
       .catch(() => setError("Failed to load products."))
       .finally(() => { setLoading(false); setLoadingMore(false); });
-  }, [buildFilters]);
+  }, [buildFilters, mergeProducts]);
 
   // Debounce re-fetch when filters change (reset to page 1)
   useEffect(() => {

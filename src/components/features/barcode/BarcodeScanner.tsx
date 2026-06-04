@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
 interface Props {
@@ -28,10 +28,17 @@ export default function BarcodeScanner({ onScan }: Readonly<Props>) {
     const [facingMode, setFacingMode]   = useState<"environment" | "user">("environment");
     const html5QrCodeRef                = useRef<Html5Qrcode | null>(null);
 
+    const stopCamera = useCallback(async () => {
+        const qr = html5QrCodeRef.current;
+        html5QrCodeRef.current = null;
+        setScanning(false);
+        if (!qr) return;
+        try { await qr.stop(); qr.clear(); } catch { /* ignore */ }
+    }, []);
+
     useEffect(() => {
         return () => { stopCamera(); };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [stopCamera]);
 
     async function startCamera(mode: "environment" | "user" = facingMode) {
         setCameraError(null);
@@ -60,13 +67,7 @@ export default function BarcodeScanner({ onScan }: Readonly<Props>) {
         }
     }
 
-    async function stopCamera() {
-        const qr = html5QrCodeRef.current;
-        html5QrCodeRef.current = null;
-        setScanning(false);
-        if (!qr) return;
-        try { await qr.stop(); qr.clear(); } catch { /* ignore */ }
-    }
+
 
     async function switchFacing() {
         const newMode = facingMode === "environment" ? "user" : "environment";

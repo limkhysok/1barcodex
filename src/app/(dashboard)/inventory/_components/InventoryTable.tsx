@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import type { InventoryRecord } from "@/src/types/inventory.types";
 import {
   Edit2,
@@ -141,10 +142,11 @@ export function InventoryTable({
           <button type="button" onClick={() => onView(r)} className="w-full text-left flex flex-col cursor-pointer flex-1">
             <div className="relative h-36 w-full bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors">
               {r.product_details.product_picture ? (
-                <img
+                <Image
                   src={`${BASE_URL}${r.product_details.product_picture}`}
                   alt={r.product_details.product_name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
                 <Package size={28} strokeWidth={1} className="opacity-20" />

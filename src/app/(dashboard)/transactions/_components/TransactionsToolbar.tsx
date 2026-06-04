@@ -14,7 +14,6 @@ interface TransactionsToolbarProps {
   setTypeFilter: (v: string) => void;
   dateFilter: string;
   setDateFilter: (v: string) => void;
-  totalResults: number;
 }
 
 function DropdownFilter({
@@ -100,7 +99,6 @@ function DropdownFilter({
 export function TransactionsToolbar({
   typeFilter, setTypeFilter,
   dateFilter, setDateFilter,
-  totalResults,
 }: Readonly<TransactionsToolbarProps>) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersRef = useRef<HTMLDivElement>(null);

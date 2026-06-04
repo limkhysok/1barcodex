@@ -181,8 +181,8 @@ export default function InventoryClient({
       fetchInventory(1, false);
       fetchStats();
       getProducts().then(setPaginatedProducts).catch(() => { });
-    } catch (err: any) {
-      if (err?.response?.status === 409) {
+    } catch (err: unknown) {
+      if ((err as { response?: { status?: number } })?.response?.status === 409) {
         setFormError("AN INVENTORY RECORD FOR THIS PRODUCT, SITE, AND LOCATION ALREADY EXISTS.");
       } else {
         setFormError("FAILED TO SAVE. PLEASE VERIFY INPUTS");
@@ -280,8 +280,8 @@ export default function InventoryClient({
       const isDesc = ordering.startsWith("-");
       const field = isDesc ? ordering.substring(1) : ordering;
 
-      list.sort((a: any, b: any) => {
-        let valA: any, valB: any;
+      list.sort((a: InventoryRecord, b: InventoryRecord) => {
+        let valA: string | number, valB: string | number;
 
         if (field === "product_name") {
           valA = (a.product_details?.product_name || "").toLowerCase();
@@ -290,8 +290,8 @@ export default function InventoryClient({
           valA = new Date(a.updated_at).getTime();
           valB = new Date(b.updated_at).getTime();
         } else {
-          valA = a[field];
-          valB = b[field];
+          valA = a[field as keyof InventoryRecord] as string | number;
+          valB = b[field as keyof InventoryRecord] as string | number;
         }
 
         if (valA < valB) return isDesc ? 1 : -1;

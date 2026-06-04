@@ -102,14 +102,16 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   useEffect(() => {
     const access = localStorage.getItem("access_token");
     if (!access) {
-      clearAuth();
-      setIsLoading(false);
+      requestAnimationFrame(() => {
+        clearAuth();
+        setIsLoading(false);
+      });
       return;
     }
     const decoded = decodeToken(access);
     if (decoded) {
       // Early state from token for faster UI gating
-      setUser(prev => ({ ...(prev || {} as User), ...decoded }));
+      requestAnimationFrame(() => setUser(prev => ({ ...(prev || {} as User), ...decoded })));
     }
 
     getMe()
@@ -136,7 +138,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
 
     const delay = exp - Date.now();
     if (delay <= 0) {
-      validateToken();
+      requestAnimationFrame(() => validateToken());
       return;
     }
 

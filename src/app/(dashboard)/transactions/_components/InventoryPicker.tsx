@@ -19,11 +19,14 @@ const InventoryPicker: React.FC<InventoryPickerProps> = ({ inventory, value, onC
   const dropRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [prevValue, setPrevValue] = useState(value);
+
   const selected = inventory.find((r) => r.id === value);
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     setSearch(selected ? `${selected.product_details.product_name} (stock: ${selected.quantity_on_hand})` : "");
-  }, [value, selected]);
+  }
 
   useEffect(() => {
     function handler(e: MouseEvent) {

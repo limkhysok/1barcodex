@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/src/context/AuthContext";
 import type { User } from "@/src/types/auth.types";
 import { getStaffUsers, createStaffUser, updateStaffUser, deleteStaffUser } from "@/src/services/user.service";
@@ -20,7 +20,7 @@ import {
   EyeOff
 } from "lucide-react";
 
-type SortDir = "asc" | "desc" | "";
+
 
 const SortIcon = ({ field, currentOrdering }: { field: string; currentOrdering: string }) => {
   const isAsc = currentOrdering === field;
@@ -141,7 +141,7 @@ export default function StaffClient() {
     setModalOpen(true);
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
@@ -150,7 +150,7 @@ export default function StaffClient() {
         toast.success("Staff member created successfully.");
       } else if (selectedUser) {
         // Only send password if it was changed
-        const updateData: any = { ...formData };
+        const updateData: Partial<typeof formData> = { ...formData };
         if (!updateData.password) {
           delete updateData.password;
         }
@@ -159,8 +159,8 @@ export default function StaffClient() {
       }
       setModalOpen(false);
       loadStaff();
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || "An error occurred. Please check your data.";
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "An error occurred. Please check your data.";
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -199,9 +199,9 @@ export default function StaffClient() {
       const isDesc = ordering.startsWith("-");
       const field = isDesc ? ordering.substring(1) : ordering;
 
-      list.sort((a: any, b: any) => {
-        const valA = (a[field] || "").toString().toLowerCase();
-        const valB = (b[field] || "").toString().toLowerCase();
+      list.sort((a: User, b: User) => {
+        const valA = (a[field as keyof User] || "").toString().toLowerCase();
+        const valB = (b[field as keyof User] || "").toString().toLowerCase();
         if (valA < valB) return isDesc ? 1 : -1;
         if (valA > valB) return isDesc ? -1 : 1;
         return 0;

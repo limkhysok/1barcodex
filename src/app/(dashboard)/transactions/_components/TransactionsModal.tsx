@@ -18,10 +18,6 @@ function formatDateTime(ts: string): string {
 }
 
 
-const TYPE_CONFIG: Record<string, { label: string; bg: string; text: string; dot: string }> = {
-  Receive: { label: "Receive", bg: "bg-green-50", text: "text-green-600", dot: "bg-green-500" },
-  Sale: { label: "Sale", bg: "bg-red-50", text: "text-red-600", dot: "bg-red-500" },
-};
 
 type ItemDraft = { id: string; inventory: number; quantity: number };
 
@@ -113,9 +109,10 @@ function useCameraScanner(readerId: string, onScan: (decodedText: string) => Pro
           handleCameraScan,
           () => { } // ignore errors
         );
-      } catch (err: any) {
-        console.warn("Camera start error:", err);
-        setCameraError(err.message || "Could not start camera.");
+      } catch (err: unknown) {
+        const error = err as Error;
+        console.warn("Camera start error:", error);
+        setCameraError(error.message || "Could not start camera.");
         setIsCameraOpen(false);
       }
     }, 100);
@@ -149,10 +146,9 @@ function Row({ label, value }: Readonly<{ label: string; value: React.ReactNode 
 type ViewModalProps = {
   viewTarget: Transaction | null;
   onClose: () => void;
-  inventory: InventoryRecord[];
 };
 
-export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onClose, inventory }) => {
+export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onClose }) => {
   if (!viewTarget) return null;
 
   const totalQuantity = viewTarget.items.reduce((sum, i) => sum + Math.abs(i.quantity), 0);
@@ -386,7 +382,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
       } else {
         setScanFeedback({ ok: true, msg: `Added: ${productName} (${targetRecord.site})` });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Unexpected scan error:", err);
       setScanFeedback({ ok: false, msg: `System Error: Unable to scan "${q}"` });
     }
@@ -425,7 +421,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
       setExtraRecords([]); // Clear cache on close
       if (stopCamera) stopCamera();
     }
-  }, [isOpen]);
+  }, [isOpen, stopCamera]);
 
   if (!isOpen) return null;
 
@@ -799,7 +795,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
       } else {
         setScanFeedback({ ok: true, msg: `Added: ${productName} (${targetRecord.site})` });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Unexpected scan error:", err);
       setScanFeedback({ ok: false, msg: `System Error: Unable to scan "${q}"` });
     }
@@ -865,7 +861,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
       setExtraRecords([]);
       if (stopCamera) stopCamera();
     }
-  }, [editTarget]);
+  }, [editTarget, stopCamera]);
 
   if (!editTarget) return null;
 

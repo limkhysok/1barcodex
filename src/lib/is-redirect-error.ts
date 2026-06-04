@@ -1,9 +1,5 @@
 export function isRedirectError(e: unknown): boolean {
-  return (
-    typeof e === "object" &&
-    e !== null &&
-    "digest" in e &&
-    typeof (e as { digest: unknown }).digest === "string" &&
-    (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")
-  );
+  if (typeof e !== "object" || e === null || !("digest" in e)) return false;
+  const digest = e.digest;
+  return typeof digest === "string" && digest.startsWith("NEXT_REDIRECT");
 }

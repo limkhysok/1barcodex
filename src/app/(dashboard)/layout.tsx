@@ -17,11 +17,7 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
   const userSetCollapse = useRef(false);
 
   useEffect(() => {
-    // Apply breakpoint defaults on mount only (no user override yet)
-    const init = window.innerWidth;
-    if (init >= 1024) setSidebarCollapsed(false);
-    else if (init >= 768) setSidebarCollapsed(true);
-
+    // Apply breakpoint defaults asynchronously to avoid cascading render warning
     function handleResize() {
       const w = window.innerWidth;
       if (!userSetCollapse.current) {
@@ -30,6 +26,10 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
       }
       if (w >= 768) setSidebarOpen(false);
     }
+    
+    // Initial check
+    requestAnimationFrame(handleResize);
+    
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);

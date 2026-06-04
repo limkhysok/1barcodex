@@ -8,6 +8,7 @@ import type { PaginatedInventory, PaginatedTransactions } from "@/src/types/api.
 type TxTypeFilter = "" | "Receive" | "Sale";
 type TemplateItem = { barcode: string; product_name: string; unit: string; quantity: number };
 import { useAuth } from "@/src/context/AuthContext";
+import { useReactToPrint } from "react-to-print";
 import { TransactionsToolbar } from "./_components/TransactionsToolbar";
 import StatsOverview from "./_components/StatsOverview";
 import TransactionsTable from "./_components/TransactionsTable";
@@ -135,38 +136,22 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
     return () => observer.disconnect();
   }, [hasMore, loadingMore, loading, page, fetchAll]);
 
+  const handleNativePrint = useReactToPrint({
+    contentRef: templateRef,
+    documentTitle: "Transaction",
+    onAfterPrint: () => setPendingExportItems([]),
+  });
+
   const exportTemplateAsPdf = async (items: TemplateItem[], txType: "Sale" | "Receive") => {
     setPendingExportItems(items);
     setPendingExportType(txType);
     await waitTwoFrames();
     try {
-      try {
-        const face = new FontFace("KantumruyPro", "url(/fonts/KantumruyPro-Regular.ttf)");
-        document.fonts.add(await face.load());
-        await document.fonts.ready;
-      } catch { /* already loaded */ }
-      const html2canvas = (await import("html2canvas")).default;
-      const { default: jsPDF } = await import("jspdf");
-      const doc = new jsPDF({ orientation: "portrait", format: "a4", unit: "mm", compress: true });
-      const pdfW = doc.internal.pageSize.getWidth();
-      const pdfH = doc.internal.pageSize.getHeight();
-      const pageNodes = Array.from(templateRef.current?.children ?? []) as HTMLElement[];
-      for (let i = 0; i < pageNodes.length; i++) {
-        const pageNode = pageNodes[i];
-        const canvas = await html2canvas(pageNode, {
-          scale: 3, useCORS: true, backgroundColor: "#ffffff",
-          logging: false, width: pageNode.scrollWidth, height: pageNode.scrollHeight,
-        });
-        if (i > 0) doc.addPage();
-        doc.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, pdfW, pdfH);
+      if (handleNativePrint) {
+        handleNativePrint();
       }
-      const pdfBlob = doc.output("blob");
-      const url = URL.createObjectURL(pdfBlob);
-      window.open(url, "_blank");
-      URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Export failed", err);
-    } finally {
+      console.error("Print failed", err);
       setPendingExportItems([]);
     }
   };
@@ -316,7 +301,6 @@ const handlePrint = async (t: Transaction) => {
           setTypeFilter={setTypeFilter as (v: string) => void}
           dateFilter={dateFilter}
           setDateFilter={setDateFilter}
-          totalResults={displayed.length}
         />
       </div>
 
@@ -368,7 +352,7 @@ const handlePrint = async (t: Transaction) => {
         formError={editFormError}
       />
 
-      <ViewTransactionModal viewTarget={viewTarget} onClose={() => setViewTarget(null)} inventory={inventory} />
+      <ViewTransactionModal viewTarget={viewTarget} onClose={() => setViewTarget(null)} />
 
       <DeleteConfirmModal
         deleteTarget={deleteTarget}
@@ -377,19 +361,17 @@ const handlePrint = async (t: Transaction) => {
         deleting={deleting}
       />
 
-      {/* Hidden template rendered off-screen for html2canvas capture */}
-      <div
-        ref={templateRef}
-        aria-hidden="true"
-        style={{ position: "absolute", left: "-9999px", top: 0, zIndex: -1, pointerEvents: "none" }}
-      >
-        {pendingExportItems.length > 0 && (
-          <TransactionTemplate
-            transaction={{ transaction_type: pendingExportType, items: pendingExportItems }}
-            autoDate={pdfAutoDate}
-            date={pdfDate}
-          />
-        )}
+      {/* Hidden template rendered off-screen for printing */}
+      <div style={{ display: "none" }}>
+        <div ref={templateRef}>
+          {pendingExportItems.length > 0 && (
+            <TransactionTemplate
+              transaction={{ transaction_type: pendingExportType, items: pendingExportItems }}
+              autoDate={pdfAutoDate}
+              date={pdfDate}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

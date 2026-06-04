@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import type { InventoryRecord, InventoryPayload } from "@/src/types/inventory.types";
 import type { Product } from "@/src/types/product.types";
 import { Package, LayoutGrid, Plus, Check } from "lucide-react";
@@ -159,13 +160,15 @@ function FilterableProductSelect({
 }>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [prevValue, setPrevValue] = useState(value);
   const ref = useRef<HTMLDivElement>(null);
 
   const selected = products.find((p) => p.id === value);
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     setSearch(selected ? `${selected.product_name} (${selected.barcode})` : "");
-  }, [value, selected]);
+  }
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -236,12 +239,13 @@ function FilterableProductSelect({
                       active ? "bg-orange-500 text-white" : "text-gray-700 hover:bg-orange-50"
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${active ? "bg-white/20" : "bg-gray-50 border border-gray-100"}`}>
+                    <div className={`relative w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${active ? "bg-white/20" : "bg-gray-50 border border-gray-100"}`}>
                       {p.product_picture ? (
-                        <img
+                        <Image
                           src={`${BASE_URL}${p.product_picture}`}
                           alt={p.product_name}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       ) : (
                         <Package size={14} className={active ? "text-white/60" : "text-gray-300"} />
@@ -357,12 +361,13 @@ export function InventoryModal({
             const needsReorder = form.quantity_on_hand <= selectedProduct.reorder_level;
             return (
               <div className="grid grid-cols-[80px_1fr] gap-4 px-4 py-3.5 bg-orange-50/50 border border-orange-100 rounded-xl">
-                <div className="w-20 h-20 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
+                <div className="relative w-20 h-20 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
                   {selectedProduct.product_picture ? (
-                    <img
+                    <Image
                       src={`${BASE_URL}${selectedProduct.product_picture}`}
                       alt={selectedProduct.product_name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <Package size={24} className="text-gray-200" />

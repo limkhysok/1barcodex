@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import type { InventoryRecord } from "@/src/types/inventory.types";
 import { Package } from "lucide-react";
 
@@ -88,8 +89,8 @@ export function InventoryDetailModal({ open, record, onClose }: Readonly<Invento
         {/* Image */}
         <div className="px-5 pt-4">
           {imageUrl ? (
-            <div className="w-full h-40 rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
-              <img src={imageUrl} alt={record.product_details.product_name} className="w-full h-full object-contain" />
+            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+              <Image src={imageUrl} alt={record.product_details.product_name} fill className="object-contain" />
             </div>
           ) : (
             <div className="w-full h-40 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center gap-2">

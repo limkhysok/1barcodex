@@ -114,7 +114,7 @@ async function handleApiProxy(request: NextRequest): Promise<Response | null> {
       headers,
       ...(hasBody ? { body: request.body, duplex: "half" } : {}),
       redirect: "manual", 
-    } as RequestInit);
+    });
 
     const resHeaders = new Headers(upstream.headers);
     resHeaders.delete("transfer-encoding");

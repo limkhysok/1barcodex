@@ -1,8 +1,7 @@
 import React from "react";
 
-const NAVY = "#1c3456";
 const BORDER_COLOR = "#000000";
-const OUTER_BORDER = `2px solid #000000`;
+const OUTER_BORDER = `1px solid #000000`;
 
 export const ROWS_PER_PAGE = 25;
 
@@ -10,7 +9,7 @@ const CELL_BASE: React.CSSProperties = {
   border: `1px solid ${BORDER_COLOR}`,
   fontSize: "13px",
   lineHeight: "1.6",
-  padding: "7px 5px",
+  padding: "5px 5px 0px 5px",
   boxSizing: "border-box",
 };
 
@@ -22,8 +21,7 @@ const CELL_HEADER: React.CSSProperties = {
   fontWeight: "normal",
   fontSize: "14px",
   verticalAlign: "middle",
-  padding: "0px 5px 10px 5px",
-  
+  padding: "5px",
 };
 
 const CELL_BODY: React.CSSProperties = {
@@ -33,7 +31,7 @@ const CELL_BODY: React.CSSProperties = {
   verticalAlign: "middle",
   textAlign: "center",
   fontSize: "13px",
-  padding: "0px 5px 10px 5px",
+  padding: "5px",
 };
 
 const CELL_BODY_ALT: React.CSSProperties = {
@@ -51,11 +49,11 @@ const CELL_SUMMARY: React.CSSProperties = {
   borderTopColor: "#000000",
   borderTopWidth: "1px",
   fontSize: "14px",
-  padding: "0px 5px 10px 5px",
+  padding: "5px",
 };
 
 const TITLE: Record<"Sale" | "Receive", string> = {
-  Sale:    "ប័ណ្ណស្នើបើកគ្រឿងបន្លាស់",
+  Sale: "ប័ណ្ណស្នើបើកគ្រឿងបន្លាស់",
   Receive: "ប័ណ្ណស្នើបញ្ចូលគ្រឿងបន្លាស់",
 };
 
@@ -83,12 +81,12 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
   const title = TITLE[transaction.transaction_type];
   const displayDate = autoDate && date
     ? (() => {
-        const d = new Date(date);
-        const dd = String(d.getDate()).padStart(2, "0");
-        const mm = String(d.getMonth() + 1).padStart(2, "0");
-        const yy = String(d.getFullYear());
-        return `ថ្ងៃទី ${dd} ខែ ${mm} ឆ្នាំ ${yy}`;
-      })()
+      const d = new Date(date);
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yy = String(d.getFullYear());
+      return `ថ្ងៃទី ${dd} ខែ ${mm} ឆ្នាំ ${yy}`;
+    })()
     : "ថ្ងៃទី....... ខែ....... ឆ្នាំ ........";
   const items = transaction.items;
 
@@ -174,7 +172,7 @@ const TransactionTemplate = ({ transaction, autoDate, date }: {
                 })}
 
                 {/* Empty filler rows (min 5 rows on last page) */}
-                {isLast && chunk.length < 5 && (["r0","r1","r2","r3","r4"] as const).slice(chunk.length).map((rowKey) => (
+                {isLast && chunk.length < 5 && (["r0", "r1", "r2", "r3", "r4"] as const).slice(chunk.length).map((rowKey) => (
                   <tr key={`empty-${startIndex}-${rowKey}`}>
                     <td style={{ ...CELL_BODY, height: "32px" }}>&nbsp;</td>
                     <td style={CELL_BODY}></td>
