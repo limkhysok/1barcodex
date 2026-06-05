@@ -116,7 +116,7 @@ function SidebarContent({
       <div className="flex items-center h-12.5 border-b border-gray-400 overflow-hidden shrink-0 bg-white">
         {/* Logo pinned in same fixed-width cell as nav icons — never moves */}
         <div className="shrink-0 flex items-center justify-center w-12.5">
-          <Image src="/ctk.svg" alt="CTK" width={16} height={22} priority className="h-auto" />
+          <Image src="/ctk.svg" alt="CTK" width={16} height={22} priority className="w-4 h-auto" />
         </div>
 
         <div

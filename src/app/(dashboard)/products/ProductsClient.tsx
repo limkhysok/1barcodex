@@ -24,6 +24,54 @@ function fetchPageSilent(pg: number) {
   return getProducts(undefined, { page: pg }).catch(() => null);
 }
 
+// --- filter-meta cache (categories + suppliers) ---
+// Module-level promise deduplicates StrictMode double-mount; sessionStorage skips re-fetch on navigation.
+const FILTER_CACHE_KEY = "products:filter_meta:v1";
+
+function readFilterCache(): { categories: string[]; suppliers: string[] } | null {
+  if (globalThis.window === undefined) return null;
+  try {
+    const raw = sessionStorage.getItem(FILTER_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as { categories: string[]; suppliers: string[] }) : null;
+  } catch { return null; }
+}
+
+function writeFilterCache(categories: string[], suppliers: string[]) {
+  try { sessionStorage.setItem(FILTER_CACHE_KEY, JSON.stringify({ categories, suppliers })); } catch { /* quota */ }
+}
+
+let _filterMetaInFlight: Promise<{ categories: string[]; suppliers: string[] }> | null = null;
+
+function getOrFetchFilterMeta(initial: PaginatedProducts): Promise<{ categories: string[]; suppliers: string[] }> {
+  const cached = readFilterCache();
+  if (cached) return Promise.resolve(cached);
+  if (_filterMetaInFlight) return _filterMetaInFlight;
+
+  _filterMetaInFlight = (async () => {
+    const cats = new Set(initial.results.map((p) => p.category));
+    const sups = new Set(initial.results.map((p) => p.supplier));
+    if (initial.next && initial.results.length > 0) {
+      const totalPages = Math.ceil(initial.count / initial.results.length);
+      const pages = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, i) => fetchPageSilent(i + 2))
+      );
+      for (const data of pages) {
+        if (!data) continue;
+        for (const p of data.results) { cats.add(p.category); sups.add(p.supplier); }
+      }
+    }
+    const result = {
+      categories: Array.from(cats).sort((a, b) => a.localeCompare(b)),
+      suppliers: Array.from(sups).sort((a, b) => a.localeCompare(b)),
+    };
+    writeFilterCache(result.categories, result.suppliers);
+    _filterMetaInFlight = null;
+    return result;
+  })();
+
+  return _filterMetaInFlight;
+}
+
 function getSortParam(field: string, dir: SortDir): string | undefined {
   if (!field || !dir) return undefined;
   return dir === "desc" ? `-${field}` : field;
@@ -98,29 +146,21 @@ export default function ProductsClient({
     Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b))
   );
 
-  // On mount: fetch all remaining pages in parallel to populate category/supplier dropdowns
+  // On mount: seed category/supplier dropdowns — cached after first fetch, never re-fetches on navigation
   useEffect(() => {
     let cancelled = false;
-    async function discover() {
-      const pageSize = initialPaginated.results.length;
-      if (!pageSize || !initialPaginated.next) return; // only 1 page, already seeded
-      const totalPages = Math.ceil(initialPaginated.count / pageSize);
-      const results = await Promise.all(
-        Array.from({ length: totalPages - 1 }, (_, i) => fetchPageSilent(i + 2))
-      );
+    getOrFetchFilterMeta(initialPaginated).then((meta) => {
       if (cancelled) return;
       let catChanged = false, supChanged = false;
-      for (const data of results) {
-        if (!data) continue;
-        for (const p of data.results) {
-          if (!allCategoriesRef.current.has(p.category)) { allCategoriesRef.current.add(p.category); catChanged = true; }
-          if (!allSuppliersRef.current.has(p.supplier)) { allSuppliersRef.current.add(p.supplier); supChanged = true; }
-        }
+      for (const c of meta.categories) {
+        if (!allCategoriesRef.current.has(c)) { allCategoriesRef.current.add(c); catChanged = true; }
+      }
+      for (const s of meta.suppliers) {
+        if (!allSuppliersRef.current.has(s)) { allSuppliersRef.current.add(s); supChanged = true; }
       }
       if (catChanged) setCategories(Array.from(allCategoriesRef.current).sort((a, b) => a.localeCompare(b)));
       if (supChanged) setSuppliers(Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b)));
-    }
-    discover();
+    });
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

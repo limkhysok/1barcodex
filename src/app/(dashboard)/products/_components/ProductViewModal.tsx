@@ -40,7 +40,7 @@ export function ProductViewModal({ product, onClose, onEdit, onDelete, canEdit, 
         onClick={onClose}
         aria-label="Close modal"
       />
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 bg-white">

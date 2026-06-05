@@ -52,7 +52,7 @@ export default function DashboardNavbar({ onMenuClick }: Readonly<Props>) {
 
           <Link href="/dashboard" className="md:hidden flex items-center gap-2 shrink-0">
             <div className="flex items-center justify-center shrink-0 w-6">
-              <Image src="/ctk.svg" alt="CTK" width={16} height={22} priority style={{ height: "auto" }} />
+              <Image src="/ctk.svg" alt="CTK" width={16} height={22} priority className="w-4 h-auto" />
             </div>
             <div className="flex flex-col leading-none">
               <p className="text-[17px] font-black tracking-tight  text-gray-900">CTK</p>

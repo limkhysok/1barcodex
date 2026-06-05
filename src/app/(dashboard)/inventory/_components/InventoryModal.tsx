@@ -348,7 +348,7 @@ export function InventoryModal({
           </div>
 
           <Field
-            label="Qty on Hand"
+            label="Quantity on Hand"
             id="quantity_on_hand"
             type="number"
             value={form.quantity_on_hand}

@@ -476,9 +476,9 @@
               </div>
             </div>
 
-            <div className="w-full min-w-0 relative h-64 sm:h-90 md:h-110 lg:h-120 xl:h-120 p-5 pl-2">
+            <div className="w-full min-w-0 relative h-64 sm:h-[22.5rem] md:h-[27.5rem] lg:h-[30rem] xl:h-[30rem] p-5 pl-2">
               {mounted && chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                   <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#1a1a1a', fontSize: 11, fontWeight: 400 }} dy={10} />

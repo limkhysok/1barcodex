@@ -47,7 +47,7 @@ function useCameraScanner(readerId: string, onScan: (decodedText: string) => Pro
   const lastScannedRef = React.useRef<{ code: string; time: number } | null>(null);
   const [lastScanSuccess, setLastScanSuccess] = React.useState(false);
 
-  const stopCamera = async () => {
+  const stopCamera = React.useCallback(async () => {
     const qr = html5QrCodeRef.current;
     if (qr?.isScanning) {
       try {
@@ -59,7 +59,7 @@ function useCameraScanner(readerId: string, onScan: (decodedText: string) => Pro
     }
     html5QrCodeRef.current = null;
     setIsCameraOpen(false);
-  };
+  }, []);
 
   const handleCameraScan = async (decodedText: string) => {
     const now = Date.now();
@@ -199,6 +199,7 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
             <div className="px-5 py-3">
               <Row label="Date" value={<span suppressHydrationWarning>{formatDateTime(viewTarget.transaction_date).split(" ")[0]}</span>} />
               <Row label="Items" value={`${viewTarget.items.length} ${viewTarget.items.length === 1 ? "item" : "items"}`} />
+              <Row label="Total Qty" value={totalQuantity} />
               <Row label="By" value={viewTarget.performed_by_username} />
 
 
@@ -208,26 +209,26 @@ export const ViewTransactionModal: React.FC<ViewModalProps> = ({ viewTarget, onC
           {/* Items table */} 
           <div className="px-5 pb-5 pt-5">
             <div className="border border-gray-600 rounded-lg overflow-hidden">
-              <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-500">
-                <span className="text-sm font-medium text-gray-700 w-28 shrink-0">No</span>
-                <span className="flex-1 text-sm font-medium text-gray-700">Product</span>
-                <span className="w-28 shrink-0 text-sm font-medium text-gray-700">Barcode</span>
-                <span className="w-14 shrink-0 text-sm font-medium text-gray-700 text-right">Quantity</span>
+              <div className="grid grid-cols-[8%_1fr_26%_12%] items-center gap-x-2 px-4 py-2 bg-gray-50 border-b border-gray-500">
+                <span className="text-sm font-medium text-gray-700">No</span>
+                <span className="text-sm font-medium text-gray-700">Product</span>
+                <span className="text-sm font-medium text-gray-700">Barcode</span>
+                <span className="text-sm font-medium text-gray-700 text-right">Quantity</span>
               </div>
               <div className="divide-y divide-gray-600">
                 {viewTarget.items.map((item, idx) => {
                   return (
-                    <div key={item.id} className="flex items-center gap-4 px-4 py-2.5 hover:bg-gray-50/60 transition-colors">
-                      <div className="w-28 shrink-0">
+                    <div key={item.id} className="grid grid-cols-[8%_1fr_26%_12%] items-center gap-x-2 px-4 py-2.5 hover:bg-gray-50/60 transition-colors">
+                      <div>
                         <span className="text-[13px] font-medium text-gray-800 tabular-nums">{String(idx + 1).padStart(2, "0")}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0">
                         <p className="text-[13px] font-medium text-gray-900 truncate">{item.product_name}</p>
                       </div>
-                      <div className="w-28 shrink-0 min-w-0">
+                      <div className="min-w-0">
                         <span className="text-[13px] font-mono text-gray-900 truncate block">{item.barcode || "—"}</span>
                       </div>
-                      <div className="w-14 shrink-0 text-center">
+                      <div className="text-right">
                         <span className="text-[13px] font-bold text-gray-900 tabular-nums">{Math.abs(item.quantity)}</span>
                       </div>
                     </div>
@@ -421,7 +422,8 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
       setExtraRecords([]); // Clear cache on close
       if (stopCamera) stopCamera();
     }
-  }, [isOpen, stopCamera]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -606,6 +608,7 @@ export const NewTransactionModal: React.FC<NewModalProps> = ({ isOpen, onClose, 
                             value={item.inventory}
                             onChange={(id) => updateItem(idx, { inventory: id, quantity: item.quantity || 1 })}
                             excludeIds={selectedInvIds}
+                            onFetchExtra={(r) => setExtraRecords((prev) => prev.some((e) => e.id === r.id) ? prev : [...prev, r])}
                           />
                         </div>
                         {/* Mobile: barcode info line */}
@@ -835,7 +838,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
           product_details: {
             id: 0,
             barcode: item.barcode,
-            product_name: item.product_name,
+            product_name: item.product_name ?? "",
             category: "",
             supplier: "",
             cost_per_unit: item.cost_per_unit,
@@ -861,7 +864,8 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
       setExtraRecords([]);
       if (stopCamera) stopCamera();
     }
-  }, [editTarget, stopCamera]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editTarget]);
 
   if (!editTarget) return null;
 
@@ -1042,6 +1046,7 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
                             value={item.inventory}
                             onChange={(id) => updateEditItem(idx, { inventory: id, quantity: item.quantity || 1 })}
                             excludeIds={editSelectedInvIds}
+                            onFetchExtra={(r) => setExtraRecords((prev) => prev.some((e) => e.id === r.id) ? prev : [...prev, r])}
                           />
                         </div>
                         {/* Mobile: barcode info line */}
