@@ -16,10 +16,14 @@ interface InventoryPickerProps {
 const InventoryPicker: React.FC<InventoryPickerProps> = ({ inventory, value, onChange, excludeIds, onFetchExtra }) => {
   const selected = inventory.find((r) => r.id === value);
 
+  // Always derived from live inventory — never stale state.
+  // When extraRecords are replaced with real fetched records, this auto-updates.
+  const displayLabel = selected
+    ? `${selected.product_details.product_name ?? ""} (stock: ${selected.quantity_on_hand})`
+    : "";
+
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState(
-    selected ? `${selected.product_details.product_name ?? ""} (stock: ${selected.quantity_on_hand})` : ""
-  );
+  const [search, setSearch] = useState(""); // filter text only, used when open
   const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 });
   const ref = useRef<HTMLDivElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
@@ -27,23 +31,16 @@ const InventoryPicker: React.FC<InventoryPickerProps> = ({ inventory, value, onC
   const [apiResults, setApiResults] = useState<InventoryRecord[]>([]);
   const [apiLoading, setApiLoading] = useState(false);
 
-  const [prevValue, setPrevValue] = useState(value);
-
-  if (value !== prevValue) {
-    setPrevValue(value);
-    setSearch(selected ? `${selected.product_details.product_name ?? ""} (stock: ${selected.quantity_on_hand})` : "");
-  }
-
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
-        setSearch(selected ? `${selected.product_details.product_name ?? ""} (stock: ${selected.quantity_on_hand})` : "");
+        setSearch("");
       }
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [selected]);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -101,7 +98,6 @@ const InventoryPicker: React.FC<InventoryPickerProps> = ({ inventory, value, onC
     );
   }, [inventory, search, excludeIds, value, selected]);
 
-  // Merge local + API results, deduped by id, respecting excludeIds
   const allFiltered = useMemo(() => {
     const combined = [...localFiltered];
     for (const r of apiResults) {
@@ -119,7 +115,7 @@ const InventoryPicker: React.FC<InventoryPickerProps> = ({ inventory, value, onC
         type="text"
         autoComplete="off"
         placeholder="Search Product/Barcode..."
-        value={search}
+        value={open ? search : displayLabel}
         onFocus={handleFocus}
         onChange={(e) => { setSearch(e.target.value); setOpen(true); }}
         className="w-full text-[13px] pr-1 py-1 outline-none transition placeholder:text-gray-700 text-black text-left bg-transparent focus:text-orange-600 font-medium"
@@ -151,11 +147,12 @@ const InventoryPicker: React.FC<InventoryPickerProps> = ({ inventory, value, onC
                       onFetchExtra?.(r);
                     }
                     onChange(r.id);
-                    setSearch(`${r.product_details.product_name ?? ""} (Stock: ${r.quantity_on_hand})`);
+                    setSearch("");
                     setOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2 flex items-start gap-4 transition-all duration-150 ${value === r.id ? "bg-orange-500 text-white" : "text-slate-700 hover:bg-orange-50"
-                    }`}
+                  className={`w-full text-left px-4 py-2 flex items-start gap-4 transition-all duration-150 ${
+                    value === r.id ? "bg-orange-500 text-white" : "text-slate-700 hover:bg-orange-50"
+                  }`}
                 >
                   <div className="min-w-0 flex-1">
                     <p className={`text-[13px] font-medium truncate ${value === r.id ? "text-white" : "text-slate-900"}`}>

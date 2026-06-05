@@ -32,7 +32,7 @@ function generateId(): string {
 
 const emptyItem = (): ItemDraft => ({ id: generateId(), inventory: 0, quantity: 1 });
 import InventoryPicker from "./InventoryPicker";
-import { scanBarcode } from "@/src/services/inventory.service";
+import { scanBarcode, getInventoryRecord } from "@/src/services/inventory.service";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
 // --- CUSTOM HOOKS ------------------------------------------------------------
@@ -864,6 +864,25 @@ export const EditTransactionModal: React.FC<EditModalProps> = ({ editTarget, onC
       setExtraRecords([]);
       if (stopCamera) stopCamera();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editTarget]);
+
+  // Fetch real inventory records for items whose IDs aren't in the paginated prop,
+  // so quantity_on_hand shows the actual stock instead of the seeded 0.
+  React.useEffect(() => {
+    if (!editTarget) return;
+    const missingIds = editTarget.items
+      .map((item) => item.inventory)
+      .filter((id) => id > 0 && !inventory.some((r) => r.id === id));
+    if (missingIds.length === 0) return;
+    Promise.all(missingIds.map((id) => getInventoryRecord(id).catch(() => null)))
+      .then((records) => {
+        const valid = records.filter((r): r is InventoryRecord => r !== null);
+        if (valid.length === 0) return;
+        setExtraRecords((prev) =>
+          prev.map((er) => valid.find((r) => r.id === er.id) ?? er)
+        );
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editTarget]);
 

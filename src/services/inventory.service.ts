@@ -72,6 +72,11 @@ export async function updateInventory(id: number, payload: Partial<InventoryPayl
   return data;
 }
 
+export async function getInventoryRecord(id: number): Promise<InventoryRecord> {
+  const { data } = await api.get<InventoryRecord>(`/v1/inventory/${id}/`);
+  return data;
+}
+
 export async function deleteInventory(id: number): Promise<void> {
   await api.delete(`/v1/inventory/${id}/`);
 }
