@@ -71,12 +71,16 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
         <DashboardNavbar onMenuClick={() => setSidebarOpen((v) => !v)} />
         <main className="flex-1 overflow-y-auto">{children}</main>
         <Toaster
-          position="top-right"
-          richColors
+          position="bottom-right"
           closeButton
           duration={4000}
           toastOptions={{
-            style: { fontFamily: "var(--font-roboto)", fontSize: "12px", borderRadius: "3px" },
+            style: { fontFamily: "var(--font-roboto)", borderRadius: "3px" },
+            classNames: {
+              toast: "!bg-white shadow-lg border border-gray-200",
+              title: "font-medium text-[13px]",
+              description: "text-[13px] !text-gray-900",
+            },
           }}
         />
       </div>

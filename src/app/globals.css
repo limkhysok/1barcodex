@@ -27,6 +27,14 @@ body {
   font-family: var(--font-sans), sans-serif;
 }
 
+[data-sonner-toast][data-type="success"] [data-title] {
+  color: #16a34a !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-title] {
+  color: #dc2626 !important;
+}
+
 @keyframes scanline {
   0% {
     transform: translateY(-100%);

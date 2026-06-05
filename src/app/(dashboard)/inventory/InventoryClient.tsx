@@ -201,8 +201,14 @@ export default function InventoryClient() {
       fetchInventory(1, false);
       fetchStats();
       toast.success("Record Deleted", { description: "Inventory record has been removed." });
-    } catch {
-      toast.error("Delete Failed", { description: "Failed to delete record. Please try again." });
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number; data?: { detail?: string } } })?.response?.status;
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      if (status === 409) {
+        toast.error("Cannot Delete", { description: detail ?? "This record has existing transactions and cannot be removed." });
+      } else {
+        toast.error("Delete Failed", { description: "Failed to delete record. Please try again." });
+      }
     } finally {
       setDeleting(false);
     }

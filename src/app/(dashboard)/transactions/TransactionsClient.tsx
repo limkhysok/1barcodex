@@ -8,6 +8,7 @@ import type { PaginatedInventory } from "@/src/types/api.types";
 type TxTypeFilter = "" | "Receive" | "Sale";
 type TemplateItem = { barcode: string; product_name: string; unit: string; quantity: number };
 import { useAuth } from "@/src/context/AuthContext";
+import { toast } from "sonner";
 import { useReactToPrint } from "react-to-print";
 import { TransactionsToolbar } from "./_components/TransactionsToolbar";
 import StatsOverview from "./_components/StatsOverview";
@@ -159,6 +160,7 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
       setModalOpen(false);
       fetchAll(1, false);
       getInventory().then(setPaginatedInventory).catch(() => { });
+      toast.success("Transaction Created", { description: "Transaction has been saved successfully." });
       if (andExport) {
         const templateItems: TemplateItem[] = payload.items.map((i) => {
           const rec = inventory.find((r) => r.id === i.inventory);
@@ -176,6 +178,7 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
       const data = (err as ApiErr)?.response?.data;
       const msg = data?.detail ?? data?.items?.[0]?.quantity ?? "Failed to create transaction.";
       setFormError(msg);
+      toast.error("Transaction Failed", { description: msg });
     } finally {
       setSaving(false);
     }
@@ -189,11 +192,13 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
       setEditTarget(null);
       fetchAll(1, false);
       getInventory().then(setPaginatedInventory).catch(() => { });
+      toast.success("Transaction Updated", { description: "Transaction has been updated successfully." });
     } catch (err: unknown) {
       type ApiErr = { response?: { data?: { detail?: string; items?: Array<{ quantity?: string }> } } };
       const data = (err as ApiErr)?.response?.data;
       const msg = data?.detail ?? data?.items?.[0]?.quantity ?? "Failed to update transaction.";
       setEditFormError(msg);
+      toast.error("Update Failed", { description: msg });
     } finally {
       setEditSaving(false);
     }
@@ -206,6 +211,9 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
       await deleteTransaction(deleteTarget.id);
       setDeleteTarget(null);
       fetchAll(1, false);
+      toast.success("Transaction Deleted", { description: "Transaction has been removed." });
+    } catch {
+      toast.error("Delete Failed", { description: "Failed to delete transaction. Please try again." });
     } finally {
       setDeleting(false);
     }
