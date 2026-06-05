@@ -60,7 +60,7 @@ function NavItem({
         `}
       >
         {/* Icon pinned in a fixed-width cell — same width as collapsed sidebar, never moves */}
-        <div className={`shrink-0 flex items-center justify-center w-12.5 py-3 text-gray-900 ${active ? "scale-110" : "group-hover:scale-110"}`}>
+        <div className={`shrink-0 flex items-center justify-center w-12.5 py-3 text-gray-900 transition-transform duration-300 ease-in-out ${active ? "scale-110" : "group-hover:scale-110"}`}>
           {icon}
         </div>
 
@@ -74,9 +74,12 @@ function NavItem({
           <span
             className={`
               min-w-0 text-sm font-regular text-gray-900
-              whitespace-nowrap overflow-hidden pr-4 
-              transition-opacity duration-1000 ease-in-out
-              ${isCollapsed ? "opacity-0" : "opacity-100"}
+              whitespace-nowrap overflow-hidden pr-4
+              transition-[opacity,transform] ease-in-out
+              ${isCollapsed
+                ? "opacity-0 -translate-x-2 duration-150"
+                : "opacity-100 translate-x-0 duration-500 delay-150"
+              }
             `}
           >
             {label}
@@ -129,8 +132,11 @@ function SidebarContent({
           <div
             className={`
               min-w-0 flex flex-col leading-none overflow-hidden pr-4
-              transition-opacity duration-500 ease-in-out
-              ${isCollapsed ? "opacity-0" : "opacity-100"}
+              transition-[opacity,transform] ease-in-out
+              ${isCollapsed
+                ? "opacity-0 -translate-x-2 duration-150"
+                : "opacity-100 translate-x-0 duration-500 delay-150"
+              }
             `}
           >
             <p className="text-[17px] font-black tracking-tight  text-gray-900">CTK</p>
@@ -155,8 +161,11 @@ function SidebarContent({
               className={`
                 min-w-0 text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-2
                 whitespace-nowrap overflow-hidden
-                transition-opacity duration-500 ease-in-out
-                ${isCollapsed ? "opacity-0" : "opacity-100"}
+                transition-[opacity,transform] ease-in-out
+                ${isCollapsed
+                  ? "opacity-0 -translate-x-2 duration-150"
+                  : "opacity-100 translate-x-0 duration-500 delay-150"
+                }
               `}
             >
               Menu
@@ -188,8 +197,11 @@ function SidebarContent({
                   className={`
                     min-w-0 text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-2
                     whitespace-nowrap overflow-hidden
-                    transition-opacity duration-500 ease-in-out
-                    ${isCollapsed ? "opacity-0" : "opacity-100"}
+                    transition-[opacity,transform] ease-in-out
+                    ${isCollapsed
+                      ? "opacity-0 -translate-x-2 duration-150"
+                      : "opacity-100 translate-x-0 duration-500 delay-150"
+                    }
                   `}
                 >
                   Management
@@ -228,16 +240,18 @@ function CollapseToggle({
       className="
         absolute top-12.5 -right-3 z-30 hidden md:flex
         items-center justify-center w-6 h-6 rounded-full
-        bg-white text-gray-800 border border-gray-400
-        hover:text-orange-600 hover:border-orange-200
-        active:scale-95 transition-all duration-300
-        shadow-xl group/btn cursor-pointer
+        bg-white text-gray-500 border border-gray-300
+        hover:text-orange-600 hover:border-orange-400 hover:bg-orange-50
+        active:scale-90 active:shadow-sm
+        transition-all duration-300 ease-in-out
+        shadow-md hover:shadow-orange-100/80
+        group/btn cursor-pointer
       "
     >
       <ChevronLeft
         size={14}
         strokeWidth={3.5}
-        className={`transition-transform duration-500 ease-in-out ${isCollapsed ? "rotate-180" : "rotate-0"}`}
+        className={`transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isCollapsed ? "rotate-180" : "rotate-0"}`}
       />
     </button>
   );
@@ -252,6 +266,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
       <div
         className={`
           hidden md:block h-full shrink-0 relative z-20
+          transition-[width,min-width] duration-500 ease-in-out
           ${isCollapsed ? "w-12.5 min-w-12.5" : "w-45 min-w-45"}
         `}
       >
