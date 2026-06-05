@@ -1,6 +1,7 @@
   "use client";
 
-  import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+  import React, { useState, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+  import useSWR from "swr";
   import Link from "next/link";
   import {
     Package,
@@ -206,102 +207,167 @@
     return d.toLocaleDateString();
   }
 
-  interface DashboardClientProps {
-    initialStats: DashboardStats | null;
-    initialRange?: RangeLabel;
+  type ChartPoint = { date: string; isoKey: string; receive: number; sale: number };
+
+  function buildEmptyPoint(d: Date): ChartPoint {
+    return { date: d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" }), isoKey: d.toISOString().slice(0, 10), receive: 0, sale: 0 };
   }
 
-  export default function DashboardClient({ initialStats, initialRange = "7_days" }: Readonly<DashboardClientProps>) {
-    const [range, setRange]             = useState<RangeLabel>(initialRange);
+  function prefillDateGrid(rangeStart: string, rangeEnd: string): Record<string, ChartPoint> {
+    const groups: Record<string, ChartPoint> = {};
+    const startMs  = new Date(rangeStart).getTime();
+    const endMs    = new Date(rangeEnd).getTime();
+    if ((endMs - startMs) / 86_400_000 > 90) return groups;
+    for (let ms = startMs; ms <= endMs; ms += 86_400_000) {
+      const d = new Date(ms);
+      groups[d.toISOString().slice(0, 10)] = buildEmptyPoint(d);
+    }
+    return groups;
+  }
+
+  function buildChartData(stats: DashboardStats | null | undefined): ChartPoint[] {
+    const rangeStart = stats?.range?.start?.slice(0, 10) ?? null;
+    const rangeEnd   = stats?.range?.end?.slice(0, 10)   ?? null;
+    const groups     = rangeStart && rangeEnd ? prefillDateGrid(rangeStart, rangeEnd) : {} as Record<string, ChartPoint>;
+
+    for (const tx of stats?.transactions?.recent_activity ?? []) {
+      const dateObj = new Date(tx.transaction_date);
+      const isoKey  = dateObj.toISOString().slice(0, 10);
+      if (rangeStart && isoKey < rangeStart) continue;
+      if (rangeEnd   && isoKey > rangeEnd)   continue;
+      if (!groups[isoKey]) groups[isoKey] = buildEmptyPoint(dateObj);
+      if (tx.transaction_type === "Receive") groups[isoKey].receive += tx.total_quantity;
+      else groups[isoKey].sale += tx.total_quantity;
+    }
+
+    return Object.values(groups).sort((a, b) => a.isoKey.localeCompare(b.isoKey));
+  }
+
+  interface KpiCardsProps {
+    productsTotal: number;
+    needsReorder: number;
+    transactionsTotal: number;
+    loading: boolean;
+  }
+
+  function KpiCards({ productsTotal, needsReorder, transactionsTotal, loading }: Readonly<KpiCardsProps>) {
+    const lowTextCls = needsReorder > 0 ? "text-red-500" : "text-slate-900";
+    const lowIconCls = needsReorder > 0 ? "text-red-500" : "text-orange-500";
+    return (
+      <div className={`transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+        {/* MOBILE (< sm) */}
+        <div className="sm:hidden grid grid-cols-3 gap-1.5">
+          <Link href="/products" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
+            <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Product</p>
+            <p className="text-base font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-0.5">{productsTotal.toLocaleString()}</p>
+            <Package size={18} className="text-orange-500 absolute right-2 top-2" strokeWidth={1.5} />
+          </Link>
+          <Link href="/inventory" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
+            <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Low Stock</p>
+            <p className={`text-base font-medium leading-none tabular-nums tracking-tighter mt-0.5 ${lowTextCls}`}>{needsReorder.toLocaleString()}</p>
+            <AlertCircle size={18} className={`absolute right-2 top-2 ${lowIconCls}`} strokeWidth={1.5} />
+          </Link>
+          <Link href="/transactions" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
+            <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Transaction</p>
+            <p className="text-base font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-0.5">{transactionsTotal.toLocaleString()}</p>
+            <Boxes size={18} className="text-orange-500 absolute right-2 top-2" strokeWidth={1.5} />
+          </Link>
+        </div>
+
+        {/* TABLET (sm → lg) */}
+        <div className="hidden sm:grid lg:hidden grid-cols-3 gap-2">
+          <Link href="/products" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Product</p>
+              <p className="text-xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{productsTotal.toLocaleString()}</p>
+            </div>
+            <Package size={22} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1.5} />
+          </Link>
+          <Link href="/inventory" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Low Stock</p>
+              <p className={`text-xl font-medium leading-none tabular-nums tracking-tighter mt-1 ${lowTextCls}`}>{needsReorder.toLocaleString()}</p>
+            </div>
+            <AlertCircle size={22} className={`group-hover:scale-110 transition-transform duration-200 shrink-0 ${lowIconCls}`} strokeWidth={1.5} />
+          </Link>
+          <Link href="/transactions" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Transaction</p>
+              <p className="text-xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{transactionsTotal.toLocaleString()}</p>
+            </div>
+            <Boxes size={22} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1.5} />
+          </Link>
+        </div>
+
+        {/* DESKTOP (≥ lg) */}
+        <div className="hidden lg:grid grid-cols-3 gap-5">
+          <Link href="/products" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-base font-regular text-slate-900">Product</p>
+              <p className="text-2xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{productsTotal.toLocaleString()}</p>
+            </div>
+            <Package size={40} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1} />
+          </Link>
+          <Link href="/inventory" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-base font-regular text-slate-900">Low Stock</p>
+              <p className={`text-2xl font-medium leading-none tabular-nums tracking-tighter mt-1 ${lowTextCls}`}>{needsReorder.toLocaleString()}</p>
+            </div>
+            <AlertCircle size={40} className={`group-hover:scale-110 transition-transform duration-200 shrink-0 ${lowIconCls}`} strokeWidth={1} />
+          </Link>
+          <Link href="/transactions" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex flex-col justify-center">
+              <p className="text-base font-regular text-slate-900">Transaction</p>
+              <p className="text-2xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{transactionsTotal.toLocaleString()}</p>
+            </div>
+            <Boxes size={40} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1} />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  export default function DashboardClient() {
+    const [range, setRange]             = useState<RangeLabel>("7_days");
     const [customStart, setCustomStart] = useState(() => {
       const d = new Date();
       d.setDate(d.getDate() - 7);
       return d.toISOString().slice(0, 10);
     });
     const [customEnd, setCustomEnd] = useState(() => new Date().toISOString().slice(0, 10));
-    const [stats, setStats]             = useState<DashboardStats | null>(initialStats);
-    const [loading, setLoading]         = useState(false);
-    const [error, setError]             = useState("");
-    const [mounted, setMounted]         = useState(false);
-    const skipInitialFetch              = useRef(!!initialStats);
+    // useSyncExternalStore: false on server/hydration, true on client — no setState-in-effect needed
+    const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
-    useEffect(() => {
-      setMounted(true);
-    }, []);
+    // SWR key: null when custom range isn't ready yet (pauses fetch)
+    let swrKey: string | null;
+    if (range !== "custom") {
+      swrKey = `dashboard-${range}`;
+    } else if (customStart && customEnd && customStart <= customEnd) {
+      swrKey = `dashboard-custom-${customStart}-${customEnd}`;
+    } else {
+      swrKey = null;
+    }
 
-    const fetchStats = useCallback(async (r: RangeLabel, start?: string, end?: string) => {
-      setLoading(true);
-      setError("");
-      try {
-        const data = await getDashboardStats(undefined, { range: r, start, end });
-        if (data) setStats(data);
-      } catch (err) {
-        const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-        setError(detail ?? "Failed to load stats. Please refresh.");
-      } finally {
-        setLoading(false);
-      }
-    }, []);
+    const { data: stats, isValidating: loading, error: swrError, mutate } = useSWR<DashboardStats | null>(
+      swrKey,
+      () => getDashboardStats(undefined, {
+        range,
+        start: range === "custom" ? customStart : undefined,
+        end: range === "custom" ? customEnd : undefined,
+      }),
+    );
 
-    useEffect(() => {
-      if (skipInitialFetch.current) {
-        skipInitialFetch.current = false;
-        return;
-      }
-      if (range === "custom") {
-        if (customStart && customEnd && customStart <= customEnd) {
-          fetchStats("custom", customStart, customEnd);
-        }
-        return;
-      }
-      fetchStats(range);
-    }, [range, customStart, customEnd, fetchStats]);
+    const error = swrError ? "Failed to load stats. Please refresh." : "";
 
     const products     = stats?.products;
     const inventory    = stats?.inventory;
     const transactions = stats?.transactions;
 
-  const chartData = useMemo(() => {
-      const rangeStart = stats?.range?.start ? stats.range.start.slice(0, 10) : null;
-      const rangeEnd   = stats?.range?.end   ? stats.range.end.slice(0, 10)   : null;
-
-      const groups: { [key: string]: { date: string; isoKey: string; receive: number; sale: number } } = {};
-
-      // For ranges ≤ 90 days, pre-fill every date with 0 so the chart is
-      // continuous and the range-end date always appears on the right.
-      if (rangeStart && rangeEnd) {
-        const startMs = new Date(rangeStart).getTime();
-        const endMs   = new Date(rangeEnd).getTime();
-        const diffDays = (endMs - startMs) / 86_400_000;
-        if (diffDays <= 90) {
-          for (let ms = startMs; ms <= endMs; ms += 86_400_000) {
-            const d = new Date(ms);
-            const isoKey = d.toISOString().slice(0, 10);
-            groups[isoKey] = {
-              date: d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" }),
-              isoKey,
-              receive: 0,
-              sale: 0,
-            };
-          }
-        }
-      }
-
-      (transactions?.recent_activity ?? []).forEach(tx => {
-        const dateObj = new Date(tx.transaction_date);
-        const isoKey = dateObj.toISOString().slice(0, 10);
-        if (rangeStart && isoKey < rangeStart) return;
-        if (rangeEnd   && isoKey > rangeEnd)   return;
-        if (!groups[isoKey]) groups[isoKey] = { date: dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" }), isoKey, receive: 0, sale: 0 };
-        if (tx.transaction_type === "Receive") groups[isoKey].receive += tx.total_quantity;
-        else groups[isoKey].sale += tx.total_quantity;
-      });
-      return Object.values(groups).sort((a, b) => a.isoKey.localeCompare(b.isoKey));
-    }, [stats, transactions]);
+  const chartData = useMemo(() => buildChartData(stats), [stats]);
 
     return (
       <div className="px-4 py-5 sm:px-5 sm:py-5 space-y-3">
-        
+
         {/* ── HEADER: MOBILE (< sm) — single row ── */}
         <div className="sm:hidden flex items-center justify-between gap-2">
           <div className="flex flex-col shrink-0">
@@ -319,7 +385,7 @@
             />
             <button
               type="button"
-              onClick={() => fetchStats(range, customStart || undefined, customEnd || undefined)}
+              onClick={() => mutate()}
               disabled={loading}
               className="p-2 border border-gray-600 rounded-md text-slate-400 active:bg-slate-50 transition-colors disabled:opacity-50 shrink-0"
             >
@@ -349,7 +415,7 @@
               />
               <button
                 type="button"
-                onClick={() => fetchStats(range, customStart || undefined, customEnd || undefined)}
+                onClick={() => mutate()}
                 disabled={loading}
                 className="group flex items-center gap-2 px-4 h-8 text-[13px] font-regular  border border-slate-900 rounded-md text-slate-900 hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
               >
@@ -371,84 +437,12 @@
         )}
 
         {/* ── KPI GRID ── */}
-        <div className={`transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
-
-          {/* MOBILE (< sm) */}
-          <div className="sm:hidden grid grid-cols-3 gap-1.5">
-            <Link href="/products" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
-              <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Product</p>
-              <p className="text-base font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-0.5">{(products?.total ?? 0).toLocaleString()}</p>
-              <Package size={18} className="text-orange-500 absolute right-2 top-2" strokeWidth={1.5} />
-            </Link>
-
-            <Link href="/inventory" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
-              <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Low Stock</p>
-              <p className={`text-base font-medium leading-none tabular-nums tracking-tighter mt-0.5 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-slate-900"}`}>{(inventory?.needs_reorder ?? 0).toLocaleString()}</p>
-              <AlertCircle size={18} className={`absolute right-2 top-2 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-orange-500"}`} strokeWidth={1.5} />
-            </Link>
-
-            <Link href="/transactions" className="bg-white border border-gray-400 rounded-md overflow-hidden flex flex-col px-2 py-2.5 relative">
-              <p className="text-[9px] font-medium text-slate-600 uppercase tracking-widest">Transaction</p>
-              <p className="text-base font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-0.5">{(transactions?.total ?? 0).toLocaleString()}</p>
-              <Boxes size={18} className="text-orange-500 absolute right-2 top-2" strokeWidth={1.5} />
-            </Link>
-          </div>
-
-          {/* TABLET (sm → lg) */}
-          <div className="hidden sm:grid lg:hidden grid-cols-3 gap-2">
-            <Link href="/products" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
-              <div className="flex flex-col justify-center">
-                <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Product</p>
-                <p className="text-xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{(products?.total ?? 0).toLocaleString()}</p>
-              </div>
-              <Package size={22} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1.5} />
-            </Link>
-
-            <Link href="/inventory" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
-              <div className="flex flex-col justify-center">
-                <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Low Stock</p>
-                <p className={`text-xl font-medium leading-none tabular-nums tracking-tighter mt-1 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-slate-900"}`}>{(inventory?.needs_reorder ?? 0).toLocaleString()}</p>
-              </div>
-              <AlertCircle size={22} className={`group-hover:scale-110 transition-transform duration-200 shrink-0 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-orange-500"}`} strokeWidth={1.5} />
-            </Link>
-
-            <Link href="/transactions" className="group bg-white border border-gray-600 rounded-md overflow-hidden flex items-center justify-between px-4 py-3 hover:shadow-md transition-shadow duration-200">
-              <div className="flex flex-col justify-center">
-                <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">Transaction</p>
-                <p className="text-xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{(transactions?.total ?? 0).toLocaleString()}</p>
-              </div>
-              <Boxes size={22} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1.5} />
-            </Link>
-          </div>
-
-          {/* DESKTOP (≥ lg) */}
-          <div className="hidden lg:grid grid-cols-3 gap-5">
-            <Link href="/products" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
-              <div className="flex flex-col justify-center">
-                <p className="text-base font-regular text-slate-900">Product</p>
-                <p className="text-2xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{(products?.total ?? 0).toLocaleString()}</p>
-              </div>
-              <Package size={40} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1} />
-            </Link>
-
-            <Link href="/inventory" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
-              <div className="flex flex-col justify-center">
-                <p className="text-base font-regular text-slate-900">Low Stock</p>
-                <p className={`text-2xl font-medium leading-none tabular-nums tracking-tighter mt-1 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-slate-900"}`}>{(inventory?.needs_reorder ?? 0).toLocaleString()}</p>
-              </div>
-              <AlertCircle size={40} className={`group-hover:scale-110 transition-transform duration-200 shrink-0 ${(inventory?.needs_reorder ?? 0) > 0 ? "text-red-500" : "text-orange-500"}`} strokeWidth={1} />
-            </Link>
-
-            <Link href="/transactions" className="group bg-white border border-gray-600 rounded-lg overflow-hidden flex items-center justify-between px-5 py-4 hover:shadow-md transition-shadow duration-200">
-              <div className="flex flex-col justify-center">
-                <p className="text-base font-regular text-slate-900">Transaction</p>
-                <p className="text-2xl font-medium text-slate-900 leading-none tabular-nums tracking-tighter mt-1">{(transactions?.total ?? 0).toLocaleString()}</p>
-              </div>
-              <Boxes size={40} className="text-orange-500 group-hover:scale-110 transition-transform duration-200 shrink-0" strokeWidth={1} />
-            </Link>
-          </div>
-
-        </div>
+        <KpiCards
+          productsTotal={products?.total ?? 0}
+          needsReorder={inventory?.needs_reorder ?? 0}
+          transactionsTotal={transactions?.total ?? 0}
+          loading={loading}
+        />
 
         {/* ── ANALYTICS + SIGNAL LOG ── */}
         <div className={`grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5 items-stretch transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
@@ -476,7 +470,7 @@
               </div>
             </div>
 
-            <div className="w-full min-w-0 relative h-64 sm:h-[22.5rem] md:h-[27.5rem] lg:h-[30rem] xl:h-[30rem] p-5 pl-2">
+            <div className="w-full min-w-0 relative h-64 sm:h-90 md:h-110 lg:h-120 xl:h-120 p-5 pl-2">
               {mounted && chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                   <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>

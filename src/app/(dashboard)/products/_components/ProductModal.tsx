@@ -114,6 +114,28 @@ function ModalSelect({ label, value, options, onChange, placeholder, optional }:
   );
 }
 
+function convertToSquareWebP(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new globalThis.Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const size = Math.min(img.width, img.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = 600;
+      canvas.height = 600;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 600, 600);
+      canvas.toBlob(
+        (blob) => resolve(new File([blob!], file.name.replace(/\.[^.]+$/, ".webp"), { type: "image/webp" })),
+        "image/webp",
+        0.85
+      );
+    };
+    img.src = objectUrl;
+  });
+}
+
 interface ProductModalProps {
   open: boolean;
   onClose: () => void;
@@ -145,11 +167,11 @@ export function ProductModal({
   if (saving) saveLabel = "Saving…";
   else if (editing) saveLabel = "Save Changes";
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setForm((f) => ({ ...f, product_picture: file }));
-    }
+    if (!file) return;
+    const converted = await convertToSquareWebP(file);
+    setForm((f) => ({ ...f, product_picture: converted }));
   };
 
   const removePicture = () => {

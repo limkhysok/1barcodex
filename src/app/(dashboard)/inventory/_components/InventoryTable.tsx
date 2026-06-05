@@ -14,7 +14,6 @@ import {
   Eye
 } from "lucide-react";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export type SortDir = "asc" | "desc" | "";
 
@@ -143,7 +142,7 @@ export function InventoryTable({
             <div className="relative h-36 w-full bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors">
               {r.product_details.product_picture ? (
                 <Image
-                  src={`${BASE_URL}${r.product_details.product_picture}`}
+                  src={r.product_details.product_picture}
                   alt={r.product_details.product_name}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"

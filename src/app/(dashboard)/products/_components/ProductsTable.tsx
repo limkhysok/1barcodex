@@ -4,7 +4,6 @@ import type { Product } from "@/src/types/product.types";
 import { Edit2, Trash2, Eye, Database, ArrowUp, ArrowDown, Package } from "lucide-react";
 import Image from "next/image";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export type SortDir = "asc" | "desc" | "";
 
@@ -122,7 +121,7 @@ export function ProductsTable({
           <button type="button" onClick={() => onView(p)} className="w-full text-left flex flex-row cursor-pointer">
             <div className="w-28 shrink-0 bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
               {p.product_picture ? (
-                <Image src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
+                <Image src={p.product_picture} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
               ) : (
                 <Package size={28} strokeWidth={1} className="opacity-20" />
               )}
@@ -157,7 +156,7 @@ export function ProductsTable({
           <button type="button" onClick={() => onView(p)} className="w-full text-left flex flex-col cursor-pointer">
             <div className="h-24 w-full bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-orange-50 transition-colors relative">
               {p.product_picture ? (
-                <Image src={`${BASE_URL}${p.product_picture}`} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
+                <Image src={p.product_picture} alt={p.product_name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
               ) : (
                 <Package size={24} strokeWidth={1} className="opacity-20" />
               )}

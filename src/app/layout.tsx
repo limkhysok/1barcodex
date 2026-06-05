@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { fontSans, fontMono, fontKhmer } from "@/src/fonts";
 import { AuthProvider } from "@/src/context/AuthContext";
+import { SWRProvider } from "@/src/lib/SWRProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,7 +24,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <SWRProvider>{children}</SWRProvider>
+        </AuthProvider>
       </body>
     </html>
   );

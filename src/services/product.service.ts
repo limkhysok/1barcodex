@@ -90,7 +90,8 @@ export async function updateProduct(id: number, payload: Partial<ProductPayload>
     const { data } = await api.patch<Product>(`/v1/products/${id}/`, formData);
     return data;
   }
-  const { data } = await api.patch<Product>(`/v1/products/${id}/`, payload);
+  const { product_picture: _, ...rest } = payload;
+  const { data } = await api.patch<Product>(`/v1/products/${id}/`, rest);
   return data;
 }
 

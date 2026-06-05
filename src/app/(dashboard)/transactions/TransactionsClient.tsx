@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { Transaction, TransactionPayload } from "@/src/types/transaction.types";
 import { getTransactions, createTransaction, updateTransaction, deleteTransaction, getTransactionStats, type TransactionStats } from "@/src/services/transaction.service";
 import { getInventory } from "@/src/services/inventory.service";
-import type { PaginatedInventory, PaginatedTransactions } from "@/src/types/api.types";
+import type { PaginatedInventory } from "@/src/types/api.types";
 type TxTypeFilter = "" | "Receive" | "Sale";
 type TemplateItem = { barcode: string; product_name: string; unit: string; quantity: number };
 import { useAuth } from "@/src/context/AuthContext";
@@ -25,33 +25,23 @@ function waitTwoFrames(): Promise<void> {
   return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 }
 
-type TransactionsClientProps = Readonly<{
-  initialPaginatedTransactions: PaginatedTransactions;
-  initialPaginatedInventory: PaginatedInventory;
-  initialStats: TransactionStats | null;
-}>;
-
-const TransactionsClient: React.FC<TransactionsClientProps> = ({
-  initialPaginatedTransactions,
-  initialPaginatedInventory,
-  initialStats,
-}) => {
+const TransactionsClient: React.FC = () => {
   const { role } = useAuth();
   const canEdit = role === "boss" || role === "superadmin";
   const canDelete = role === "superadmin";
 
-  const [transactions, setTransactions] = useState<Transaction[]>(initialPaginatedTransactions.results);
-  const [hasMore, setHasMore] = useState(initialPaginatedTransactions.next !== null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const [paginatedInventory, setPaginatedInventory] = useState<PaginatedInventory>(initialPaginatedInventory);
+  const [paginatedInventory, setPaginatedInventory] = useState<PaginatedInventory>({ count: 0, next: null, previous: null, results: [] });
   const inventory = paginatedInventory.results;
 
-  const [stats, setStats] = useState<TransactionStats | null>(initialStats);
+  const [stats, setStats] = useState<TransactionStats | null>(null);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [typeFilter, setTypeFilter] = useState<TxTypeFilter>("");
@@ -118,6 +108,11 @@ setTransactions((prev) => append ? [...prev, ...txData.results] : txData.results
   useEffect(() => {
     fetchAll(1, false);
   }, [fetchAll]);
+
+  // Fetch inventory for the create/edit modals on mount
+  useEffect(() => {
+    getInventory().then(setPaginatedInventory).catch(() => {});
+  }, []);
 
   // Infinite scroll — root must be the <main> scroll container, not the window
   useEffect(() => {

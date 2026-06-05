@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import useSWR, { mutate } from "swr";
 import { toast } from "sonner";
 import { useAuth } from "@/src/context/AuthContext";
 import type { Product, ProductPayload } from "@/src/types/product.types";
-import { getProducts, createProduct, updateProduct, deleteProduct } from "@/src/services/product.service";
+import { getProducts, getProductStats, createProduct, updateProduct, deleteProduct } from "@/src/services/product.service";
 import type { ProductFilters } from "@/src/services/product.service";
-import type { PaginatedProducts, ProductStats } from "@/src/types/api.types";
 import { type ApiError, getFieldError } from "@/src/types/error.types";
 
 // Components
@@ -19,58 +19,6 @@ import { ProductToolbar } from "./_components/ProductToolbar";
 import { ProductViewModal } from "./_components/ProductViewModal";
 
 const REORDER_PRESETS = new Set([5, 10, 15, 20]);
-
-function fetchPageSilent(pg: number) {
-  return getProducts(undefined, { page: pg }).catch(() => null);
-}
-
-// --- filter-meta cache (categories + suppliers) ---
-// Module-level promise deduplicates StrictMode double-mount; sessionStorage skips re-fetch on navigation.
-const FILTER_CACHE_KEY = "products:filter_meta:v1";
-
-function readFilterCache(): { categories: string[]; suppliers: string[] } | null {
-  if (globalThis.window === undefined) return null;
-  try {
-    const raw = sessionStorage.getItem(FILTER_CACHE_KEY);
-    return raw ? (JSON.parse(raw) as { categories: string[]; suppliers: string[] }) : null;
-  } catch { return null; }
-}
-
-function writeFilterCache(categories: string[], suppliers: string[]) {
-  try { sessionStorage.setItem(FILTER_CACHE_KEY, JSON.stringify({ categories, suppliers })); } catch { /* quota */ }
-}
-
-let _filterMetaInFlight: Promise<{ categories: string[]; suppliers: string[] }> | null = null;
-
-function getOrFetchFilterMeta(initial: PaginatedProducts): Promise<{ categories: string[]; suppliers: string[] }> {
-  const cached = readFilterCache();
-  if (cached) return Promise.resolve(cached);
-  if (_filterMetaInFlight) return _filterMetaInFlight;
-
-  _filterMetaInFlight = (async () => {
-    const cats = new Set(initial.results.map((p) => p.category));
-    const sups = new Set(initial.results.map((p) => p.supplier));
-    if (initial.next && initial.results.length > 0) {
-      const totalPages = Math.ceil(initial.count / initial.results.length);
-      const pages = await Promise.all(
-        Array.from({ length: totalPages - 1 }, (_, i) => fetchPageSilent(i + 2))
-      );
-      for (const data of pages) {
-        if (!data) continue;
-        for (const p of data.results) { cats.add(p.category); sups.add(p.supplier); }
-      }
-    }
-    const result = {
-      categories: Array.from(cats).sort((a, b) => a.localeCompare(b)),
-      suppliers: Array.from(sups).sort((a, b) => a.localeCompare(b)),
-    };
-    writeFilterCache(result.categories, result.suppliers);
-    _filterMetaInFlight = null;
-    return result;
-  })();
-
-  return _filterMetaInFlight;
-}
 
 function getSortParam(field: string, dir: SortDir): string | undefined {
   if (!field || !dir) return undefined;
@@ -97,25 +45,21 @@ const emptyForm: ProductPayload = {
   supplier: "",
 };
 
-export default function ProductsClient({
-  initialPaginated,
-  initialStats,
-}: Readonly<{
-  initialPaginated: PaginatedProducts;
-  initialStats: ProductStats | null;
-}>) {
+export default function ProductsClient() {
   const { role } = useAuth();
   const canEdit = role === "boss" || role === "superadmin";
   const canDelete = role === "superadmin";
 
-  const [products, setProducts] = useState<Product[]>(initialPaginated.results);
-  const [hasMore, setHasMore] = useState(initialPaginated.next !== null);
+  const { data: productStats } = useSWR("product-stats", () => getProductStats());
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -137,37 +81,13 @@ export default function ProductsClient({
   const [sortField, setSortField] = useState<string>("id");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   // Accumulate all ever-seen categories/suppliers so the dropdown never collapses when filters are active
-  const allCategoriesRef = useRef<Set<string>>(new Set(initialPaginated.results.map(p => p.category)));
-  const allSuppliersRef = useRef<Set<string>>(new Set(initialPaginated.results.map(p => p.supplier)));
-  const [categories, setCategories] = useState<string[]>(() =>
-    Array.from(allCategoriesRef.current).sort((a, b) => a.localeCompare(b))
-  );
-  const [suppliers, setSuppliers] = useState<string[]>(() =>
-    Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b))
-  );
-
-  // On mount: seed category/supplier dropdowns — cached after first fetch, never re-fetches on navigation
-  useEffect(() => {
-    let cancelled = false;
-    getOrFetchFilterMeta(initialPaginated).then((meta) => {
-      if (cancelled) return;
-      let catChanged = false, supChanged = false;
-      for (const c of meta.categories) {
-        if (!allCategoriesRef.current.has(c)) { allCategoriesRef.current.add(c); catChanged = true; }
-      }
-      for (const s of meta.suppliers) {
-        if (!allSuppliersRef.current.has(s)) { allSuppliersRef.current.add(s); supChanged = true; }
-      }
-      if (catChanged) setCategories(Array.from(allCategoriesRef.current).sort((a, b) => a.localeCompare(b)));
-      if (supChanged) setSuppliers(Array.from(allSuppliersRef.current).sort((a, b) => a.localeCompare(b)));
-    });
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const allCategoriesRef = useRef<Set<string>>(new Set<string>());
+  const allSuppliersRef = useRef<Set<string>>(new Set<string>());
+  const [categories, setCategories] = useState<string[]>([]);
+  const [suppliers, setSuppliers] = useState<string[]>([]);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersRef = useRef<HTMLDivElement>(null);
-  const filtersMounted = useRef(false);
 
   const buildFilters = useCallback((nextPage = 1): ProductFilters => {
     const ordering = getSortParam(sortField, sortDir);
@@ -208,10 +128,12 @@ export default function ProductsClient({
       .finally(() => { setLoading(false); setLoadingMore(false); });
   }, [buildFilters, mergeProducts]);
 
-  // Debounce re-fetch when filters change (reset to page 1)
+  // Initial load is immediate; subsequent filter changes are debounced
+  const initialFetchDone = useRef(false);
   useEffect(() => {
-    if (!filtersMounted.current) { filtersMounted.current = true; return; }
-    const t = setTimeout(() => fetchProducts(1, false), 300);
+    const delay = initialFetchDone.current ? 300 : 0;
+    initialFetchDone.current = true;
+    const t = setTimeout(() => fetchProducts(1, false), delay);
     return () => clearTimeout(t);
   }, [fetchProducts]);
 
@@ -292,6 +214,7 @@ export default function ProductsClient({
       setSaving(false);
       setModalOpen(false);
       fetchProducts(1, false);
+      mutate("product-stats");
     } catch (err: unknown) {
       setSaving(false);
       const apiErr = err as ApiError;
@@ -330,6 +253,7 @@ export default function ProductsClient({
       setDeleteTarget(null);
       setDeleting(false);
       fetchProducts(1, false);
+      mutate("product-stats");
     } catch (err: unknown) {
       const apiErr = err as ApiError;
       const data = apiErr?.response?.data;
@@ -337,6 +261,7 @@ export default function ProductsClient({
       if (status === 404) {
         setDeleteTarget(null);
         fetchProducts(1, false);
+        mutate("product-stats");
       } else if (status === 409) {
         toast.error("Cannot Delete Product", {
           description: (data?.detail as string | undefined) ?? "This product has linked transactions and cannot be removed.",
@@ -354,7 +279,7 @@ export default function ProductsClient({
       <ProductHeader onNew={openCreate} />
 
       {/* ── Stats: Category Overview ── */}
-      <StatsOverview stats={initialStats} products={products} />
+      <StatsOverview stats={productStats ?? null} products={products} />
 
       {/* ── Toolbar: Advanced Filters ── */}
       <ProductToolbar

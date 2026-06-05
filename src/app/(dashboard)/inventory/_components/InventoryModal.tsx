@@ -6,7 +6,6 @@ import type { InventoryRecord, InventoryPayload } from "@/src/types/inventory.ty
 import type { Product } from "@/src/types/product.types";
 import { Package, LayoutGrid, Plus, Check } from "lucide-react";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 const inputCls =
   "w-full px-3 py-2 rounded-lg border border-gray-600 text-[13px] text-gray-800 placeholder:text-gray-700 outline-none focus:ring-1 focus:border-orange-400 focus:bg-white transition";
@@ -242,7 +241,7 @@ function FilterableProductSelect({
                     <div className={`relative w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${active ? "bg-white/20" : "bg-gray-50 border border-gray-100"}`}>
                       {p.product_picture ? (
                         <Image
-                          src={`${BASE_URL}${p.product_picture}`}
+                          src={p.product_picture}
                           alt={p.product_name}
                           fill
                           className="object-cover"
@@ -364,7 +363,7 @@ export function InventoryModal({
                 <div className="relative w-20 h-20 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
                   {selectedProduct.product_picture ? (
                     <Image
-                      src={`${BASE_URL}${selectedProduct.product_picture}`}
+                      src={selectedProduct.product_picture}
                       alt={selectedProduct.product_name}
                       fill
                       className="object-cover"

@@ -5,7 +5,7 @@ import { useAuth } from "@/src/context/AuthContext";
 import type { InventoryRecord, InventoryPayload, InventoryStats } from "@/src/types/inventory.types";
 import { getInventory, createInventory, updateInventory, deleteInventory, getInventoryStats } from "@/src/services/inventory.service";
 import { getProducts } from "@/src/services/product.service";
-import type { PaginatedInventory, PaginatedProducts } from "@/src/types/api.types";
+import type { PaginatedProducts } from "@/src/types/api.types";
 
 import { StatsOverview } from "./_components/StatsOverview";
 import { InventoryTable } from "./_components/InventoryTable";
@@ -32,25 +32,19 @@ function validateInventoryForm(form: InventoryPayload): string {
   return "";
 }
 
-export default function InventoryClient({
-  initialPaginatedRecords,
-  initialPaginatedProducts,
-}: Readonly<{
-  initialPaginatedRecords: PaginatedInventory;
-  initialPaginatedProducts: PaginatedProducts;
-}>) {
+export default function InventoryClient() {
   const { role } = useAuth();
   const canEdit = role === "boss" || role === "superadmin";
   const canDelete = role === "superadmin";
 
-  const [records, setRecords] = useState<InventoryRecord[]>(initialPaginatedRecords.results);
-  const [hasMore, setHasMore] = useState(initialPaginatedRecords.next !== null);
+  const [records, setRecords] = useState<InventoryRecord[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const [paginatedProducts, setPaginatedProducts] = useState<PaginatedProducts>(initialPaginatedProducts);
+  const [paginatedProducts, setPaginatedProducts] = useState<PaginatedProducts>({ count: 0, next: null, previous: null, results: [] });
   const products = paginatedProducts.results;
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   // sentinel ref for infinite scroll
@@ -116,11 +110,17 @@ export default function InventoryClient({
       .finally(() => { setLoading(false); setLoadingMore(false); });
   }, [ordering, siteFilter, statusFilter]);
 
-  // Debounced re-fetch when search or ordering changes (reset to page 1)
-  const filtersMounted = useRef(false);
+  // Fetch products for the create/edit modal on mount
   useEffect(() => {
-    if (!filtersMounted.current) { filtersMounted.current = true; return; }
-    const t = setTimeout(() => fetchInventory(1, false), 300);
+    getProducts().then(setPaginatedProducts).catch(() => {});
+  }, []);
+
+  // Initial load is immediate; subsequent filter changes are debounced
+  const initialFetchDone = useRef(false);
+  useEffect(() => {
+    const delay = initialFetchDone.current ? 300 : 0;
+    initialFetchDone.current = true;
+    const t = setTimeout(() => fetchInventory(1, false), delay);
     return () => clearTimeout(t);
   }, [fetchInventory]);
 
@@ -258,8 +258,8 @@ export default function InventoryClient({
   }
 
   const siteOptions = useMemo(
-    () => Array.from(new Set(initialPaginatedRecords.results.map((r) => r.site))).sort((a, b) => a.localeCompare(b)),
-    [initialPaginatedRecords.results]
+    () => Array.from(new Set(records.map((r) => r.site))).sort((a, b) => a.localeCompare(b)),
+    [records]
   );
 
   // -- Client-side Filtering & Sorting Logic --
