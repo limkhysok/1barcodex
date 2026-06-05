@@ -54,7 +54,7 @@ function NavItem({
         className={`
           flex items-center w-full select-none
           ${active
-            ? "bg-gray-200 text-orange-600 border-r-2 border-orange-600"
+            ? "bg-gray-200 text-orange-600 border-r-3 border-orange-600"
             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
           }
         `}
